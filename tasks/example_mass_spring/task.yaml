@@ -1,0 +1,13 @@
+id: example_mass_spring
+title: 弹簧阻尼滑块示例
+question: 改变质量、刚度和阻尼时，滑块的一维运动如何变化？
+simulation:
+  engine: mujoco
+  duration: 6.0
+  timestep: 0.005
+theory_topics:
+  - 一维运动
+  - 阻尼振动
+  - 速度与加速度
+  - 能量耗散
+

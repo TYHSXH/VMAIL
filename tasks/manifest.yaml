@@ -1,0 +1,7 @@
+tasks:
+  - id: example_mass_spring
+    title: 弹簧阻尼滑块示例
+    path: example_mass_spring
+    status: ready
+    description: 一个最小任务包，用来展示参数、MuJoCo 模型、观测量和网页运行流程。
+

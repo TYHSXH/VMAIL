@@ -1,0 +1,24 @@
+layout:
+  parameter_groups:
+    - title: 物理参数
+      parameters:
+        - mass
+        - stiffness
+        - damping
+    - title: 初始条件
+      parameters:
+        - initial_displacement
+        - initial_velocity
+  charts:
+    - title: 位移
+      series:
+        - joint.slide_x.position
+    - title: 速度
+      series:
+        - joint.slide_x.velocity
+    - title: 加速度
+      series:
+        - joint.slide_x.acceleration
+    - title: 等效关节力
+      series:
+        - joint.slide_x.force

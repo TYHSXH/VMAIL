@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
+    <title>VMAIL 理论力学实验台</title>
+  </head>
+  <body>
+    <div id="app">
+      <aside id="taskSidebar" class="task-sidebar">
+        <header class="brand-row">
+          <span class="brand-mark">V</span>
+          <div class="brand-copy">
+            <strong>VMAIL</strong>
+            <span>理论力学实验台</span>
+          </div>
+          <button id="collapseTasks" class="icon-button" type="button" title="收起任务栏" aria-label="收起任务"></button>
+        </header>
+        <button id="refreshTasks" class="quiet-button wide" type="button">刷新学习任务</button>
+        <nav id="taskList" class="task-list" aria-label="学习任务"></nav>
+      </aside>
+
+      <main class="stage-shell">
+        <header class="topbar">
+          <button id="expandTasks" class="icon-button hidden" type="button" title="展开任务栏" aria-label="展开任务栏"></button>
+          <div class="task-heading">
+            <span id="engineBadge" class="engine-badge loading">正在加载 MuJoCo WASM</span>
+            <h1 id="taskTitle">选择一个学习任务</h1>
+          </div>
+          <div class="topbar-actions">
+            <span id="simTime" class="sim-time">t = 0.000 s</span>
+            <button id="toggleInspector" class="quiet-button" type="button">参数与数据</button>
+          </div>
+        </header>
+
+        <section class="viewer-stage" aria-label="MuJoCo 三维仿真">
+          <div id="mujocoViewport" class="mujoco-viewport"></div>
+          <div id="viewerLoading" class="viewer-loading">
+            <strong>正在启动浏览器端 MuJoCo</strong>
+            <span>首次加载需要初始化 WebAssembly。</span>
+          </div>
+          <div class="viewer-toolbar" role="toolbar" aria-label="仿真控制">
+            <button id="resetButton" type="button" disabled>重置</button>
+            <button id="stepButton" type="button" disabled>单步</button>
+            <button id="playButton" class="active" type="button" disabled>暂停</button>
+            <span class="toolbar-divider"></span>
+            <div class="mode-switch" aria-label="鼠标模式">
+              <button id="cameraMode" class="active" type="button">相机</button>
+              <button id="dragMode" type="button">拖动物体</button>
+            </div>
+            <button id="contactButton" type="button" disabled>接触点</button>
+            <button id="homeCameraButton" type="button" disabled>复位视角</button>
+          </div>
+          <div class="viewer-help">
+            <span id="mouseHint">左键旋转，右键平移，滚轮缩放</span>
+            <span id="selectionLabel"></span>
+          </div>
+        </section>
+      </main>
+
+      <aside id="inspector" class="inspector">
+        <header class="inspector-header">
+          <nav class="tabs" aria-label="任务面板">
+            <button class="tab active" data-tab="parameters" type="button">参数</button>
+            <button class="tab" data-tab="data" type="button">数据</button>
+            <button class="tab" data-tab="task" type="button">任务</button>
+          </nav>
+          <button id="closeInspector" class="icon-button" type="button" title="收起面板" aria-label="收起面板"></button>
+        </header>
+
+        <section class="tab-panel active" data-panel="parameters">
+          <form id="parameterForm" class="parameter-form"></form>
+          <div class="simulation-settings">
+            <label>仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
+            <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.0001" step="0.001" value="0.005" /></label>
+          </div>
+          <button id="applyParameters" class="primary-button wide" type="button" disabled>应用参数并重载模型</button>
+        </section>
+
+        <section class="tab-panel" data-panel="data">
+          <div class="data-actions">
+            <button id="clearData" class="quiet-button" type="button">清空曲线</button>
+            <button id="runButton" class="primary-button" type="button" disabled>计算并保存</button>
+          </div>
+          <canvas id="chartCanvas" width="720" height="440"></canvas>
+          <div id="chartLegend" class="legend"></div>
+          <div id="liveValues" class="live-values"></div>
+        </section>
+
+        <section class="tab-panel" data-panel="task">
+          <p id="taskQuestion" class="question">从左侧选择学习任务。</p>
+          <div id="topicTags" class="tags"></div>
+          <details class="notes">
+            <summary>建模说明</summary>
+            <pre id="taskNotes"></pre>
+          </details>
+        </section>
+      </aside>
+
+      <div id="message" class="toast hidden" role="status"></div>
+    </div>
+    <script type="module" src="/main.js"></script>
+  </body>
+</html>

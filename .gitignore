@@ -1,0 +1,6 @@
+.venv/
+.npm-cache/
+node_modules/
+__pycache__/
+*.pyc
+tasks/*/results/run_*/
