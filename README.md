@@ -1,5 +1,7 @@
 # VMAIL 理论力学实验台
 
+[简体中文](README.md) | [English](README_EN.md)
+
 VMAIL 是一个在学生电脑本地运行的可交互 MuJoCo 实验台。学生可以让 AI coding 工具在 `tasks/` 中创建学习任务，然后在网页里加载模型、修改参数、拖动物体、调整关节与执行器、观察运动数据，并进行批量计算和保存。
 
 浏览器使用官方 `@mujoco/mujoco` WebAssembly 运行物理仿真，Three.js/WebGL 显示三维场景。Python 后端负责读取任务、验证配置，以及执行需要保存完整数据的批量实验。
