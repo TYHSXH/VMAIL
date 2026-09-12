@@ -26,6 +26,8 @@ front_suspension_damping
 robot_arm_endpoint_force
 ```
 
+AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的工作约定，规定了命名、验证、脚本安全和结果保存方式。
+
 ## tasks/manifest.yaml
 
 网页通过这个文件发现任务。
@@ -40,6 +42,8 @@ tasks:
 ```
 
 AI 每创建一个任务，都应当把它加入 `manifest.yaml`。
+
+`manifest.yaml` 是所有任务共用的全局索引，所以位于 `tasks/` 根目录。它不属于 `example_mass_spring` 或其他单个任务，也不应复制到任务子目录中。
 
 ## task.yaml
 
@@ -178,6 +182,30 @@ layout:
 `series` 名称必须能对应 `observe.yaml` 产生的数据列。
 
 浏览器使用官方 MuJoCo WebAssembly 运行时执行物理计算，并通过 WebGL 显示 `model.xml`。相机旋转、平移、缩放、动态刚体选择和三维外力拖拽是工作台的通用能力，不需要每个任务额外声明。`ui.yaml` 只负责参数分组和数据曲线；模型能否被拖动取决于刚体是否具有可运动自由度。
+
+实验台的“控制”页会自动列出：
+
+- 类型为 `slide` 或 `hinge` 的一维关节，用于暂停后直接调整关节位置。
+- 模型中的 actuator，用于在运行时写入 `data.ctrl`。
+
+actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `kp`、`kv` 等模型参数可以通过 `parameters.yaml` 指向 actuator 的 MJCF 属性，应用参数后重新编译生效。
+
+## 实时仿真与批量实验
+
+浏览器三维视窗是持续交互仿真，直到学生暂停或重置。 `task.yaml` 中的 `simulation.duration` 只作为“计算并保存”批量实验的默认时长；`simulation.timestep` 同时用于浏览器模型和批量实验。
+
+## 可选 Python 脚本
+
+复杂任务可增加 `scripts/`，用于随时间施加外力/力矩、控制器、扫参或更复杂的数据处理。脚本不是任务加载的必需文件，网页也不会自动执行它。推荐：
+
+```text
+task_id/
+  scripts/
+    run_experiment.py
+  results/
+```
+
+脚本使用相对路径读取 `model.xml`，将 `data.ctrl`、`data.xfrc_applied` 或 `data.qfrc_applied` 作为控制入口，并把结果写回本任务的 `results/`。
 
 ## notes.md
 

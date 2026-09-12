@@ -2,16 +2,12 @@
 setlocal
 cd /d "%~dp0"
 
-if not exist ".venv\Scripts\python.exe" (
-  echo Creating local Python environment...
-  py -3 -m venv .venv
-  if errorlevel 1 (
-    python -m venv .venv
-  )
-)
+if not exist ".venv\Scripts\python.exe" call setup.bat
+if errorlevel 1 exit /b 1
 
-echo Installing or checking dependencies...
-".venv\Scripts\python.exe" -m pip install -r requirements.txt
+".venv\Scripts\python.exe" -c "import fastapi, yaml, numpy, mujoco, PIL, uvicorn" >nul 2>nul
+if errorlevel 1 call setup.bat
+if errorlevel 1 exit /b 1
 
 echo.
 echo Starting VMAIL at http://127.0.0.1:8000

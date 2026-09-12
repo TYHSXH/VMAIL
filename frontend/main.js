@@ -17,7 +17,7 @@ const el = Object.fromEntries(
     "stepButton", "playButton", "cameraMode", "dragMode", "contactButton", "homeCameraButton",
     "mouseHint", "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
     "timestepInput", "applyParameters", "runButton", "clearData", "chartCanvas", "chartLegend",
-    "liveValues", "taskQuestion", "topicTags", "taskNotes", "message",
+    "liveValues", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
@@ -142,6 +142,7 @@ async function loadBrowserModel() {
       body: JSON.stringify({ parameters: collectParameters(), timestep: Number(el.timestepInput.value) }),
     });
     await state.viewer.loadModel(model.xml, model.initial_state, model.observe);
+    renderRuntimeControls();
     state.viewer.setPaused(false);
     el.playButton.textContent = "暂停";
     el.playButton.classList.add("active");
@@ -151,6 +152,39 @@ async function loadBrowserModel() {
   } catch (error) {
     el.viewerLoading.innerHTML = `<strong>模型载入失败</strong><span>${error.message}</span>`;
     showMessage(error.message, true);
+  }
+}
+
+function controlRow(item, onChange) {
+  const row = document.createElement("label");
+  row.className = "runtime-control";
+  row.innerHTML = `<span><strong>${item.name}</strong><small>${item.kindLabel}</small></span><input type="range" min="${item.min}" max="${item.max}" step="${item.step}" value="${item.value}" /><output>${Number(item.value).toFixed(3)}</output>`;
+  const input = row.querySelector("input");
+  const output = row.querySelector("output");
+  input.addEventListener("input", () => {
+    const value = Number(input.value);
+    output.value = value.toFixed(3);
+    onChange(value);
+  });
+  return row;
+}
+
+function renderRuntimeControls() {
+  const controls = state.viewer?.getInteractiveControls() || { joints: [], actuators: [] };
+  el.jointControls.innerHTML = "<h2>一维关节</h2>";
+  el.actuatorControls.innerHTML = "<h2>执行器</h2>";
+  if (!controls.joints.length) el.jointControls.insertAdjacentHTML("beforeend", '<p class="empty-state">模型没有可直接定位的滑动或转动关节。</p>');
+  if (!controls.actuators.length) el.actuatorControls.insertAdjacentHTML("beforeend", '<p class="empty-state">模型没有执行器。可让 AI 在 model.xml 中添加 motor、position 或 velocity actuator。</p>');
+  for (const item of controls.joints) {
+    el.jointControls.appendChild(controlRow(item, (value) => {
+      state.viewer.setPaused(true);
+      el.playButton.textContent = "播放";
+      el.playButton.classList.remove("active");
+      state.viewer.setJointPosition(item.id, value);
+    }));
+  }
+  for (const item of controls.actuators) {
+    el.actuatorControls.appendChild(controlRow(item, (value) => state.viewer.setActuatorControl(item.id, value)));
   }
 }
 

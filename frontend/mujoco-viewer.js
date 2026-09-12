@@ -163,6 +163,67 @@ export class MujocoBrowserViewer {
     this.paused = paused;
   }
 
+  getInteractiveControls() {
+    if (!this.model || !this.data) return { joints: [], actuators: [] };
+    const joints = [];
+    const hinge = this.mujoco.mjtJoint.mjJNT_HINGE.value;
+    const slide = this.mujoco.mjtJoint.mjJNT_SLIDE.value;
+    for (let id = 0; id < this.model.njnt; id += 1) {
+      const type = this.model.jnt_type[id];
+      if (type !== hinge && type !== slide) continue;
+      const value = Number(this.data.qpos[this.model.jnt_qposadr[id]]);
+      const fallback = type === hinge ? Math.PI : Math.max(1, Math.abs(value) * 2);
+      const rangeMin = Number(this.model.jnt_range[id * 2]);
+      const rangeMax = Number(this.model.jnt_range[id * 2 + 1]);
+      const hasRange = Number.isFinite(rangeMin) && Number.isFinite(rangeMax) && rangeMax > rangeMin;
+      const min = hasRange ? rangeMin : -fallback;
+      const max = hasRange ? rangeMax : fallback;
+      joints.push({
+        id,
+        name: this.mujoco.mj_id2name(this.model, this.mujoco.mjtObj.mjOBJ_JOINT.value, id) || `joint_${id}`,
+        kindLabel: type === hinge ? "转动关节位置 (rad)" : "滑动关节位置 (m)",
+        min,
+        max,
+        step: Math.max((max - min) / 500, 0.0001),
+        value,
+      });
+    }
+
+    const actuators = [];
+    for (let id = 0; id < this.model.nu; id += 1) {
+      const rangeMin = Number(this.model.actuator_ctrlrange[id * 2]);
+      const rangeMax = Number(this.model.actuator_ctrlrange[id * 2 + 1]);
+      const hasRange = Number.isFinite(rangeMin) && Number.isFinite(rangeMax) && rangeMax > rangeMin;
+      const min = hasRange ? rangeMin : -1;
+      const max = hasRange ? rangeMax : 1;
+      actuators.push({
+        id,
+        name: this.mujoco.mj_id2name(this.model, this.mujoco.mjtObj.mjOBJ_ACTUATOR.value, id) || `actuator_${id}`,
+        kindLabel: "MuJoCo ctrl 控制量",
+        min,
+        max,
+        step: Math.max((max - min) / 500, 0.0001),
+        value: Number(this.data.ctrl[id]),
+      });
+    }
+    return { joints, actuators };
+  }
+
+  setJointPosition(jointId, value) {
+    if (!this.model || !this.data || jointId < 0 || jointId >= this.model.njnt) return;
+    this.clearDrag();
+    this.data.qpos[this.model.jnt_qposadr[jointId]] = Number(value);
+    this.data.qvel[this.model.jnt_dofadr[jointId]] = 0;
+    this.mujoco.mj_forward(this.model, this.data);
+    this.updateScene();
+    this.emitSample(true);
+  }
+
+  setActuatorControl(actuatorId, value) {
+    if (!this.model || !this.data || actuatorId < 0 || actuatorId >= this.model.nu) return;
+    this.data.ctrl[actuatorId] = Number(value);
+  }
+
   setMode(mode) {
     this.mode = mode;
     this.controls.enabled = mode === "camera";

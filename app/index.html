@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL 理论力学实验台</title>
-    <script type="module" crossorigin src="/static/assets/index-DVuUCpFq.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/assets/index-BcrizWWv.css">
+    <script type="module" crossorigin src="/static/assets/index-CGsTMRpj.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/assets/index-Dij1boqp.css">
   </head>
   <body>
     <div id="app">
@@ -65,6 +65,7 @@
         <header class="inspector-header">
           <nav class="tabs" aria-label="任务面板">
             <button class="tab active" data-tab="parameters" type="button">参数</button>
+            <button class="tab" data-tab="controls" type="button">控制</button>
             <button class="tab" data-tab="data" type="button">数据</button>
             <button class="tab" data-tab="task" type="button">任务</button>
           </nav>
@@ -74,10 +75,17 @@
         <section class="tab-panel active" data-panel="parameters">
           <form id="parameterForm" class="parameter-form"></form>
           <div class="simulation-settings">
-            <label>仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
+            <label title="仅用于数据页的批量计算，不会限制三维视窗中的持续播放">批量计算时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
             <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.0001" step="0.001" value="0.005" /></label>
           </div>
+          <p class="field-help">批量计算时长用于生成并保存完整数据；三维视窗会持续运行，直到暂停或重置。</p>
           <button id="applyParameters" class="primary-button wide" type="button" disabled>应用参数并重载模型</button>
+        </section>
+
+        <section class="tab-panel" data-panel="controls">
+          <p class="panel-intro">关节用于调整模型姿态；执行器控制量可在仿真运行时连续改变。</p>
+          <div id="jointControls" class="runtime-controls"></div>
+          <div id="actuatorControls" class="runtime-controls"></div>
         </section>
 
         <section class="tab-panel" data-panel="data">
