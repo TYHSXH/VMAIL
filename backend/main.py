@@ -7,7 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from uuid import uuid4
 
 from .task_io import TaskValidationError, load_task, list_tasks, save_run_result
@@ -20,7 +20,8 @@ TASKS_DIR = ROOT / "tasks"
 
 
 class SimulationRequest(BaseModel):
-    parameters: dict[str, Any] = {}
+    parameters: dict[str, Any] = Field(default_factory=dict)
+    controls: dict[str, float] = Field(default_factory=dict)
     duration: float | None = None
     timestep: float | None = None
 
@@ -69,7 +70,13 @@ def api_get_task(task_id: str) -> dict[str, Any]:
 def api_simulate(task_id: str, request: SimulationRequest) -> dict[str, Any]:
     try:
         task = load_task(TASKS_DIR, task_id)
-        result = run_mujoco_task(task, request.parameters, request.duration, request.timestep)
+        result = run_mujoco_task(
+            task,
+            request.parameters,
+            request.duration,
+            request.timestep,
+            request.controls,
+        )
         run_info = save_run_result(TASKS_DIR, task_id, result)
         result["saved"] = run_info
         return result

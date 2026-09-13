@@ -29,7 +29,7 @@ export class MujocoBrowserViewer {
     this.mjScene = null;
     this.meshes = [];
     this.geometryCache = new Map();
-    this.paused = false;
+    this.paused = true;
     this.mode = "camera";
     this.showContacts = false;
     this.initialState = [];
@@ -95,6 +95,7 @@ export class MujocoBrowserViewer {
 
   async loadModel(xml, initialState = [], observe = {}) {
     this.disposeModel();
+    this.paused = true;
     this.initialState = initialState;
     this.observe = observe;
     this.model = this.mujoco.MjModel.from_xml_string(xml);
@@ -219,9 +220,67 @@ export class MujocoBrowserViewer {
     this.emitSample(true);
   }
 
+  getJointPosition(jointName) {
+    if (!this.model || !this.data) return 0;
+    const jointId = this.mujoco.mj_name2id(
+      this.model,
+      this.mujoco.mjtObj.mjOBJ_JOINT.value,
+      jointName,
+    );
+    if (jointId < 0) return 0;
+    return Number(this.data.qpos[this.model.jnt_qposadr[jointId]]);
+  }
+
+  setKinematicPosition(config, value) {
+    if (config?.type !== "slider_crank") return;
+    const theta = Number(value);
+    const crankLength = Number(config.crank_length);
+    const rodLength = Number(config.rod_length);
+    if (!(crankLength > 0) || !(rodLength > crankLength)) return;
+
+    const ratio = Math.max(-1, Math.min(1, crankLength * Math.sin(theta) / rodLength));
+    const phi = Math.asin(ratio);
+    const sliderX = crankLength * Math.cos(theta)
+      + Math.sqrt(rodLength * rodLength - crankLength * crankLength * Math.sin(theta) ** 2);
+    const positions = new Map([
+      [config.crank_joint, theta],
+      [config.rod_joint, -theta - phi],
+      [config.slider_joint, sliderX - crankLength - rodLength],
+    ]);
+
+    this.clearDrag();
+    for (const [jointName, position] of positions) {
+      const jointId = this.mujoco.mj_name2id(
+        this.model,
+        this.mujoco.mjtObj.mjOBJ_JOINT.value,
+        jointName,
+      );
+      if (jointId < 0) continue;
+      this.data.qpos[this.model.jnt_qposadr[jointId]] = position;
+      this.data.qvel[this.model.jnt_dofadr[jointId]] = 0;
+    }
+    this.mujoco.mj_forward(this.model, this.data);
+    this.updateScene();
+    this.emitSample(true);
+  }
+
   setActuatorControl(actuatorId, value) {
     if (!this.model || !this.data || actuatorId < 0 || actuatorId >= this.model.nu) return;
     this.data.ctrl[actuatorId] = Number(value);
+  }
+
+  getActuatorControlValues() {
+    const values = {};
+    if (!this.model || !this.data) return values;
+    for (let id = 0; id < this.model.nu; id += 1) {
+      const name = this.mujoco.mj_id2name(
+        this.model,
+        this.mujoco.mjtObj.mjOBJ_ACTUATOR.value,
+        id,
+      ) || `actuator_${id}`;
+      values[name] = Number(this.data.ctrl[id]);
+    }
+    return values;
   }
 
   setMode(mode) {
@@ -395,6 +454,26 @@ export class MujocoBrowserViewer {
         if (field === "velocity") values[key] = this.data.qvel[dof];
         if (field === "acceleration") values[key] = this.data.qacc[dof];
         if (field === "force") values[key] = this.data.qfrc_passive[dof] + this.data.qfrc_actuator[dof] + this.data.qfrc_applied[dof];
+      }
+    }
+    const equalityObject = this.mujoco.mjtObj.mjOBJ_EQUALITY.value;
+    const equalityConstraint = this.mujoco.mjtConstraint.mjCNSTR_EQUALITY.value;
+    for (const item of this.observe?.equalities || []) {
+      const equalityId = this.mujoco.mj_name2id(this.model, equalityObject, item.name);
+      if (equalityId < 0) continue;
+      const force = [];
+      for (let index = 0; index < this.data.nefc; index += 1) {
+        if (this.data.efc_type[index] === equalityConstraint && this.data.efc_id[index] === equalityId) {
+          force.push(Number(this.data.efc_force[index]));
+        }
+      }
+      if ((item.fields || []).includes("force") && force.length) {
+        const components = [force[0] || 0, force[1] || 0, force[2] || 0];
+        const prefix = "equality." + item.name + ".force";
+        "xyz".split("").forEach((axis, index) => {
+          values[prefix + "." + axis] = components[index];
+        });
+        values[prefix + ".magnitude"] = Math.hypot(...components);
       }
     }
     for (const item of this.observe?.bodies || []) {

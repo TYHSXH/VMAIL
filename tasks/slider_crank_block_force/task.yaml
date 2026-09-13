@@ -1,0 +1,12 @@
+id: slider_crank_block_force
+title: 例7-1 曲柄滑块速度验证
+question: 已知 OA=r、AB=√3r，曲柄OA以恒角速度ω逆时针转动；当θ=60°时，从仿真数据确定滑块B的速度大小和连杆AB的角速度。
+simulation:
+  engine: mujoco
+  duration: 4.0
+  timestep: 0.001
+theory_topics:
+  - 刚体平面运动
+  - 速度合成
+  - 速度投影
+  - 曲柄滑块机构

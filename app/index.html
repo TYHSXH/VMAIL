@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL 理论力学实验台</title>
-    <script type="module" crossorigin src="/static/assets/index-CGsTMRpj.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/assets/index-Dij1boqp.css">
+    <script type="module" crossorigin src="/static/assets/index-CgS5NlvI.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/assets/index-fLqhsWe7.css">
   </head>
   <body>
     <div id="app">
@@ -45,7 +45,7 @@
           <div class="viewer-toolbar" role="toolbar" aria-label="仿真控制">
             <button id="resetButton" type="button" disabled>重置</button>
             <button id="stepButton" type="button" disabled>单步</button>
-            <button id="playButton" class="active" type="button" disabled>暂停</button>
+            <button id="playButton" type="button" disabled>开始</button>
             <span class="toolbar-divider"></span>
             <div class="mode-switch" aria-label="鼠标模式">
               <button id="cameraMode" class="active" type="button">相机</button>
@@ -91,6 +91,7 @@
         <section class="tab-panel" data-panel="data">
           <div class="data-actions">
             <button id="clearData" class="quiet-button" type="button">清空曲线</button>
+            <button id="exportData" class="quiet-button" type="button" disabled>导出当前数据</button>
             <button id="runButton" class="primary-button" type="button" disabled>计算并保存</button>
           </div>
           <canvas id="chartCanvas" width="720" height="440"></canvas>

@@ -192,7 +192,9 @@ actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `
 
 ## 实时仿真与批量实验
 
-浏览器三维视窗是持续交互仿真，直到学生暂停或重置。 `task.yaml` 中的 `simulation.duration` 只作为“计算并保存”批量实验的默认时长；`simulation.timestep` 同时用于浏览器模型和批量实验。
+浏览器载入任务后默认保持暂停，学生设置参数并点击“开始”后才进入持续交互仿真，直到再次暂停或重置。 `task.yaml` 中的 `simulation.duration` 只作为“计算并保存”批量实验的默认时长；`simulation.timestep` 同时用于浏览器模型和批量实验。
+
+“导出当前数据”不重新仿真，它直接将浏览器当前曲线缓存下载为 UTF-8 CSV。“计算并保存”会从初始状态重新运行高采样率批量实验，请求会同时传递当前参数、时长、步长和所有按名称匹配的 actuator `ctrl` 值。后端会检查执行器是否存在以及控制值是否位于 `ctrlrange` 内。
 
 ## 可选 Python 脚本
 
@@ -226,3 +228,11 @@ task_id/
 ```
 
 这份说明帮助学生理解“为什么这样建模”，而不是只看一个会动的图。
+
+## 闭环约束力与关节控件
+
+observe.yaml 还可以通过 equalities 列表读取 MJCF 闭环 equality 约束的反力。条目使用 equality 名称，并在 fields 中声明 force。系统会产生 equality.名称.force.x、y、z 和 magnitude 四列；connect 约束的三个分量采用世界坐标系。
+
+闭环机构中相互依赖的广义坐标不应作为独立位置控件。任务可以在 ui.yaml 顶层增加 controls.joints，只列出允许直接定位的关节。设置为空列表会隐藏全部关节位置控件，但不会隐藏 actuator。controls.joint_note 可用于向学生说明原因。
+
+标准曲柄滑块机构还可以在 controls.kinematic 中声明 slider_crank 联动控件。配置需要给出 crank_joint、rod_joint、slider_joint、crank_length 和 rod_length；网页只显示曲柄转角，拖动时按闭环几何同步更新三个关节位置。

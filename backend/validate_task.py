@@ -62,6 +62,10 @@ def validate_task(task_id: str) -> list[str]:
         name = item.get("name")
         if name and name not in names.get("body", set()):
             errors.append(f"observe references missing body {name}")
+    for item in observe.get("equalities", []):
+        name = item.get("name")
+        if name and name not in names.get("connect", set()) and name not in names.get("weld", set()):
+            errors.append(f"observe references missing equality {name}")
 
     ui_series = []
     for chart in task.get("ui", {}).get("layout", {}).get("charts", []):
@@ -94,4 +98,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

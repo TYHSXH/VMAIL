@@ -4,4 +4,8 @@ tasks:
     path: example_mass_spring
     status: ready
     description: 一个最小任务包，用来展示参数、MuJoCo 模型、观测量和网页运行流程。
-
+  - id: slider_crank_block_force
+    title: 例7-1 曲柄滑块速度验证
+    path: slider_crank_block_force
+    status: ready
+    description: 在 OA=r、AB=√3r 时，从网页数据验证 θ=60° 处的滑块速度和连杆角速度。

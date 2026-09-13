@@ -173,6 +173,29 @@ def _set_initial_state(model: Any, data: Any, task: dict[str, Any], values: dict
             raise SimulationError(f"Unsupported initial state field: {field}")
 
 
+def _set_actuator_controls(model: Any, data: Any, controls: dict[str, Any], mujoco: Any) -> dict[str, float]:
+    applied: dict[str, float] = {}
+    for name, raw_value in controls.items():
+        actuator_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_ACTUATOR, name)
+        if actuator_id < 0:
+            raise SimulationError(f"Actuator control references missing actuator: {name}")
+        try:
+            value = float(raw_value)
+        except (TypeError, ValueError) as exc:
+            raise SimulationError(f"Actuator control must be numeric: {name}") from exc
+        if not math.isfinite(value):
+            raise SimulationError(f"Actuator control must be finite: {name}")
+        if model.actuator_ctrllimited[actuator_id]:
+            lower, upper = model.actuator_ctrlrange[actuator_id]
+            if value < lower or value > upper:
+                raise SimulationError(
+                    f"Actuator control {name}={value:g} is outside ctrlrange [{lower:g}, {upper:g}]"
+                )
+        data.ctrl[actuator_id] = value
+        applied[name] = value
+    return applied
+
+
 def _record_observations(model: Any, data: Any, observe: dict[str, Any], mujoco: Any) -> dict[str, float]:
     row: dict[str, float] = {}
 
@@ -211,6 +234,26 @@ def _record_observations(model: Any, data: Any, observe: dict[str, Any], mujoco:
                 mujoco.mj_objectVelocity(model, data, mujoco.mjtObj.mjOBJ_BODY, body_id, velocity, 0)
                 for axis, value in zip(["wx", "wy", "wz", "vx", "vy", "vz"], velocity):
                     row[f"{prefix}.{axis}"] = float(value)
+
+    equality_constraint_type = int(mujoco.mjtConstraint.mjCNSTR_EQUALITY)
+    for item in observe.get("equalities", []):
+        name = item.get("name")
+        fields = item.get("fields", [])
+        equality_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_EQUALITY, name)
+        if equality_id < 0:
+            continue
+        force_values = [
+            float(data.efc_force[index])
+            for index in range(data.nefc)
+            if int(data.efc_type[index]) == equality_constraint_type
+            and int(data.efc_id[index]) == equality_id
+        ]
+        if "force" in fields and force_values:
+            components = (force_values + [0.0, 0.0, 0.0])[:3]
+            prefix = f"equality.{name}.force"
+            for axis, value in zip("xyz", components):
+                row[f"{prefix}.{axis}"] = value
+            row[f"{prefix}.magnitude"] = float(np.linalg.norm(components))
 
     return row
 
@@ -253,6 +296,7 @@ def run_mujoco_task(
     parameter_overrides: dict[str, Any],
     duration_override: float | None,
     timestep_override: float | None,
+    control_overrides: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     try:
         import mujoco
@@ -276,6 +320,7 @@ def run_mujoco_task(
     model.opt.timestep = timestep
     data = mujoco.MjData(model)
     _set_initial_state(model, data, task, values, mujoco)
+    controls = _set_actuator_controls(model, data, control_overrides or {}, mujoco)
     mujoco.mj_forward(model, data)
 
     observe = task.get("observe", {}).get("observe", {})
@@ -316,11 +361,13 @@ def run_mujoco_task(
         f"- Timestep: {timestep:g} s\n"
         f"- Samples: {len(series['time'])}\n"
         f"- Parameters: {values}\n"
+        f"- Actuator controls: {controls}\n"
     )
 
     return {
         "task_id": task["id"],
         "parameters": values,
+        "controls": controls,
         "duration": duration,
         "timestep": timestep,
         "series": series,

@@ -53,12 +53,12 @@ This option does not use the project's `.venv`. The active Conda environment mus
 ## Workbench Controls
 
 - 3D viewport: orbit, pan, zoom, select bodies, and apply drag forces.
-- Simulation: play, pause, step, reset, show contacts, and reset the camera.
+- Simulation: a loaded task remains still until Start is pressed; pause, resume, step, reset, contact display, and camera reset are supported.
 - Parameters: edit mass, stiffness, damping, initial state, and other MJCF values exposed by the task; applying changes recompiles the model.
 - Controls: directly position one-dimensional slide/hinge joints and write runtime inputs to MuJoCo actuator `ctrl` values.
-- Data: inspect live observation curves or run and save a Python batch experiment as CSV.
+- Data: inspect live curves; **Export current data** downloads the current browser curve buffer as CSV; **Compute and save** reruns a Python batch experiment from the initial state using the current actuator control values.
 
-"Batch duration" controls only the saved batch experiment. It does not stop the continuously running 3D simulation. "Timestep" applies to both the browser simulation and batch experiments after the model is reloaded.
+"Batch duration" controls only the saved batch experiment. It does not stop the 3D simulation after Start is pressed. "Timestep" applies to both the browser simulation and batch experiments after the model is reloaded.
 
 ## Project Structure
 

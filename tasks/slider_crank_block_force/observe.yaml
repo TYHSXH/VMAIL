@@ -1,0 +1,16 @@
+observe:
+  joints:
+    - name: crank_hinge
+      label: 曲柄OA
+      fields:
+        - position
+        - velocity
+    - name: slider_x
+      label: 滑块B
+      fields:
+        - velocity
+  bodies:
+    - name: connecting_rod
+      label: 连杆AB
+      fields:
+        - velocity

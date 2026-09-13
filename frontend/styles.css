@@ -124,14 +124,18 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .runtime-control > span { display: grid; gap: 3px; min-width: 0; }
 .runtime-control strong { overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .runtime-control small { color: #7f8c9b; font-size: 11px; }
-.runtime-control input { grid-column: 1; width: 100%; accent-color: #38bdf8; }
-.runtime-control output { grid-column: 2; grid-row: 1 / span 2; align-self: center; padding: 6px; border: 1px solid #344151; border-radius: 5px; color: #dce6ef; background: #0d141c; font: 11px Consolas, monospace; text-align: right; }
+.runtime-slider { grid-column: 1; width: 100%; accent-color: #38bdf8; }
+.runtime-number { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 74px; min-height: 34px; padding: 5px 6px; border: 1px solid #344151; border-radius: 5px; color: #dce6ef; background: #0d141c; font: 12px Consolas, monospace; text-align: right; }
+.runtime-number:focus { border-color: #38bdf8; outline: 2px solid rgba(56, 189, 248, .18); }
 
-.data-actions { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.data-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-bottom: 12px; }
 #chartCanvas { display: block; width: 100%; height: 210px; border: 1px solid #293543; border-radius: 6px; }
 .legend { display: flex; flex-wrap: wrap; gap: 7px 10px; margin: 10px 0 16px; }
-.legend span { display: flex; align-items: center; gap: 5px; max-width: 100%; color: #9cabb9; font-size: 10px; }
-.legend i { flex: none; width: 8px; height: 8px; border-radius: 2px; }
+.legend-item { display: flex; align-items: center; gap: 5px; max-width: 100%; color: #9cabb9; font-size: 10px; cursor: pointer; user-select: none; }
+.legend-item input { flex: none; width: 14px; height: 14px; margin: 0; accent-color: #38bdf8; cursor: pointer; }
+.legend-item i { flex: none; width: 8px; height: 8px; border-radius: 2px; }
+.legend-item span { overflow-wrap: anywhere; }
+.legend-item:has(input:not(:checked)) { opacity: .48; }
 .live-values { display: grid; gap: 1px; background: #26313d; }
 .live-values div { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; padding: 8px; background: #121922; }
 .live-values span { overflow: hidden; color: #8795a5; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }

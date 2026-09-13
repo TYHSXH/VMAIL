@@ -6,7 +6,10 @@ const state = {
   task: null,
   viewer: null,
   viewerReady: false,
+  simulationStarted: false,
+  parametersDirty: false,
   series: { time: [] },
+  visibleSeries: new Set(),
 };
 
 const colors = ["#38bdf8", "#34d399", "#fb923c", "#f472b6", "#a78bfa", "#facc15"];
@@ -16,7 +19,7 @@ const el = Object.fromEntries(
     "taskTitle", "simTime", "toggleInspector", "mujocoViewport", "viewerLoading", "resetButton",
     "stepButton", "playButton", "cameraMode", "dragMode", "contactButton", "homeCameraButton",
     "mouseHint", "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
-    "timestepInput", "applyParameters", "runButton", "clearData", "chartCanvas", "chartLegend",
+    "timestepInput", "applyParameters", "runButton", "clearData", "exportData", "chartCanvas", "chartLegend",
     "liveValues", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
   ].map((id) => [id, document.getElementById(id)]),
 );
@@ -48,6 +51,9 @@ async function initViewer() {
     el.engineBadge.classList.remove("loading");
     el.engineBadge.classList.add("ready");
     if (state.task) await loadBrowserModel();
+    else {
+      el.viewerLoading.innerHTML = "<strong>请选择学习任务</strong><span>从左侧任务栏选择一个模型，再设置参数并开始仿真。</span>";
+    }
   } catch (error) {
     el.viewerLoading.innerHTML = `<strong>MuJoCo WASM 启动失败</strong><span>${error.message}</span>`;
     el.engineBadge.textContent = "WASM 启动失败";
@@ -60,7 +66,6 @@ async function loadTasks() {
   const data = await requestJson("/api/tasks");
   state.tasks = data.tasks || [];
   renderTaskList();
-  if (!state.task && state.tasks.length) await selectTask(state.tasks[0].id);
 }
 
 function renderTaskList() {
@@ -84,6 +89,7 @@ async function selectTask(taskId) {
     state.task = await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
     renderTaskList();
     renderTask();
+    resetSeriesSelection();
     clearSeries();
     if (state.viewerReady) await loadBrowserModel();
   } catch (error) {
@@ -143,44 +149,102 @@ async function loadBrowserModel() {
     });
     await state.viewer.loadModel(model.xml, model.initial_state, model.observe);
     renderRuntimeControls();
-    state.viewer.setPaused(false);
-    el.playButton.textContent = "暂停";
-    el.playButton.classList.add("active");
+    state.parametersDirty = false;
+    resetPlaybackState();
     for (const button of [el.resetButton, el.stepButton, el.playButton, el.contactButton, el.homeCameraButton]) button.disabled = false;
     el.viewerLoading.classList.add("hidden");
     clearSeries();
   } catch (error) {
     el.viewerLoading.innerHTML = `<strong>模型载入失败</strong><span>${error.message}</span>`;
     showMessage(error.message, true);
+    return false;
   }
+  return true;
+}
+
+function updatePlaybackButton() {
+  const running = state.viewer && !state.viewer.paused;
+  el.playButton.textContent = running ? "暂停" : (state.simulationStarted ? "继续" : "开始");
+  el.playButton.classList.toggle("active", Boolean(running));
+}
+
+function resetPlaybackState() {
+  state.simulationStarted = false;
+  state.viewer?.setPaused(true);
+  updatePlaybackButton();
 }
 
 function controlRow(item, onChange) {
   const row = document.createElement("label");
   row.className = "runtime-control";
-  row.innerHTML = `<span><strong>${item.name}</strong><small>${item.kindLabel}</small></span><input type="range" min="${item.min}" max="${item.max}" step="${item.step}" value="${item.value}" /><output>${Number(item.value).toFixed(3)}</output>`;
-  const input = row.querySelector("input");
-  const output = row.querySelector("output");
-  input.addEventListener("input", () => {
-    const value = Number(input.value);
-    output.value = value.toFixed(3);
+  row.innerHTML = `<span><strong>${item.name}</strong><small>${item.kindLabel}</small></span><input class="runtime-slider" type="range" min="${item.min}" max="${item.max}" step="any" value="${item.value}" /><input class="runtime-number" type="number" min="${item.min}" max="${item.max}" step="any" value="${item.value}" aria-label="Set ${item.name} value" />`;
+  const slider = row.querySelector(".runtime-slider");
+  const numberInput = row.querySelector(".runtime-number");
+  const commitValue = (rawValue) => {
+    if (!Number.isFinite(rawValue)) {
+      numberInput.value = slider.value;
+      return;
+    }
+    const value = Math.min(Number(item.max), Math.max(Number(item.min), rawValue));
+    slider.value = String(value);
+    numberInput.value = String(value);
     onChange(value);
+  };
+  slider.addEventListener("input", () => {
+    const min = Number(item.min);
+    const step = Number(item.step);
+    const rawValue = Number(slider.value);
+    const value = step > 0 ? min + Math.round((rawValue - min) / step) * step : rawValue;
+    commitValue(Number(value.toFixed(12)));
+  });
+  numberInput.addEventListener("change", () => commitValue(Number(numberInput.value)));
+  numberInput.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    numberInput.blur();
   });
   return row;
 }
 
 function renderRuntimeControls() {
   const controls = state.viewer?.getInteractiveControls() || { joints: [], actuators: [] };
+  const configuredJoints = state.task?.ui?.controls?.joints;
+  const kinematicControls = state.task?.ui?.controls?.kinematic || [];
+  const joints = Array.isArray(configuredJoints)
+    ? controls.joints.filter((item) => configuredJoints.includes(item.name))
+    : controls.joints;
   el.jointControls.innerHTML = "<h2>一维关节</h2>";
   el.actuatorControls.innerHTML = "<h2>执行器</h2>";
-  if (!controls.joints.length) el.jointControls.insertAdjacentHTML("beforeend", '<p class="empty-state">模型没有可直接定位的滑动或转动关节。</p>');
+  const jointNote = state.task?.ui?.controls?.joint_note;
+  if (jointNote || (!joints.length && !kinematicControls.length)) {
+    const note = jointNote || "模型没有可直接定位的滑动或转动关节。";
+    const paragraph = document.createElement("p");
+    paragraph.className = "empty-state";
+    paragraph.textContent = note;
+    el.jointControls.appendChild(paragraph);
+  }
   if (!controls.actuators.length) el.actuatorControls.insertAdjacentHTML("beforeend", '<p class="empty-state">模型没有执行器。可让 AI 在 model.xml 中添加 motor、position 或 velocity actuator。</p>');
-  for (const item of controls.joints) {
+  for (const item of joints) {
     el.jointControls.appendChild(controlRow(item, (value) => {
       state.viewer.setPaused(true);
-      el.playButton.textContent = "播放";
-      el.playButton.classList.remove("active");
+      updatePlaybackButton();
       state.viewer.setJointPosition(item.id, value);
+    }));
+  }
+  for (const config of kinematicControls) {
+    if (config.type !== "slider_crank") continue;
+    const item = {
+      name: config.label || config.crank_joint,
+      kindLabel: "闭环联动位置 (rad)",
+      min: Number(config.min ?? -Math.PI),
+      max: Number(config.max ?? Math.PI),
+      step: Number(config.step ?? 0.01),
+      value: state.viewer.getJointPosition(config.crank_joint),
+    };
+    el.jointControls.appendChild(controlRow(item, (value) => {
+      state.viewer.setPaused(true);
+      updatePlaybackButton();
+      state.viewer.setKinematicPosition(config, value);
     }));
   }
   for (const item of controls.actuators) {
@@ -202,17 +266,90 @@ function appendSample(sample) {
     drawChart();
     renderLiveValues(sample.values);
   }
+  el.exportData.disabled = state.series.time.length === 0;
 }
 
 function clearSeries() {
   state.series = { time: [] };
   drawChart();
   el.liveValues.innerHTML = "";
+  el.exportData.disabled = true;
+}
+
+function exportCurrentData() {
+  const time = state.series.time || [];
+  if (!time.length) {
+    showMessage("当前没有可导出的数据。", true);
+    return;
+  }
+  const columns = Object.keys(state.series).filter((key) => key !== "time");
+  const escapeCell = (value) => {
+    if (value === null || value === undefined) return "";
+    const text = String(value);
+    return /[\",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+  };
+  const lines = [["time", ...columns].map(escapeCell).join(",")];
+  for (let index = 0; index < time.length; index += 1) {
+    lines.push([
+      time[index],
+      ...columns.map((column) => state.series[column]?.[index] ?? ""),
+    ].map(escapeCell).join(","));
+  }
+  const stamp = new Date().toISOString().replaceAll(":", "-").replace(/\.\d{3}Z$/, "Z");
+  const taskId = state.task?.id || "vmail";
+  const filename = `${taskId}_current_${stamp}.csv`;
+  const url = URL.createObjectURL(new Blob(["\ufeff", lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+  showMessage(`已导出当前数据：${filename}`);
+}
+
+function declaredSeriesKeys() {
+  const declared = (state.task?.ui?.layout?.charts || []).flatMap((chart) => chart.series || []);
+  return [...new Set(declared)];
+}
+
+function resetSeriesSelection() {
+  state.visibleSeries = new Set(declaredSeriesKeys());
+}
+
+function seriesColor(key) {
+  const index = declaredSeriesKeys().indexOf(key);
+  return colors[(index < 0 ? 0 : index) % colors.length];
 }
 
 function seriesKeys() {
-  const declared = (state.task?.ui?.layout?.charts || []).flatMap((chart) => chart.series || []);
-  return [...new Set(declared)].filter((key) => state.series[key]);
+  return declaredSeriesKeys().filter((key) => state.visibleSeries.has(key) && state.series[key]);
+}
+
+function renderChartLegend() {
+  el.chartLegend.innerHTML = "";
+  for (const key of declaredSeriesKeys()) {
+    const label = document.createElement("label");
+    label.className = "legend-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = state.visibleSeries.has(key);
+    checkbox.setAttribute("aria-label", `显示曲线 ${key}`);
+    checkbox.addEventListener("change", () => {
+      if (checkbox.checked) state.visibleSeries.add(key);
+      else state.visibleSeries.delete(key);
+      drawChart();
+    });
+
+    const swatch = document.createElement("i");
+    swatch.style.background = seriesColor(key);
+    const text = document.createElement("span");
+    text.textContent = key;
+    label.append(checkbox, swatch, text);
+    el.chartLegend.appendChild(label);
+  }
 }
 
 function drawChart() {
@@ -222,13 +359,13 @@ function drawChart() {
   const height = canvas.height;
   ctx.fillStyle = "#121922";
   ctx.fillRect(0, 0, width, height);
-  el.chartLegend.innerHTML = "";
+  renderChartLegend();
   const time = state.series.time;
   const keys = seriesKeys();
   if (time.length < 2 || !keys.length) {
     ctx.fillStyle = "#7f8b99";
     ctx.font = "28px Microsoft YaHei, sans-serif";
-    ctx.fillText("仿真运行后显示实时曲线", 34, 64);
+    ctx.fillText(time.length < 2 ? "仿真运行后显示实时曲线" : "请选择至少一条曲线", 34, 64);
     return;
   }
   const pad = { left: 64, right: 22, top: 24, bottom: 44 };
@@ -252,8 +389,8 @@ function drawChart() {
   ctx.font = "22px Segoe UI, sans-serif";
   ctx.fillText(maxY.toFixed(2), 8, pad.top + 8);
   ctx.fillText(minY.toFixed(2), 8, pad.top + plotH);
-  keys.forEach((key, index) => {
-    ctx.strokeStyle = colors[index % colors.length];
+  keys.forEach((key) => {
+    ctx.strokeStyle = seriesColor(key);
     ctx.lineWidth = 3;
     ctx.beginPath();
     state.series[key].forEach((value, point) => {
@@ -262,9 +399,6 @@ function drawChart() {
       else ctx.lineTo(x(time[point]), y(value));
     });
     ctx.stroke();
-    const label = document.createElement("span");
-    label.innerHTML = `<i style="background:${colors[index % colors.length]}"></i>${key}`;
-    el.chartLegend.appendChild(label);
   });
 }
 
@@ -279,11 +413,18 @@ async function runBatchSimulation() {
     const result = await requestJson(`/api/tasks/${encodeURIComponent(state.task.id)}/simulate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ parameters: collectParameters(), duration: Number(el.durationInput.value), timestep: Number(el.timestepInput.value) }),
+      body: JSON.stringify({
+        parameters: collectParameters(),
+        controls: state.viewer?.getActuatorControlValues() || {},
+        duration: Number(el.durationInput.value),
+        timestep: Number(el.timestepInput.value),
+      }),
     });
     state.series = result.series;
+    el.exportData.disabled = state.series.time.length === 0;
     drawChart();
-    showMessage(`计算完成，数据已保存到 ${result.saved.run_id}`);
+    const controls = Object.entries(result.controls || {}).map(([name, value]) => `${name}=${value}`).join(", ");
+    showMessage(`计算完成，数据已保存到 ${result.saved.run_id}${controls ? `，控制：${controls}` : ""}`);
   } catch (error) {
     showMessage(error.message, true);
   } finally {
@@ -305,11 +446,26 @@ document.querySelectorAll(".tab").forEach((button) => button.addEventListener("c
 }));
 el.refreshTasks.addEventListener("click", () => loadTasks().catch((error) => showMessage(error.message, true)));
 el.applyParameters.addEventListener("click", () => loadBrowserModel());
+el.parameterForm.addEventListener("input", () => {
+  state.parametersDirty = true;
+  resetPlaybackState();
+});
+el.timestepInput.addEventListener("input", () => {
+  state.parametersDirty = true;
+  resetPlaybackState();
+});
 el.runButton.addEventListener("click", runBatchSimulation);
 el.clearData.addEventListener("click", clearSeries);
-el.resetButton.addEventListener("click", () => { clearSeries(); state.viewer.reset(); });
-el.stepButton.addEventListener("click", () => { state.viewer.setPaused(true); el.playButton.textContent = "播放"; el.playButton.classList.remove("active"); state.viewer.step(); });
-el.playButton.addEventListener("click", () => { const paused = !state.viewer.paused; state.viewer.setPaused(paused); el.playButton.textContent = paused ? "播放" : "暂停"; el.playButton.classList.toggle("active", !paused); });
+el.exportData.addEventListener("click", exportCurrentData);
+el.resetButton.addEventListener("click", () => { state.viewer.reset(); clearSeries(); resetPlaybackState(); });
+el.stepButton.addEventListener("click", () => { state.viewer.setPaused(true); state.viewer.step(); state.simulationStarted = true; updatePlaybackButton(); });
+el.playButton.addEventListener("click", async () => {
+  const shouldRun = state.viewer.paused;
+  if (shouldRun && state.parametersDirty && !await loadBrowserModel()) return;
+  if (shouldRun) state.simulationStarted = true;
+  state.viewer.setPaused(!shouldRun);
+  updatePlaybackButton();
+});
 el.cameraMode.addEventListener("click", () => setMode("camera"));
 el.dragMode.addEventListener("click", () => setMode("drag"));
 el.contactButton.addEventListener("click", () => el.contactButton.classList.toggle("active", state.viewer.toggleContacts()));

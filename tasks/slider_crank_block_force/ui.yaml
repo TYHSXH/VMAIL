@@ -1,0 +1,16 @@
+layout:
+  parameter_groups: []
+  charts:
+    - title: 曲柄转角与角速度
+      series:
+        - joint.crank_hinge.position
+        - joint.crank_hinge.velocity
+    - title: 滑块B的水平速度
+      series:
+        - joint.slider_x.velocity
+    - title: 连杆AB的角速度
+      series:
+        - body.connecting_rod.velocity.wz
+controls:
+  joints: []
+  joint_note: 本题只用恒角速度执行器驱动曲柄；闭环关节位置不单独调整。
