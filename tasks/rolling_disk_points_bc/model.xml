@@ -7,7 +7,7 @@
     <scale jointlength="0.12" jointwidth="0.025"/>
   </visual>
   <default>
-    <joint armature="0.002" damping="0" frictionloss="0"/>
+    <joint armature="0.02" damping="0" frictionloss="0"/>
     <geom contype="0" conaffinity="0" condim="1"/>
   </default>
 
@@ -26,23 +26,22 @@
     <geom name="pivot_o" type="cylinder" size="0.075 0.04" pos="0 0 0" rgba="0.25 0.28 0.32 1"/>
 
     <body name="crank" pos="0 0 0">
-      <joint name="crank_hinge" type="hinge" axis="0 0 1" limited="true" range="-0.12 0.12"/>
-      <geom name="crank_geom" type="capsule" fromto="0 0 0 0 1 0" size="0.035" mass="0.01" rgba="0.12 0.55 0.88 1"/>
-      <site name="point_a" pos="0 1 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
-      <body name="connecting_rod" pos="0 1 0">
+      <joint name="crank_hinge" type="hinge" axis="0 0 1" limited="false"/>
+      <geom name="crank_geom" type="capsule" fromto="0 0 0 -0.4 0 0" size="0.035" mass="0.01" rgba="0.12 0.55 0.88 1"/>
+      <site name="point_a" pos="-0.4 0 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
+      <body name="connecting_rod" pos="-0.4 0 0" quat="0.956127032317956 0 0 0.292952381917024">
         <joint name="rod_hinge_a" type="hinge" axis="0 0 1" limited="false"/>
-        <geom name="rod_geom" type="capsule" fromto="0 0 0 1 0 0" size="0.03" mass="0.005" rgba="0.93 0.72 0.18 1"/>
-        <site name="rod_end_b" pos="1 0 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
+        <geom name="rod_geom" type="capsule" fromto="0 0 0 1.8 0 0" size="0.03" mass="0.005" rgba="0.93 0.72 0.18 1"/>
+        <site name="rod_end_b" pos="1.8 0 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
       </body>
     </body>
 
-    <body name="disk_carrier" pos="1 1.5 0">
+    <body name="disk_carrier" pos="1 1.5 0" quat="0.995811784667121 0 0 0.0914269627521484">
       <joint name="disk_orbit" type="hinge" axis="0 0 1" limited="false"/>
       <geom name="carrier_inertia" type="sphere" size="0.01" mass="0.001" rgba="0 0 0 0"/>
-      <body name="disk" pos="0 -0.5 0">
+      <body name="disk" pos="0 -0.5 0" quat="0.983282220963835 0 0 -0.182088093889823">
         <joint name="disk_spin" type="hinge" axis="0 0 1" limited="false"/>
         <geom name="disk_geom" type="cylinder" size="0.5 0.045" mass="1.0" rgba="0.22 0.72 0.42 0.82"/>
-        <geom name="disk_radius_mark" type="capsule" fromto="0 0 0 0.5 0 0" size="0.018" mass="0.001" rgba="0.96 0.42 0.12 1"/>
         <site name="point_b" pos="0 0 0" size="0.045" rgba="0.10 0.15 0.20 1"/>
         <site name="point_c" pos="0.5 0 0" size="0.045" rgba="0.96 0.20 0.18 1"/>
       </body>
@@ -50,12 +49,11 @@
   </worldbody>
 
   <equality>
-    <joint name="rod_kinematics" joint1="rod_hinge_a" joint2="crank_hinge" polycoef="0 -1 1.5 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
-    <joint name="orbit_kinematics" joint1="disk_orbit" joint2="crank_hinge" polycoef="0 -2 0 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
-    <joint name="pure_rolling" joint1="disk_spin" joint2="disk_orbit" polycoef="0 -2 0 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
+    <connect name="pin_b" body1="connecting_rod" body2="disk" anchor="1.8 0 0" solref="0.02 1" solimp="0.999 0.9999 0.001"/>
+    <joint name="pure_rolling" joint1="disk_spin" joint2="disk_orbit" polycoef="0 -2 0 0 0" solref="0.02 1" solimp="0.999 0.9999 0.001"/>
   </equality>
 
   <actuator>
-    <velocity name="crank_speed" joint="crank_hinge" kv="2000" ctrlrange="-5 5" ctrllimited="true"/>
+    <velocity name="crank_speed" joint="crank_hinge" kv="200" ctrlrange="-5 5" ctrllimited="true"/>
   </actuator>
 </mujoco>

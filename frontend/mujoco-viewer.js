@@ -131,12 +131,18 @@ export class MujocoBrowserViewer {
     this.geometryCache.clear();
   }
 
-  reset() {
+  reset(preserveControls = false) {
     if (!this.model || !this.data) return;
+    const controls = preserveControls ? Array.from(this.data.ctrl) : null;
     this.clearDrag();
     this.paused = true;
     this.completionNotified = false;
     this.mujoco.mj_resetData(this.model, this.data);
+    if (controls) {
+      controls.forEach((value, index) => {
+        if (index < this.data.ctrl.length) this.data.ctrl[index] = value;
+      });
+    }
     this.timeAccumulator = 0;
     this.nextSampleTime = 0;
     this.lastSampleTime = -Infinity;
@@ -178,7 +184,9 @@ export class MujocoBrowserViewer {
   }
 
   setPaused(paused) {
+    const changed = this.paused !== paused;
     this.paused = paused;
+    if (changed) this.callbacks.onPausedChange?.(paused);
   }
 
   setDuration(duration) {
@@ -311,6 +319,27 @@ export class MujocoBrowserViewer {
   setActuatorControl(actuatorId, value) {
     if (!this.model || !this.data || actuatorId < 0 || actuatorId >= this.model.nu) return;
     this.data.ctrl[actuatorId] = Number(value);
+  }
+
+  setActuatorControlValues(values = {}) {
+    if (!this.model || !this.data) return {};
+    const restored = {};
+    for (const [name, rawValue] of Object.entries(values)) {
+      const actuatorId = this.mujoco.mj_name2id(
+        this.model,
+        this.mujoco.mjtObj.mjOBJ_ACTUATOR.value,
+        name,
+      );
+      const value = Number(rawValue);
+      if (actuatorId < 0 || !Number.isFinite(value)) continue;
+      const lower = Number(this.model.actuator_ctrlrange[actuatorId * 2]);
+      const upper = Number(this.model.actuator_ctrlrange[actuatorId * 2 + 1]);
+      const hasRange = Number.isFinite(lower) && Number.isFinite(upper) && upper > lower;
+      const applied = hasRange ? Math.min(upper, Math.max(lower, value)) : value;
+      this.data.ctrl[actuatorId] = applied;
+      restored[name] = applied;
+    }
+    return restored;
   }
 
   getActuatorControlValues() {
@@ -661,14 +690,37 @@ export class MujocoBrowserViewer {
     this.pointerFromEvent(event);
     this.raycaster.setFromCamera(this.pointer, this.camera);
     const hit = this.raycaster.intersectObjects(this.meshes.filter((mesh) => mesh.visible && mesh.userData.bodyId > 0))[0];
-    if (!hit) return;
+    if (!hit || this.callbacks.onBeforeDrag?.() === false) return;
     event.preventDefault();
     event.stopPropagation();
     const normal = new THREE.Vector3();
     this.camera.getWorldDirection(normal);
     this.dragPlane.setFromNormalAndCoplanarPoint(normal, hit.point);
     this.dragTarget.copy(hit.point);
-    this.drag = { bodyId: hit.object.userData.bodyId, pointerId: event.pointerId };
+
+    const bodyId = hit.object.userData.bodyId;
+    const bodyPosition = new THREE.Vector3(
+      this.data.xpos[bodyId * 3],
+      this.data.xpos[bodyId * 3 + 1],
+      this.data.xpos[bodyId * 3 + 2],
+    );
+    const worldOffset = hit.point.clone().sub(bodyPosition);
+    const matrixOffset = bodyId * 9;
+    const matrix = this.data.xmat;
+    const localPoint = new THREE.Vector3(
+      matrix[matrixOffset] * worldOffset.x
+        + matrix[matrixOffset + 3] * worldOffset.y
+        + matrix[matrixOffset + 6] * worldOffset.z,
+      matrix[matrixOffset + 1] * worldOffset.x
+        + matrix[matrixOffset + 4] * worldOffset.y
+        + matrix[matrixOffset + 7] * worldOffset.z,
+      matrix[matrixOffset + 2] * worldOffset.x
+        + matrix[matrixOffset + 5] * worldOffset.y
+        + matrix[matrixOffset + 8] * worldOffset.z,
+    );
+    const resumeAfterDrag = this.paused && !this.hasReachedDuration();
+    this.drag = { bodyId, pointerId: event.pointerId, localPoint, resumeAfterDrag };
+    if (resumeAfterDrag) this.setPaused(false);
     this.renderer.domElement.setPointerCapture(event.pointerId);
     this.callbacks.onSelection?.(`body #${this.drag.bodyId}`);
   }
@@ -693,25 +745,53 @@ export class MujocoBrowserViewer {
       this.data.xpos[bodyId * 3 + 1],
       this.data.xpos[bodyId * 3 + 2],
     );
-    const velocity = new THREE.Vector3(
+    const angularVelocity = new THREE.Vector3(
+      this.data.cvel[bodyId * 6],
+      this.data.cvel[bodyId * 6 + 1],
+      this.data.cvel[bodyId * 6 + 2],
+    );
+    const linearVelocity = new THREE.Vector3(
       this.data.cvel[bodyId * 6 + 3],
       this.data.cvel[bodyId * 6 + 4],
       this.data.cvel[bodyId * 6 + 5],
     );
-    const force = this.dragTarget.clone().sub(position).multiplyScalar(120).addScaledVector(velocity, -18);
+    const matrixOffset = bodyId * 9;
+    const matrix = this.data.xmat;
+    const localPoint = this.drag.localPoint;
+    const worldOffset = new THREE.Vector3(
+      matrix[matrixOffset] * localPoint.x
+        + matrix[matrixOffset + 1] * localPoint.y
+        + matrix[matrixOffset + 2] * localPoint.z,
+      matrix[matrixOffset + 3] * localPoint.x
+        + matrix[matrixOffset + 4] * localPoint.y
+        + matrix[matrixOffset + 5] * localPoint.z,
+      matrix[matrixOffset + 6] * localPoint.x
+        + matrix[matrixOffset + 7] * localPoint.y
+        + matrix[matrixOffset + 8] * localPoint.z,
+    );
+    const grabPoint = position.clone().add(worldOffset);
+    const pointVelocity = angularVelocity.clone().cross(worldOffset).add(linearVelocity);
+    const force = this.dragTarget.clone().sub(grabPoint).multiplyScalar(120)
+      .addScaledVector(pointVelocity, -18);
     if (force.length() > 300) force.setLength(300);
+    const torque = worldOffset.clone().cross(force);
     const offset = bodyId * 6;
     this.data.xfrc_applied[offset] = force.x;
     this.data.xfrc_applied[offset + 1] = force.y;
     this.data.xfrc_applied[offset + 2] = force.z;
+    this.data.xfrc_applied[offset + 3] = torque.x;
+    this.data.xfrc_applied[offset + 4] = torque.y;
+    this.data.xfrc_applied[offset + 5] = torque.z;
   }
 
   clearDrag() {
+    const resumeAfterDrag = this.drag?.resumeAfterDrag;
     if (this.drag && this.data) {
       const offset = this.drag.bodyId * 6;
       for (let i = 0; i < 6; i += 1) this.data.xfrc_applied[offset + i] = 0;
     }
     this.drag = null;
+    if (resumeAfterDrag) this.setPaused(true);
     this.callbacks.onSelection?.("");
   }
 

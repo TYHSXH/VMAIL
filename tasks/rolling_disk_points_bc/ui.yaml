@@ -16,4 +16,4 @@ layout:
         - site.point_c.acceleration.magnitude
 controls:
   joints: []
-  joint_note: 瞬时运动关系已经联动，请仅将 crank_speed 设为 -2 后开始。
+  joint_note: 闭环铰接与纯滚约束已经联动，请仅将 crank_speed 设为 -2 后开始。

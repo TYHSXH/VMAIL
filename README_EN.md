@@ -55,7 +55,7 @@ This option does not use the project's `.venv`. The active Conda environment mus
 - 3D viewport: orbit, pan, zoom, select bodies, and apply drag forces.
 - Simulation: a loaded task remains still until Start is pressed; pause, resume, step, reset, contact display, and camera reset are supported.
 - Parameters: edit mass, stiffness, damping, initial state, and other MJCF values exposed by the task; applying changes recompiles the model.
-- Controls: directly position one-dimensional slide/hinge joints and write runtime inputs to MuJoCo actuator `ctrl` values.
+- Controls: directly position one-dimensional slide/hinge joints and write runtime inputs to MuJoCo actuator `ctrl` values. Values are remembered by task and actuator name across parameter reloads, resets, and restarts.
 - Data: inspect live curves; **Export current data** downloads the current browser curve buffer as CSV; **Compute and save** reruns a Python batch experiment from the initial state using the current actuator control values.
 - Point observations: a task can use a named MuJoCo `site` to record the position, velocity, and acceleration of a body-fixed point with matching browser/Python fields and SI units.
 - Layout: on desktop, drag either sidebar edge to resize it; widths are saved in the current browser.

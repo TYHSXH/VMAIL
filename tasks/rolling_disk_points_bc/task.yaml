@@ -1,9 +1,9 @@
 id: rolling_disk_points_bc
-title: 例7-10 曲柄驱动纯滚圆盘
-question: 已知 OA=AB=R=2r=1 m，圆盘沿半径R的固定圆弧纯滚；图示瞬时曲柄OA的角速度为2 rad/s、角加速度为零，从仿真数据确定圆盘上B点和C点的速度与加速度。
+title: 例7-10 改型全回转纯滚圆盘
+question: 将机构修改为 OA=0.4 m、AB=1.8 m，同时保持 R=1 m、r=0.5 m 和固定点 O、O1 不变，使曲柄能够完整回转；观察圆盘上 B、C 两点的速度与加速度。
 simulation:
   engine: mujoco
-  duration: 0.1
+  duration: 3.2
   timestep: 0.001
 theory_topics:
   - 刚体平面运动

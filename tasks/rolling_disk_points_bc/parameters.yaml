@@ -1,32 +1,4 @@
 parameters:
-  start_crank_angle:
-    label: 起始曲柄角
-    value: 0.1
-    unit: rad
-    initial_state:
-      joint: crank_hinge
-      field: qpos
-  start_rod_angle:
-    label: 起始连杆相对角
-    value: -0.085
-    unit: rad
-    initial_state:
-      joint: rod_hinge_a
-      field: qpos
-  start_orbit_angle:
-    label: 起始圆心轨道角
-    value: -0.2
-    unit: rad
-    initial_state:
-      joint: disk_orbit
-      field: qpos
-  start_spin_angle:
-    label: 起始圆盘自转角
-    value: 0.4
-    unit: rad
-    initial_state:
-      joint: disk_spin
-      field: qpos
   start_crank_speed:
     label: 起始曲柄角速度
     value: -2
@@ -36,21 +8,21 @@ parameters:
       field: qvel
   start_rod_speed:
     label: 起始连杆相对角速度
-    value: 1.4
+    value: 1.5231782849660247
     unit: rad/s
     initial_state:
       joint: rod_hinge_a
       field: qvel
   start_orbit_speed:
     label: 起始圆心轨道角速度
-    value: 4
+    value: 0.9779642198726407
     unit: rad/s
     initial_state:
       joint: disk_orbit
       field: qvel
   start_spin_speed:
     label: 起始圆盘相对角速度
-    value: -8
+    value: -1.9559284397452814
     unit: rad/s
     initial_state:
       joint: disk_spin

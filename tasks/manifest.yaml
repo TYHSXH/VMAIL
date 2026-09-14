@@ -10,7 +10,7 @@ tasks:
     status: ready
     description: 在 OA=r、AB=√3r 时，从网页数据验证 θ=60° 处的滑块速度和连杆角速度。
   - id: rolling_disk_points_bc
-    title: 例7-10 曲柄驱动纯滚圆盘
+    title: 例7-10 改型全回转纯滚圆盘
     path: rolling_disk_points_bc
     status: ready
-    description: 曲柄连杆驱动圆盘沿圆弧纯滚，观察图示瞬时 B、C 两点的速度和加速度。
+    description: 修改杆长后的全回转曲柄连杆驱动圆盘沿圆弧纯滚，观察 B、C 两点的速度和加速度。

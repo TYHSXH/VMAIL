@@ -12,6 +12,9 @@ const state = {
   series: { time: [] },
   seriesUnits: { time: "s" },
   visibleSeries: new Set(),
+  actuatorControlsByTask: new Map(),
+  viewerTaskId: null,
+  modelLoadVersion: 0,
   chartFrameId: null,
   latestSampleValues: null,
 };
@@ -48,6 +51,24 @@ async function initViewer() {
     onTime: (time) => { el.simTime.textContent = `t = ${time.toFixed(3)} s`; },
     onSample: appendSample,
     onSelection: (label) => { el.selectionLabel.textContent = label ? `已选中 ${label}` : ""; },
+    onBeforeDrag: () => {
+      if (state.parametersDirty) {
+        showMessage("参数已修改，请先应用参数后再拖动物体。", true);
+        return false;
+      }
+      if (state.simulationCompleted) {
+        showMessage("仿真已达到设定时长，请重新开始后再拖动物体。", true);
+        return false;
+      }
+      return true;
+    },
+    onPausedChange: (paused) => {
+      if (!paused) {
+        state.simulationStarted = true;
+        state.simulationCompleted = false;
+      }
+      updatePlaybackButton();
+    },
     onComplete: (time, duration) => {
       state.simulationStarted = true;
       state.simulationCompleted = true;
@@ -97,6 +118,7 @@ function renderTaskList() {
 
 async function selectTask(taskId) {
   try {
+    rememberViewerControls();
     state.task = await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
     state.seriesUnits = { time: "s" };
     renderTaskList();
@@ -149,28 +171,56 @@ function collectParameters() {
   return Object.fromEntries([...new FormData(el.parameterForm).entries()].map(([key, value]) => [key, Number(value)]));
 }
 
+function rememberViewerControls() {
+  if (!state.viewerTaskId || !state.viewer) return;
+  state.actuatorControlsByTask.set(state.viewerTaskId, state.viewer.getActuatorControlValues());
+}
+
+function restoreViewerControls() {
+  if (!state.task || !state.viewer) return {};
+  const saved = state.actuatorControlsByTask.get(state.task.id) || {};
+  const restored = state.viewer.setActuatorControlValues(saved);
+  state.actuatorControlsByTask.set(state.task.id, state.viewer.getActuatorControlValues());
+  return restored;
+}
+
+function resetViewerPreservingControls() {
+  rememberViewerControls();
+  state.viewer.reset(true);
+  restoreViewerControls();
+}
+
 async function loadBrowserModel() {
   if (!state.task || !state.viewerReady) return;
+  const task = state.task;
+  const loadVersion = ++state.modelLoadVersion;
   el.viewerLoading.classList.remove("hidden");
   el.viewerLoading.innerHTML = "<strong>正在编译 MJCF 模型</strong><span>物理引擎运行在当前浏览器中。</span>";
   try {
+    rememberViewerControls();
     const duration = Number(el.durationInput.value);
     if (!(duration > 0)) throw new Error("仿真时长必须大于 0 秒。");
-    const model = await requestJson(`/api/tasks/${encodeURIComponent(state.task.id)}/browser-model`, {
+    const model = await requestJson(`/api/tasks/${encodeURIComponent(task.id)}/browser-model`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ parameters: collectParameters(), timestep: Number(el.timestepInput.value) }),
     });
-    clearSeries();
+    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
     await state.viewer.loadModel(model.xml, model.initial_state, model.observe);
-    state.viewer.setDuration(duration);
+    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
+    state.viewerTaskId = task.id;
     state.seriesUnits = state.viewer.getObservationUnits();
+    restoreViewerControls();
+    clearSeries();
+    state.viewer.reset(true);
+    state.viewer.setDuration(duration);
     renderRuntimeControls();
     state.parametersDirty = false;
     resetPlaybackState();
     for (const button of [el.resetButton, el.stepButton, el.playButton, el.contactButton, el.homeCameraButton]) button.disabled = false;
     el.viewerLoading.classList.add("hidden");
   } catch (error) {
+    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
     el.viewerLoading.innerHTML = `<strong>模型载入失败</strong><span>${error.message}</span>`;
     showMessage(error.message, true);
     return false;
@@ -265,7 +315,10 @@ function renderRuntimeControls() {
     }));
   }
   for (const item of controls.actuators) {
-    el.actuatorControls.appendChild(controlRow(item, (value) => state.viewer.setActuatorControl(item.id, value)));
+    el.actuatorControls.appendChild(controlRow(item, (value) => {
+      state.viewer.setActuatorControl(item.id, value);
+      rememberViewerControls();
+    }));
   }
 }
 
@@ -580,7 +633,7 @@ el.durationInput.addEventListener("input", () => {
 el.runButton.addEventListener("click", runBatchSimulation);
 el.clearData.addEventListener("click", clearSeries);
 el.exportData.addEventListener("click", exportCurrentData);
-el.resetButton.addEventListener("click", () => { state.viewer.reset(); clearSeries(); resetPlaybackState(); });
+el.resetButton.addEventListener("click", () => { resetViewerPreservingControls(); clearSeries(); resetPlaybackState(); });
 el.stepButton.addEventListener("click", () => { state.viewer.setPaused(true); state.viewer.step(); state.simulationStarted = true; updatePlaybackButton(); });
 el.playButton.addEventListener("click", async () => {
   const shouldRun = state.viewer.paused;
@@ -593,7 +646,7 @@ el.playButton.addEventListener("click", async () => {
   if (shouldRun && state.parametersDirty && !await loadBrowserModel()) return;
   if (shouldRun && state.simulationCompleted) {
     clearSeries();
-    state.viewer.reset();
+    resetViewerPreservingControls();
     resetPlaybackState();
   }
   if (shouldRun) {
