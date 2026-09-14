@@ -5,7 +5,7 @@ cd /d "%~dp0"
 if not exist ".venv\Scripts\python.exe" call setup.bat
 if errorlevel 1 exit /b 1
 
-".venv\Scripts\python.exe" -c "import fastapi, yaml, numpy, mujoco, PIL, uvicorn" >nul 2>nul
+".venv\Scripts\python.exe" -c "import fastapi, yaml, numpy, mujoco, uvicorn" >nul 2>nul
 if errorlevel 1 call setup.bat
 if errorlevel 1 exit /b 1
 

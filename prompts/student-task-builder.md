@@ -24,9 +24,10 @@
 2. 使用 MuJoCo MJCF 创建 model.xml。
 3. 创建 task.yaml、parameters.yaml、observe.yaml、ui.yaml、notes.md。
 4. 更新 tasks/manifest.yaml，让网页可以发现这个任务。
-5. 参数必须有单位、范围、步长和说明。
-6. 观测量必须对应模型中真实存在的 body 或 joint。
-7. 创建完成后，请运行必要检查，确认网页后端能够读取这个任务。
+5. 参数必须有单位、范围、步长和说明；无量纲参数的单位写为 `1`。
+6. 研究刚体上的固定点时，在 model.xml 中创建具名 site，并在 observe.yaml 的 sites 中声明位置、速度或加速度；不要用相邻帧差分代替 MuJoCo 点运动学。
+7. 观测量必须对应模型中真实存在的 body、joint、site 或 equality。
+8. 创建完成后，请运行必要检查，确认网页后端能够读取这个任务。
 ```
 
 ## 更新已有任务

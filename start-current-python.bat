@@ -7,7 +7,7 @@ python -c "import sys; print(sys.executable)"
 
 echo.
 echo Checking required packages...
-python -c "import fastapi, yaml, numpy, mujoco, PIL; print('Dependencies OK')"
+python -c "import fastapi, yaml, numpy, mujoco; print('Dependencies OK')"
 if errorlevel 1 (
   echo.
   echo Missing dependency. Install requirements in the current environment with:

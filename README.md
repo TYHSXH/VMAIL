@@ -29,7 +29,7 @@ python -m pip install -r requirements.txt
 .\start-current-python.bat
 ```
 
-这种方式不会使用项目的 `.venv`。Conda 环境中必须能导入 `fastapi`、`uvicorn`、`yaml`、`numpy`、`mujoco` 和 `PIL`。
+这种方式不会使用项目的 `.venv`。Conda 环境中必须能导入 `fastapi`、`uvicorn`、`yaml`、`numpy` 和 `mujoco`。
 
 ## 常见问题
 
@@ -57,8 +57,10 @@ python -m pip install -r requirements.txt
 - 参数页：修改质量、刚度、阻尼、初始状态或 AI 暴露的其他 MJCF 参数；应用后重新编译模型。
 - 控制页：直接设置一维滑动/转动关节位置；对模型中的 actuator 实时写入 MuJoCo `ctrl`。
 - 数据页：查看实时观测曲线；“导出当前数据”会下载当前曲线缓存的 CSV；“计算并保存”会从初始状态重新运行 Python 批量实验，并继承当前 actuator 控制值。
+- 点观测：任务可通过具名 MuJoCo `site` 记录刚体固定点的位置、速度和加速度，网页与 Python 结果采用同一字段和 SI 单位。
+- 布局：桌面端可拖动左右侧栏边缘调整宽度，设置会保存在当前浏览器中。
 
-“批量计算时长”只决定数据页批量实验计算多久，不会限制点击“开始”后的三维实时仿真。“时间步长”会在应用参数重载模型时作用于浏览器仿真，也会用于批量实验。
+“仿真时长”同时控制网页实时仿真和 Python 批量实验；网页到达设定时长后会自动暂停。“时间步长”会在应用参数重载模型时作用于两种计算。实时值、曲线图例和导出 CSV 均标明单位。
 
 ## 项目结构
 
@@ -72,7 +74,6 @@ tasks/
   AGENTS.md              AI 创建任务时必须遵守的规则
   manifest.yaml          全部学习任务的全局索引
   <task_id>/             每个学习任务的独立文件夹
-outputs/                 公共导出目录
 setup.bat                首次环境配置
 start.bat                自动检查环境并启动
 start-current-python.bat 使用当前 Python/Conda 环境启动

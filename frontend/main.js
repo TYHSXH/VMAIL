@@ -7,9 +7,13 @@ const state = {
   viewer: null,
   viewerReady: false,
   simulationStarted: false,
+  simulationCompleted: false,
   parametersDirty: false,
   series: { time: [] },
+  seriesUnits: { time: "s" },
   visibleSeries: new Set(),
+  chartFrameId: null,
+  latestSampleValues: null,
 };
 
 const colors = ["#38bdf8", "#34d399", "#fb923c", "#f472b6", "#a78bfa", "#facc15"];
@@ -21,6 +25,7 @@ const el = Object.fromEntries(
     "mouseHint", "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
     "timestepInput", "applyParameters", "runButton", "clearData", "exportData", "chartCanvas", "chartLegend",
     "liveValues", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
+    "taskResizeHandle", "inspectorResizeHandle",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
@@ -43,6 +48,12 @@ async function initViewer() {
     onTime: (time) => { el.simTime.textContent = `t = ${time.toFixed(3)} s`; },
     onSample: appendSample,
     onSelection: (label) => { el.selectionLabel.textContent = label ? `已选中 ${label}` : ""; },
+    onComplete: (time, duration) => {
+      state.simulationStarted = true;
+      state.simulationCompleted = true;
+      updatePlaybackButton();
+      showMessage(`已完成 ${duration.toFixed(3)} s 仿真，自动暂停于 t = ${time.toFixed(3)} s`);
+    },
   });
   try {
     await state.viewer.init();
@@ -87,6 +98,7 @@ function renderTaskList() {
 async function selectTask(taskId) {
   try {
     state.task = await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
+    state.seriesUnits = { time: "s" };
     renderTaskList();
     renderTask();
     resetSeriesSelection();
@@ -142,18 +154,22 @@ async function loadBrowserModel() {
   el.viewerLoading.classList.remove("hidden");
   el.viewerLoading.innerHTML = "<strong>正在编译 MJCF 模型</strong><span>物理引擎运行在当前浏览器中。</span>";
   try {
+    const duration = Number(el.durationInput.value);
+    if (!(duration > 0)) throw new Error("仿真时长必须大于 0 秒。");
     const model = await requestJson(`/api/tasks/${encodeURIComponent(state.task.id)}/browser-model`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ parameters: collectParameters(), timestep: Number(el.timestepInput.value) }),
     });
+    clearSeries();
     await state.viewer.loadModel(model.xml, model.initial_state, model.observe);
+    state.viewer.setDuration(duration);
+    state.seriesUnits = state.viewer.getObservationUnits();
     renderRuntimeControls();
     state.parametersDirty = false;
     resetPlaybackState();
     for (const button of [el.resetButton, el.stepButton, el.playButton, el.contactButton, el.homeCameraButton]) button.disabled = false;
     el.viewerLoading.classList.add("hidden");
-    clearSeries();
   } catch (error) {
     el.viewerLoading.innerHTML = `<strong>模型载入失败</strong><span>${error.message}</span>`;
     showMessage(error.message, true);
@@ -164,12 +180,13 @@ async function loadBrowserModel() {
 
 function updatePlaybackButton() {
   const running = state.viewer && !state.viewer.paused;
-  el.playButton.textContent = running ? "暂停" : (state.simulationStarted ? "继续" : "开始");
+  el.playButton.textContent = running ? "暂停" : state.simulationCompleted ? "重新开始" : (state.simulationStarted ? "继续" : "开始");
   el.playButton.classList.toggle("active", Boolean(running));
 }
 
 function resetPlaybackState() {
   state.simulationStarted = false;
+  state.simulationCompleted = false;
   state.viewer?.setPaused(true);
   updatePlaybackButton();
 }
@@ -259,17 +276,24 @@ function appendSample(sample) {
     if (!state.series[key]) state.series[key] = Array(state.series.time.length - 1).fill(null);
     state.series[key].push(Number(value));
   }
-  if (state.series.time.length > 1000) {
+  if (state.series.time.length > 10000) {
     for (const values of Object.values(state.series)) values.shift();
   }
-  if (state.series.time.length % 4 === 0) {
-    drawChart();
-    renderLiveValues(sample.values);
+  state.latestSampleValues = sample.values;
+  if (state.chartFrameId === null) {
+    state.chartFrameId = requestAnimationFrame(() => {
+      state.chartFrameId = null;
+      drawChart();
+      if (state.latestSampleValues) renderLiveValues(state.latestSampleValues);
+    });
   }
   el.exportData.disabled = state.series.time.length === 0;
 }
 
 function clearSeries() {
+  if (state.chartFrameId !== null) cancelAnimationFrame(state.chartFrameId);
+  state.chartFrameId = null;
+  state.latestSampleValues = null;
   state.series = { time: [] };
   drawChart();
   el.liveValues.innerHTML = "";
@@ -288,7 +312,8 @@ function exportCurrentData() {
     const text = String(value);
     return /[\",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
   };
-  const lines = [["time", ...columns].map(escapeCell).join(",")];
+  const heading = (key) => `${key} [${state.seriesUnits[key] || "-"}]`;
+  const lines = [[heading("time"), ...columns.map(heading)].map(escapeCell).join(",")];
   for (let index = 0; index < time.length; index += 1) {
     lines.push([
       time[index],
@@ -323,6 +348,10 @@ function seriesColor(key) {
   return colors[(index < 0 ? 0 : index) % colors.length];
 }
 
+function seriesLabel(key) {
+  return `${key} [${state.seriesUnits[key] || "-"}]`;
+}
+
 function seriesKeys() {
   return declaredSeriesKeys().filter((key) => state.visibleSeries.has(key) && state.series[key]);
 }
@@ -346,7 +375,7 @@ function renderChartLegend() {
     const swatch = document.createElement("i");
     swatch.style.background = seriesColor(key);
     const text = document.createElement("span");
-    text.textContent = key;
+    text.textContent = seriesLabel(key);
     label.append(checkbox, swatch, text);
     el.chartLegend.appendChild(label);
   }
@@ -403,7 +432,10 @@ function drawChart() {
 }
 
 function renderLiveValues(values) {
-  el.liveValues.innerHTML = Object.entries(values).slice(0, 12).map(([key, value]) => `<div><span>${key}</span><strong>${Number(value).toFixed(4)}</strong></div>`).join("");
+  el.liveValues.innerHTML = Object.entries(values).map(([key, value]) => {
+    const unit = state.seriesUnits[key] || "-";
+    return `<div><span>${key}</span><strong>${Number(value).toFixed(4)} <em>${unit}</em></strong></div>`;
+  }).join("");
 }
 
 async function runBatchSimulation() {
@@ -421,6 +453,7 @@ async function runBatchSimulation() {
       }),
     });
     state.series = result.series;
+    state.seriesUnits = result.units || state.seriesUnits;
     el.exportData.disabled = state.series.time.length === 0;
     drawChart();
     const controls = Object.entries(result.controls || {}).map(([name, value]) => `${name}=${value}`).join(", ");
@@ -440,6 +473,89 @@ function setMode(mode) {
   el.mouseHint.textContent = mode === "camera" ? "左键旋转，右键平移，滚轮缩放" : "按住物体拖动，MuJoCo 将施加跟随力";
 }
 
+function setupResizableSidebars() {
+  const root = document.documentElement;
+  const settings = [
+    {
+      handle: el.taskResizeHandle,
+      panel: el.taskSidebar,
+      other: el.inspector,
+      property: "--task-sidebar-width",
+      storage: "vmail-task-sidebar-width",
+      initial: 238,
+      min: 180,
+      max: 420,
+      direction: 1,
+    },
+    {
+      handle: el.inspectorResizeHandle,
+      panel: el.inspector,
+      other: el.taskSidebar,
+      property: "--inspector-width",
+      storage: "vmail-inspector-width",
+      initial: 350,
+      min: 300,
+      max: 620,
+      direction: -1,
+    },
+  ];
+
+  const applyWidth = (setting, width) => {
+    const otherWidth = setting.other.classList.contains("collapsed") ? 0 : setting.other.getBoundingClientRect().width;
+    const available = Math.max(setting.min, window.innerWidth - otherWidth - 420);
+    const value = Math.round(Math.min(setting.max, available, Math.max(setting.min, width)));
+    root.style.setProperty(setting.property, `${value}px`);
+    return value;
+  };
+
+  for (const setting of settings) {
+    try {
+      const saved = Number(localStorage.getItem(setting.storage));
+      if (Number.isFinite(saved) && saved > 0) applyWidth(setting, saved);
+    } catch {
+      // Storage can be unavailable in restricted browser sessions.
+    }
+
+    setting.handle.addEventListener("pointerdown", (event) => {
+      if (event.button !== 0 || window.matchMedia("(max-width: 1080px)").matches) return;
+      event.preventDefault();
+      const startX = event.clientX;
+      const startWidth = setting.panel.getBoundingClientRect().width;
+      setting.handle.setPointerCapture(event.pointerId);
+      setting.handle.classList.add("active");
+      document.body.classList.add("resizing-sidebar");
+
+      const move = (moveEvent) => {
+        applyWidth(setting, startWidth + (moveEvent.clientX - startX) * setting.direction);
+      };
+      const finish = () => {
+        setting.handle.classList.remove("active");
+        document.body.classList.remove("resizing-sidebar");
+        setting.handle.removeEventListener("pointermove", move);
+        setting.handle.removeEventListener("pointerup", finish);
+        setting.handle.removeEventListener("pointercancel", finish);
+        try {
+          localStorage.setItem(setting.storage, String(Math.round(setting.panel.getBoundingClientRect().width)));
+        } catch {
+          // The resized layout still works for the current page.
+        }
+      };
+      setting.handle.addEventListener("pointermove", move);
+      setting.handle.addEventListener("pointerup", finish);
+      setting.handle.addEventListener("pointercancel", finish);
+    });
+
+    setting.handle.addEventListener("dblclick", () => {
+      applyWidth(setting, setting.initial);
+      try {
+        localStorage.removeItem(setting.storage);
+      } catch {
+        // Resetting the visible width is sufficient.
+      }
+    });
+  }
+}
+
 document.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
   document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === button.dataset.tab));
@@ -454,6 +570,13 @@ el.timestepInput.addEventListener("input", () => {
   state.parametersDirty = true;
   resetPlaybackState();
 });
+el.durationInput.addEventListener("input", () => {
+  const duration = Number(el.durationInput.value);
+  if (!(duration > 0) || !state.viewer) return;
+  state.viewer.setDuration(duration);
+  if (state.viewer.getTime() + 1e-9 < duration) state.simulationCompleted = false;
+  updatePlaybackButton();
+});
 el.runButton.addEventListener("click", runBatchSimulation);
 el.clearData.addEventListener("click", clearSeries);
 el.exportData.addEventListener("click", exportCurrentData);
@@ -461,8 +584,23 @@ el.resetButton.addEventListener("click", () => { state.viewer.reset(); clearSeri
 el.stepButton.addEventListener("click", () => { state.viewer.setPaused(true); state.viewer.step(); state.simulationStarted = true; updatePlaybackButton(); });
 el.playButton.addEventListener("click", async () => {
   const shouldRun = state.viewer.paused;
+  const duration = Number(el.durationInput.value);
+  if (shouldRun && !(duration > 0)) {
+    showMessage("仿真时长必须大于 0 秒。", true);
+    el.durationInput.focus();
+    return;
+  }
   if (shouldRun && state.parametersDirty && !await loadBrowserModel()) return;
-  if (shouldRun) state.simulationStarted = true;
+  if (shouldRun && state.simulationCompleted) {
+    clearSeries();
+    state.viewer.reset();
+    resetPlaybackState();
+  }
+  if (shouldRun) {
+    state.viewer.setDuration(duration);
+    state.simulationStarted = true;
+    state.simulationCompleted = false;
+  }
   state.viewer.setPaused(!shouldRun);
   updatePlaybackButton();
 });
@@ -480,4 +618,5 @@ window.addEventListener("keydown", (event) => {
 });
 window.addEventListener("beforeunload", () => state.viewer?.dispose());
 
+setupResizableSidebars();
 Promise.all([initViewer(), loadTasks()]).catch((error) => showMessage(error.message, true));

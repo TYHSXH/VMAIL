@@ -13,4 +13,13 @@ observe:
       fields:
         - position
         - velocity
-
+  sites:
+    - name: slider_center
+      label: 滑块中心点
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+      frame: world

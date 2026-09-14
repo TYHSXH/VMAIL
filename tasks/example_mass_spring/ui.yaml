@@ -22,3 +22,8 @@ layout:
     - title: 等效关节力
       series:
         - joint.slide_x.force
+    - title: 滑块中心点运动
+      series:
+        - site.slider_center.position.x
+        - site.slider_center.velocity.vx
+        - site.slider_center.acceleration.ax

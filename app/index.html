@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL 理论力学实验台</title>
-    <script type="module" crossorigin src="/static/assets/index-CgS5NlvI.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/assets/index-fLqhsWe7.css">
+    <script type="module" crossorigin src="/static/assets/index-DOOmJ5t-.js"></script>
+    <link rel="stylesheet" crossorigin href="/static/assets/index-o_O4uYj8.css">
   </head>
   <body>
     <div id="app">
@@ -21,6 +21,7 @@
         </header>
         <button id="refreshTasks" class="quiet-button wide" type="button">刷新学习任务</button>
         <nav id="taskList" class="task-list" aria-label="学习任务"></nav>
+        <div id="taskResizeHandle" class="resize-handle resize-handle-right" role="separator" aria-label="调整任务栏宽度" aria-orientation="vertical" tabindex="0"></div>
       </aside>
 
       <main class="stage-shell">
@@ -62,6 +63,7 @@
       </main>
 
       <aside id="inspector" class="inspector">
+        <div id="inspectorResizeHandle" class="resize-handle resize-handle-left" role="separator" aria-label="调整参数与数据面板宽度" aria-orientation="vertical" tabindex="0"></div>
         <header class="inspector-header">
           <nav class="tabs" aria-label="任务面板">
             <button class="tab active" data-tab="parameters" type="button">参数</button>
@@ -75,10 +77,10 @@
         <section class="tab-panel active" data-panel="parameters">
           <form id="parameterForm" class="parameter-form"></form>
           <div class="simulation-settings">
-            <label title="仅用于数据页的批量计算，不会限制三维视窗中的持续播放">批量计算时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
+            <label title="同时控制三维实时仿真与数据页批量计算的持续时间">仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
             <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.0001" step="0.001" value="0.005" /></label>
           </div>
-          <p class="field-help">批量计算时长用于生成并保存完整数据；三维视窗会持续运行，直到暂停或重置。</p>
+          <p class="field-help">点击开始后，三维仿真运行至设定时长并自动暂停；实时数据按仿真时间高频采集（每次最多约 5000 点），曲线按屏幕帧率刷新。</p>
           <button id="applyParameters" class="primary-button wide" type="button" disabled>应用参数并重载模型</button>
         </section>
 

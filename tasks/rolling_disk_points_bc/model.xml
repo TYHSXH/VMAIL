@@ -1,0 +1,61 @@
+<mujoco model="rolling_disk_points_bc">
+  <compiler angle="radian" inertiafromgeom="true"/>
+  <option gravity="0 0 0" timestep="0.001" integrator="implicitfast" iterations="100" tolerance="1e-10"/>
+  <statistic center="1 0.75 0" extent="1.45"/>
+  <visual>
+    <global azimuth="90" elevation="-90"/>
+    <scale jointlength="0.12" jointwidth="0.025"/>
+  </visual>
+  <default>
+    <joint armature="0.002" damping="0" frictionloss="0"/>
+    <geom contype="0" conaffinity="0" condim="1"/>
+  </default>
+
+  <worldbody>
+    <light name="key_light" pos="1 -2.5 4" dir="0 0 -1"/>
+    <geom name="ground" type="plane" size="1.7 1.35 0.02" pos="1 0.75 -0.13" rgba="0.12 0.15 0.18 1"/>
+
+    <geom name="track_1" type="capsule" fromto="0.060307 1.157980 -0.055 0.233956 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_2" type="capsule" fromto="0.233956 0.857212 -0.055 0.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_3" type="capsule" fromto="0.500000 0.633975 -0.055 0.826352 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_4" type="capsule" fromto="0.826352 0.515192 -0.055 1.173648 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_5" type="capsule" fromto="1.173648 0.515192 -0.055 1.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_6" type="capsule" fromto="1.500000 0.633975 -0.055 1.766044 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_7" type="capsule" fromto="1.766044 0.857212 -0.055 1.939693 1.157980 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <site name="arc_center_o1" pos="1 1.5 0" size="0.04" rgba="0.75 0.78 0.82 1"/>
+    <geom name="pivot_o" type="cylinder" size="0.075 0.04" pos="0 0 0" rgba="0.25 0.28 0.32 1"/>
+
+    <body name="crank" pos="0 0 0">
+      <joint name="crank_hinge" type="hinge" axis="0 0 1" limited="true" range="-0.12 0.12"/>
+      <geom name="crank_geom" type="capsule" fromto="0 0 0 0 1 0" size="0.035" mass="0.01" rgba="0.12 0.55 0.88 1"/>
+      <site name="point_a" pos="0 1 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
+      <body name="connecting_rod" pos="0 1 0">
+        <joint name="rod_hinge_a" type="hinge" axis="0 0 1" limited="false"/>
+        <geom name="rod_geom" type="capsule" fromto="0 0 0 1 0 0" size="0.03" mass="0.005" rgba="0.93 0.72 0.18 1"/>
+        <site name="rod_end_b" pos="1 0 0" size="0.04" rgba="0.96 0.52 0.10 1"/>
+      </body>
+    </body>
+
+    <body name="disk_carrier" pos="1 1.5 0">
+      <joint name="disk_orbit" type="hinge" axis="0 0 1" limited="false"/>
+      <geom name="carrier_inertia" type="sphere" size="0.01" mass="0.001" rgba="0 0 0 0"/>
+      <body name="disk" pos="0 -0.5 0">
+        <joint name="disk_spin" type="hinge" axis="0 0 1" limited="false"/>
+        <geom name="disk_geom" type="cylinder" size="0.5 0.045" mass="1.0" rgba="0.22 0.72 0.42 0.82"/>
+        <geom name="disk_radius_mark" type="capsule" fromto="0 0 0 0.5 0 0" size="0.018" mass="0.001" rgba="0.96 0.42 0.12 1"/>
+        <site name="point_b" pos="0 0 0" size="0.045" rgba="0.10 0.15 0.20 1"/>
+        <site name="point_c" pos="0.5 0 0" size="0.045" rgba="0.96 0.20 0.18 1"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <equality>
+    <joint name="rod_kinematics" joint1="rod_hinge_a" joint2="crank_hinge" polycoef="0 -1 1.5 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
+    <joint name="orbit_kinematics" joint1="disk_orbit" joint2="crank_hinge" polycoef="0 -2 0 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
+    <joint name="pure_rolling" joint1="disk_spin" joint2="disk_orbit" polycoef="0 -2 0 0 0" solref="0.005 1" solimp="0.999 0.9999 0.001"/>
+  </equality>
+
+  <actuator>
+    <velocity name="crank_speed" joint="crank_hinge" kv="2000" ctrlrange="-5 5" ctrllimited="true"/>
+  </actuator>
+</mujoco>

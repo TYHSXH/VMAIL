@@ -4,3 +4,4 @@ node_modules/
 __pycache__/
 *.pyc
 tasks/*/results/run_*/
+MUJOCO_LOG.TXT

@@ -30,12 +30,16 @@ export class MujocoBrowserViewer {
     this.meshes = [];
     this.geometryCache = new Map();
     this.paused = true;
+    this.duration = Infinity;
+    this.completionNotified = false;
     this.mode = "camera";
     this.showContacts = false;
     this.initialState = [];
     this.drag = null;
     this.lastFrame = performance.now();
-    this.lastSample = 0;
+    this.sampleInterval = 0.001;
+    this.nextSampleTime = 0;
+    this.lastSampleTime = -Infinity;
     this.timeAccumulator = 0;
     this.frameId = null;
 
@@ -130,8 +134,12 @@ export class MujocoBrowserViewer {
   reset() {
     if (!this.model || !this.data) return;
     this.clearDrag();
+    this.paused = true;
+    this.completionNotified = false;
     this.mujoco.mj_resetData(this.model, this.data);
     this.timeAccumulator = 0;
+    this.nextSampleTime = 0;
+    this.lastSampleTime = -Infinity;
     for (const item of this.initialState) {
       const jointId = this.mujoco.mj_name2id(
         this.model,
@@ -153,15 +161,51 @@ export class MujocoBrowserViewer {
   step(count = 1) {
     if (!this.model || !this.data) return;
     for (let i = 0; i < count; i += 1) {
+      if (this.hasReachedDuration()) {
+        this.finishDuration();
+        break;
+      }
       this.applyDragForce();
       this.mujoco.mj_step(this.model, this.data);
+      if (this.hasReachedDuration()) {
+        this.finishDuration();
+        break;
+      }
     }
+    this.mujoco.mj_forward(this.model, this.data);
     this.updateScene();
     this.emitSample(true);
   }
 
   setPaused(paused) {
     this.paused = paused;
+  }
+
+  setDuration(duration) {
+    const value = Number(duration);
+    this.duration = Number.isFinite(value) && value > 0 ? value : Infinity;
+    const timestep = Number(this.model?.opt?.timestep || 0.001);
+    const boundedDuration = Number.isFinite(this.duration) ? this.duration : 5;
+    this.sampleInterval = Math.max(timestep, boundedDuration / 5000);
+    this.nextSampleTime = this.getTime() + this.sampleInterval;
+    if (this.data && !this.hasReachedDuration()) this.completionNotified = false;
+    if (this.data && this.hasReachedDuration()) this.finishDuration();
+  }
+
+  getTime() {
+    return Number(this.data?.time || 0);
+  }
+
+  hasReachedDuration() {
+    return Boolean(this.data && Number.isFinite(this.duration) && this.data.time + 1e-9 >= this.duration);
+  }
+
+  finishDuration() {
+    this.paused = true;
+    this.timeAccumulator = 0;
+    if (this.completionNotified) return;
+    this.completionNotified = true;
+    this.callbacks.onComplete?.(this.getTime(), this.duration);
   }
 
   getInteractiveControls() {
@@ -419,13 +463,34 @@ export class MujocoBrowserViewer {
       if (this.model && this.data && !this.paused) {
         const timestep = this.model.opt.timestep;
         this.timeAccumulator = Math.min(this.timeAccumulator + elapsed, 0.1);
+        let stepped = false;
+        let stateFresh = false;
+        let completed = false;
         while (this.timeAccumulator >= timestep) {
+          if (this.hasReachedDuration()) {
+            this.finishDuration();
+            completed = true;
+            break;
+          }
           this.applyDragForce();
           this.mujoco.mj_step(this.model, this.data);
           this.timeAccumulator -= timestep;
+          stepped = true;
+          stateFresh = false;
+          if (this.data.time + 1e-12 >= this.nextSampleTime) {
+            this.mujoco.mj_forward(this.model, this.data);
+            stateFresh = true;
+            this.emitSample(false);
+          }
+          if (this.hasReachedDuration()) {
+            this.finishDuration();
+            completed = true;
+            break;
+          }
         }
+        if (stepped && !stateFresh) this.mujoco.mj_forward(this.model, this.data);
         this.updateScene();
-        this.emitSample(false, now);
+        this.emitSample(completed, now);
       }
       this.controls.update();
       this.renderer.render(this.scene, this.camera);
@@ -435,14 +500,77 @@ export class MujocoBrowserViewer {
     this.frameId = requestAnimationFrame(frame);
   }
 
-  emitSample(force = false, now = performance.now()) {
-    if (!force && now - this.lastSample < 50) return;
-    this.lastSample = now;
-    this.callbacks.onSample?.({ time: this.data.time, values: this.readObservations() });
+  emitSample(force = false) {
+    const time = Number(this.data?.time || 0);
+    if (!force && time + 1e-12 < this.nextSampleTime) return false;
+    if (Math.abs(time - this.lastSampleTime) < 1e-12) return false;
+    this.lastSampleTime = time;
+    while (this.nextSampleTime <= time + 1e-12) this.nextSampleTime += this.sampleInterval;
+    this.callbacks.onSample?.({ time, values: this.readObservations() });
+    return true;
+  }
+
+  getObservationUnits() {
+    const units = { time: "s" };
+    const slideType = this.mujoco.mjtJoint.mjJNT_SLIDE.value;
+    for (const item of this.observe?.joints || []) {
+      const jointId = this.mujoco.mj_name2id(this.model, this.mujoco.mjtObj.mjOBJ_JOINT.value, item.name);
+      if (jointId < 0) continue;
+      const linear = this.model.jnt_type[jointId] === slideType;
+      const fieldUnits = linear
+        ? { position: "m", velocity: "m/s", acceleration: "m/s²", force: "N" }
+        : { position: "rad", velocity: "rad/s", acceleration: "rad/s²", force: "N·m" };
+      for (const field of item.fields || []) {
+        if (fieldUnits[field]) units[`joint.${item.name}.${field}`] = fieldUnits[field];
+      }
+    }
+    for (const item of this.observe?.equalities || []) {
+      if (!(item.fields || []).includes("force")) continue;
+      const prefix = `equality.${item.name}.force`;
+      for (const axis of "xyz") units[`${prefix}.${axis}`] = "N";
+      units[`${prefix}.magnitude`] = "N";
+    }
+    for (const item of this.observe?.bodies || []) {
+      for (const field of item.fields || []) {
+        if (field === "position") {
+          for (const axis of "xyz") units[`body.${item.name}.position.${axis}`] = "m";
+        }
+        if (field === "velocity") {
+          for (const axis of ["wx", "wy", "wz"]) units[`body.${item.name}.velocity.${axis}`] = "rad/s";
+          for (const axis of ["vx", "vy", "vz"]) units[`body.${item.name}.velocity.${axis}`] = "m/s";
+        }
+      }
+    }
+    for (const item of this.observe?.sites || []) {
+      const components = Array.isArray(item.components) && item.components.length ? item.components : [..."xyz"];
+      for (const field of item.fields || []) {
+        const suffixes = field === "position"
+          ? components
+          : components.map((axis) => `${field === "velocity" ? "v" : "a"}${axis}`);
+        const unit = field === "position" ? "m" : field === "velocity" ? "m/s" : "m/s²";
+        for (const suffix of suffixes) units[`site.${item.name}.${field}.${suffix}`] = unit;
+        if (item.magnitude) units[`site.${item.name}.${field}.magnitude`] = unit;
+      }
+    }
+    return units;
+  }
+
+  readObjectVector(methodName, objectType, objectId) {
+    const buffer = new this.mujoco.DoubleBuffer(6);
+    try {
+      this.mujoco[methodName](this.model, this.data, objectType, objectId, buffer, 0);
+      return Array.from(buffer.GetView());
+    } finally {
+      buffer.delete();
+    }
   }
 
   readObservations() {
     const values = {};
+    const sites = this.observe?.sites || [];
+    if (sites.some((item) => (item.fields || []).includes("acceleration"))) {
+      this.mujoco.mj_rnePostConstraint(this.model, this.data);
+    }
     for (const item of this.observe?.joints || []) {
       const jointId = this.mujoco.mj_name2id(this.model, this.mujoco.mjtObj.mjOBJ_JOINT.value, item.name);
       if (jointId < 0) continue;
@@ -489,6 +617,33 @@ export class MujocoBrowserViewer {
           ["wx", "wy", "wz", "vx", "vy", "vz"].forEach((axis, index) => {
             values[`body.${item.name}.velocity.${axis}`] = this.data.cvel[bodyId * 6 + index];
           });
+        }
+      }
+    }
+    const siteObject = this.mujoco.mjtObj.mjOBJ_SITE.value;
+    for (const item of sites) {
+      const siteId = this.mujoco.mj_name2id(this.model, siteObject, item.name);
+      if (siteId < 0) continue;
+      const components = Array.isArray(item.components) && item.components.length ? item.components : [..."xyz"];
+      for (const field of item.fields || []) {
+        const prefix = `site.${item.name}.${field}`;
+        if (field === "position") {
+          const vector = [0, 1, 2].map((index) => Number(this.data.site_xpos[siteId * 3 + index]));
+          components.forEach((axis) => {
+            const index = "xyz".indexOf(axis);
+            values[`${prefix}.${axis}`] = vector[index];
+          });
+          if (item.magnitude) values[`${prefix}.magnitude`] = Math.hypot(...vector);
+        }
+        if (field === "velocity" || field === "acceleration") {
+          const method = field === "velocity" ? "mj_objectVelocity" : "mj_objectAcceleration";
+          const vector = this.readObjectVector(method, siteObject, siteId);
+          components.forEach((axis) => {
+            const index = "xyz".indexOf(axis);
+            const suffix = `${field === "velocity" ? "v" : "a"}${axis}`;
+            values[`${prefix}.${suffix}`] = vector[index + 3];
+          });
+          if (item.magnitude) values[`${prefix}.magnitude`] = Math.hypot(...vector.slice(3, 6));
         }
       }
     }

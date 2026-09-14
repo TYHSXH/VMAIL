@@ -76,15 +76,20 @@ def save_run_result(tasks_dir: Path, task_id: str, result: dict[str, Any]) -> di
     series = result.get("series", {})
     time = series.get("time", [])
     columns = [key for key in series.keys() if key != "time"]
+    units = result.get("units", {})
+    heading = lambda key: f"{key} [{units.get(key, '-')}]"
 
     with data_path.open("w", encoding="utf-8", newline="") as handle:
         writer = csv.writer(handle)
-        writer.writerow(["time", *columns])
+        writer.writerow([heading("time"), *[heading(column) for column in columns]])
         for index, t in enumerate(time):
             writer.writerow([t, *[series[col][index] if index < len(series[col]) else "" for col in columns]])
 
     curves_path = run_dir / "curves.json"
     curves_path.write_text(json.dumps(series, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    units_path = run_dir / "units.json"
+    units_path.write_text(json.dumps(units, ensure_ascii=False, indent=2), encoding="utf-8")
 
     summary_path = run_dir / "summary.md"
     summary_path.write_text(result.get("summary", ""), encoding="utf-8")
@@ -93,6 +98,6 @@ def save_run_result(tasks_dir: Path, task_id: str, result: dict[str, Any]) -> di
         "run_id": run_dir.name,
         "data_csv": str(data_path),
         "curves_json": str(curves_path),
+        "units_json": str(units_path),
         "summary_md": str(summary_path),
     }
-

@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from copy import deepcopy
 from typing import Any
-import base64
-import io
 import math
 import xml.etree.ElementTree as ET
 
@@ -47,73 +45,6 @@ def prepare_browser_model(
         "initial_state": initial_state,
         "observe": task.get("observe", {}).get("observe", {}),
     }
-
-
-class MujocoInteractiveSession:
-    def __init__(
-        self,
-        task: dict[str, Any],
-        parameter_overrides: dict[str, Any],
-        timestep_override: float | None = None,
-        width: int = 640,
-        height: int = 360,
-    ) -> None:
-        try:
-            import mujoco
-        except Exception as exc:
-            raise SimulationError("MuJoCo is not installed. Run start.bat or activate a Conda environment with MuJoCo.") from exc
-
-        self.mujoco = mujoco
-        self.task = task
-        self.values = _merged_parameter_values(task, parameter_overrides)
-        xml = _apply_mjcf_overrides(task["model_xml"], task, self.values)
-        try:
-            self.model = mujoco.MjModel.from_xml_string(xml)
-        except Exception as exc:
-            raise SimulationError(f"MuJoCo could not load model.xml: {exc}") from exc
-
-        config = deepcopy(task.get("task", {}).get("simulation", {}))
-        self.model.opt.timestep = float(timestep_override or config.get("timestep", self.model.opt.timestep))
-        self.data = mujoco.MjData(self.model)
-        self.width = width
-        self.height = height
-        self.renderer = None
-        self.reset()
-
-    def close(self) -> None:
-        if self.renderer is not None:
-            self.renderer.close()
-            self.renderer = None
-
-    def reset(self) -> dict[str, Any]:
-        self.mujoco.mj_resetData(self.model, self.data)
-        _set_initial_state(self.model, self.data, self.task, self.values, self.mujoco)
-        self.mujoco.mj_forward(self.model, self.data)
-        return self.snapshot()
-
-    def step(self, steps: int = 1) -> dict[str, Any]:
-        for _ in range(max(1, steps)):
-            self.mujoco.mj_step(self.model, self.data)
-        return self.snapshot()
-
-    def set_joint_position(self, joint_name: str, value: float) -> dict[str, Any]:
-        joint_id = self.mujoco.mj_name2id(self.model, self.mujoco.mjtObj.mjOBJ_JOINT, joint_name)
-        if joint_id < 0:
-            raise SimulationError(f"Joint not found: {joint_name}")
-        self.data.qpos[self.model.jnt_qposadr[joint_id]] = float(value)
-        self.data.qvel[self.model.jnt_dofadr[joint_id]] = 0.0
-        self.mujoco.mj_forward(self.model, self.data)
-        return self.snapshot()
-
-    def snapshot(self) -> dict[str, Any]:
-        observe = self.task.get("observe", {}).get("observe", {})
-        return {
-            "time": float(self.data.time),
-            "image": _render_png_data_url(self.model, self.data, self.mujoco, self.width, self.height, self),
-            "observations": _record_observations(self.model, self.data, observe, self.mujoco),
-            "qpos": [float(value) for value in self.data.qpos],
-            "qvel": [float(value) for value in self.data.qvel],
-        }
 
 
 def _parameter_entries(task: dict[str, Any]) -> dict[str, Any]:
@@ -198,6 +129,9 @@ def _set_actuator_controls(model: Any, data: Any, controls: dict[str, Any], mujo
 
 def _record_observations(model: Any, data: Any, observe: dict[str, Any], mujoco: Any) -> dict[str, float]:
     row: dict[str, float] = {}
+    sites = observe.get("sites", [])
+    if any("acceleration" in item.get("fields", []) for item in sites):
+        mujoco.mj_rnePostConstraint(model, data)
 
     for item in observe.get("joints", []):
         name = item.get("name")
@@ -235,6 +169,30 @@ def _record_observations(model: Any, data: Any, observe: dict[str, Any], mujoco:
                 for axis, value in zip(["wx", "wy", "wz", "vx", "vy", "vz"], velocity):
                     row[f"{prefix}.{axis}"] = float(value)
 
+    for item in sites:
+        name = item.get("name")
+        fields = item.get("fields", [])
+        components = item.get("components") or list("xyz")
+        site_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, name)
+        if site_id < 0:
+            continue
+        for field in fields:
+            prefix = f"site.{name}.{field}"
+            if field == "position":
+                for axis in components:
+                    row[f"{prefix}.{axis}"] = float(data.site_xpos[site_id]["xyz".index(axis)])
+                if item.get("magnitude"):
+                    row[f"{prefix}.magnitude"] = float(np.linalg.norm(data.site_xpos[site_id]))
+            elif field in {"velocity", "acceleration"}:
+                vector = np.zeros(6)
+                method = mujoco.mj_objectVelocity if field == "velocity" else mujoco.mj_objectAcceleration
+                method(model, data, mujoco.mjtObj.mjOBJ_SITE, site_id, vector, 0)
+                for axis in components:
+                    suffix = ("v" if field == "velocity" else "a") + axis
+                    row[f"{prefix}.{suffix}"] = float(vector["xyz".index(axis) + 3])
+                if item.get("magnitude"):
+                    row[f"{prefix}.magnitude"] = float(np.linalg.norm(vector[3:6]))
+
     equality_constraint_type = int(mujoco.mjtConstraint.mjCNSTR_EQUALITY)
     for item in observe.get("equalities", []):
         name = item.get("name")
@@ -258,37 +216,56 @@ def _record_observations(model: Any, data: Any, observe: dict[str, Any], mujoco:
     return row
 
 
-def _render_png_data_url(
-    model: Any,
-    data: Any,
-    mujoco: Any,
-    width: int,
-    height: int,
-    session: MujocoInteractiveSession | None = None,
-) -> str:
-    try:
-        from PIL import Image
-    except Exception as exc:
-        raise SimulationError("Pillow is required for MuJoCo frame rendering. Install requirements.txt again.") from exc
+def _observation_units(model: Any, observe: dict[str, Any], mujoco: Any) -> dict[str, str]:
+    units = {"time": "s"}
+    for item in observe.get("joints", []):
+        name = item.get("name")
+        joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        if joint_id < 0:
+            continue
+        linear = int(model.jnt_type[joint_id]) == int(mujoco.mjtJoint.mjJNT_SLIDE)
+        field_units = (
+            {"position": "m", "velocity": "m/s", "acceleration": "m/s²", "force": "N"}
+            if linear
+            else {"position": "rad", "velocity": "rad/s", "acceleration": "rad/s²", "force": "N·m"}
+        )
+        for field in item.get("fields", []):
+            if field in field_units:
+                units[f"joint.{name}.{field}"] = field_units[field]
 
-    try:
-        renderer = session.renderer if session is not None else None
-        if renderer is None:
-            renderer = mujoco.Renderer(model, height=height, width=width)
-            if session is not None:
-                session.renderer = renderer
-        renderer.update_scene(data)
-        pixels = renderer.render()
-    except Exception as exc:
-        raise SimulationError(f"MuJoCo rendering failed: {exc}") from exc
-    finally:
-        if session is None and "renderer" in locals():
-            renderer.close()
+    for item in observe.get("bodies", []):
+        name = item.get("name")
+        for field in item.get("fields", []):
+            if field == "position":
+                for axis in "xyz":
+                    units[f"body.{name}.position.{axis}"] = "m"
+            elif field == "velocity":
+                for axis in ["wx", "wy", "wz"]:
+                    units[f"body.{name}.velocity.{axis}"] = "rad/s"
+                for axis in ["vx", "vy", "vz"]:
+                    units[f"body.{name}.velocity.{axis}"] = "m/s"
 
-    buffer = io.BytesIO()
-    Image.fromarray(pixels).save(buffer, format="PNG")
-    encoded = base64.b64encode(buffer.getvalue()).decode("ascii")
-    return f"data:image/png;base64,{encoded}"
+    for item in observe.get("sites", []):
+        name = item.get("name")
+        components = item.get("components") or list("xyz")
+        for field in item.get("fields", []):
+            suffixes = components if field == "position" else [
+                ("v" if field == "velocity" else "a") + axis for axis in components
+            ]
+            unit = "m" if field == "position" else "m/s" if field == "velocity" else "m/s²"
+            for suffix in suffixes:
+                units[f"site.{name}.{field}.{suffix}"] = unit
+            if item.get("magnitude"):
+                units[f"site.{name}.{field}.magnitude"] = unit
+
+    for item in observe.get("equalities", []):
+        if "force" not in item.get("fields", []):
+            continue
+        prefix = f"equality.{item.get('name')}.force"
+        for axis in "xyz":
+            units[f"{prefix}.{axis}"] = "N"
+        units[f"{prefix}.magnitude"] = "N"
+    return units
 
 
 def run_mujoco_task(
@@ -324,10 +301,9 @@ def run_mujoco_task(
     mujoco.mj_forward(model, data)
 
     observe = task.get("observe", {}).get("observe", {})
+    units = _observation_units(model, observe, mujoco)
     series: dict[str, list[float]] = {"time": []}
-    frames: list[dict[str, Any]] = []
     steps = max(1, math.ceil(duration / timestep))
-    sample_stride = max(1, steps // 180)
 
     for step in range(steps + 1):
         row = _record_observations(model, data, observe, mujoco)
@@ -338,21 +314,11 @@ def run_mujoco_task(
             if key != "time" and key not in row:
                 series[key].append(float("nan"))
 
-        if step % sample_stride == 0:
-            body_positions = {}
-            for body_id in range(1, model.nbody):
-                name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, body_id) or f"body_{body_id}"
-                body_positions[name] = [float(v) for v in data.xpos[body_id]]
-            frames.append(
-                {
-                    "time": float(data.time),
-                    "bodies": body_positions,
-                    "image": _render_png_data_url(model, data, mujoco, 640, 360),
-                }
-            )
-
         if step < steps:
             mujoco.mj_step(model, data)
+            # mj_step advances qpos/qvel after computing derived Cartesian state.
+            # Refresh sites/bodies so the next recorded row matches the new time.
+            mujoco.mj_forward(model, data)
 
     summary = (
         f"# Simulation Summary\n\n"
@@ -362,6 +328,7 @@ def run_mujoco_task(
         f"- Samples: {len(series['time'])}\n"
         f"- Parameters: {values}\n"
         f"- Actuator controls: {controls}\n"
+        f"- Units: {units}\n"
     )
 
     return {
@@ -371,6 +338,6 @@ def run_mujoco_task(
         "duration": duration,
         "timestep": timestep,
         "series": series,
-        "frames": frames,
+        "units": units,
         "summary": summary,
     }

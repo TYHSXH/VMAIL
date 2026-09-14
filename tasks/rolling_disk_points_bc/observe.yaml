@@ -1,0 +1,29 @@
+observe:
+  joints:
+    - name: crank_hinge
+      label: 曲柄OA
+      fields:
+        - position
+        - velocity
+        - acceleration
+  sites:
+    - name: point_b
+      label: 圆盘中心B
+      fields:
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      magnitude: true
+      frame: world
+    - name: point_c
+      label: 圆盘边缘C
+      fields:
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      magnitude: true
+      frame: world

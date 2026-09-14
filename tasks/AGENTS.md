@@ -44,6 +44,7 @@ README.md               任务专用操作说明
 - `model.xml` 必须是可由 MuJoCo 编译的 MJCF。
 - 被参数、观测量、执行器或脚本引用的 body、joint、geom、site、sensor 和 actuator 必须显式命名，并保持名称稳定。
 - 学生需要比较的变量应写入 `parameters.yaml`，不要把关键变量只硬编码在 Python 脚本中。
+- 每个参数必须声明 `unit`；无量纲参数使用 `unit: "1"`。
 - `mjcf` 参数必须准确指向标签、名称和属性；初始状态使用 `initial_state`。
 - `kp`、`kv`、阻尼、摩擦、质量等需要重新编译模型的参数，修改后由网页“应用参数并重载模型”生效。
 - actuator 的运行时输入由网页“控制”页写入 `data.ctrl`；执行器应设置合理的 `ctrlrange`。
@@ -52,9 +53,12 @@ README.md               任务专用操作说明
 ## 观测与界面
 
 - 只在 `observe.yaml` 中声明本学习问题真正需要的量。
+- 刚体上的固定研究点应在 `model.xml` 中定义为具名 `site`，再通过 `observe.yaml` 的 `sites` 声明 `position`、`velocity` 或 `acceleration`。可用 `components` 限定 `x/y/z`，当前坐标系必须写 `frame: world` 或省略。
+- site 输出列遵循 `site.<name>.position.x`、`site.<name>.velocity.vx`、`site.<name>.acceleration.ax` 的命名方式。
 - `ui.yaml` 中每条图线必须对应实际产生的数据列。
+- 所有参数和输出数据必须有明确单位；不要在名称相同的列上自行改变框架规定的 SI 单位。
 - 参数分组应使用学生能理解的中文标题，参数键保持简短稳定。
-- `task.yaml.simulation.duration` 是 Python 批量实验的默认时长；浏览器实时仿真不会在该时刻自动停止。
+- `task.yaml.simulation.duration` 同时作为浏览器实时仿真和 Python 批量实验的默认时长；网页到达该时长后自动暂停。
 - `task.yaml.simulation.timestep` 同时作为浏览器模型和批量实验的默认时间步长。
 
 ## 复杂控制脚本
@@ -82,6 +86,7 @@ README.md               任务专用操作说明
 
 - MuJoCo 能编译 `model.xml`。
 - 所有参数引用和观测引用都存在。
+- 所有参数均声明单位，site 观测引用的名称、字段和分量均能通过校验。
 - 初始状态无穿透、爆炸或明显单位错误。
 - 网页刷新后能出现任务，参数可重载，重置可恢复初始状态。
 - 有 actuator 时，“控制”页能改变运动；没有 actuator 时不要虚构控制器。

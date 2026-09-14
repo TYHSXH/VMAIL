@@ -116,7 +116,7 @@ initial_state:
 
 这会设置关节初始广义坐标。`field` 也可以是 `qvel`，表示初始广义速度。
 
-每个参数建议包含：
+每个参数必须包含 `unit`；无量纲参数写 `unit: "1"`。同时建议包含：
 
 - `value`
 - `unit`
@@ -145,6 +145,17 @@ observe:
       fields:
         - position
         - velocity
+  sites:
+    - name: endpoint
+      label: 连杆端点 P
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      frame: world
 ```
 
 当前支持的 joint 字段：
@@ -159,7 +170,25 @@ observe:
 - `position`
 - `velocity`
 
-结果会保存到任务目录下的 `results/run_*/data.csv` 和 `results/run_*/curves.json`。
+当前支持的 site 字段：
+
+- `position`
+- `velocity`
+- `acceleration`
+
+`site` 必须对应 `model.xml` 中显式命名的 `<site>`，用于表示固定在某个刚体上的研究点。`components` 可选 `x`、`y`、`z`；省略时输出三个方向。`magnitude: true` 会额外输出对应位置、速度或加速度的 `magnitude` 列。当前 `frame` 只支持 `world`。
+
+site 数据列命名如下：
+
+```text
+site.endpoint.position.x
+site.endpoint.velocity.vx
+site.endpoint.acceleration.ax
+```
+
+网页实时仿真和 Python 批量计算使用同一套名称及单位。平移位置、速度、加速度分别使用 `m`、`m/s`、`m/s²`；转动关节使用 `rad`、`rad/s`、`rad/s²`。数据页图例、实时值和 CSV 表头都会显示单位。
+
+结果会保存到任务目录下的 `results/run_*/data.csv`、`curves.json` 和 `units.json`。`data.csv` 的每一列表头包含单位；`units.json` 提供机器可读的列名到单位映射。
 
 ## ui.yaml
 
@@ -192,7 +221,7 @@ actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `
 
 ## 实时仿真与批量实验
 
-浏览器载入任务后默认保持暂停，学生设置参数并点击“开始”后才进入持续交互仿真，直到再次暂停或重置。 `task.yaml` 中的 `simulation.duration` 只作为“计算并保存”批量实验的默认时长；`simulation.timestep` 同时用于浏览器模型和批量实验。
+浏览器载入任务后默认保持暂停。学生设置参数并点击“开始”后，网页从初始状态运行至 `simulation.duration` 并自动暂停；“计算并保存”的 Python 批量实验使用相同的时长。`simulation.timestep` 也同时用于浏览器模型和批量实验。
 
 “导出当前数据”不重新仿真，它直接将浏览器当前曲线缓存下载为 UTF-8 CSV。“计算并保存”会从初始状态重新运行高采样率批量实验，请求会同时传递当前参数、时长、步长和所有按名称匹配的 actuator `ctrl` 值。后端会检查执行器是否存在以及控制值是否位于 `ctrlrange` 内。
 

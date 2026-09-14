@@ -29,7 +29,7 @@ python -m pip install -r requirements.txt
 .\start-current-python.bat
 ```
 
-This option does not use the project's `.venv`. The active Conda environment must be able to import `fastapi`, `uvicorn`, `yaml`, `numpy`, `mujoco`, and `PIL`.
+This option does not use the project's `.venv`. The active Conda environment must be able to import `fastapi`, `uvicorn`, `yaml`, `numpy`, and `mujoco`.
 
 ## Troubleshooting
 
@@ -57,8 +57,10 @@ This option does not use the project's `.venv`. The active Conda environment mus
 - Parameters: edit mass, stiffness, damping, initial state, and other MJCF values exposed by the task; applying changes recompiles the model.
 - Controls: directly position one-dimensional slide/hinge joints and write runtime inputs to MuJoCo actuator `ctrl` values.
 - Data: inspect live curves; **Export current data** downloads the current browser curve buffer as CSV; **Compute and save** reruns a Python batch experiment from the initial state using the current actuator control values.
+- Point observations: a task can use a named MuJoCo `site` to record the position, velocity, and acceleration of a body-fixed point with matching browser/Python fields and SI units.
+- Layout: on desktop, drag either sidebar edge to resize it; widths are saved in the current browser.
 
-"Batch duration" controls only the saved batch experiment. It does not stop the 3D simulation after Start is pressed. "Timestep" applies to both the browser simulation and batch experiments after the model is reloaded.
+"Simulation duration" controls both the browser simulation and the Python batch experiment. The browser pauses automatically when it reaches that duration. "Timestep" applies to both calculations after the model is reloaded. Live values, chart legends, and exported CSV headers include units.
 
 ## Project Structure
 
@@ -72,7 +74,6 @@ tasks/
   AGENTS.md              Rules AI must follow when creating tasks
   manifest.yaml          Shared index of all learning tasks
   <task_id>/             One independent folder per task
-outputs/                 Shared export directory
 setup.bat                First-time environment setup
 start.bat                Automatic environment check and launch
 start-current-python.bat Launch with the active Python/Conda environment

@@ -1,0 +1,19 @@
+layout:
+  parameter_groups: []
+  charts:
+    - title: 曲柄运动状态
+      series:
+        - joint.crank_hinge.position
+        - joint.crank_hinge.velocity
+        - joint.crank_hinge.acceleration
+    - title: B、C点速度大小
+      series:
+        - site.point_b.velocity.magnitude
+        - site.point_c.velocity.magnitude
+    - title: B、C点加速度大小
+      series:
+        - site.point_b.acceleration.magnitude
+        - site.point_c.acceleration.magnitude
+controls:
+  joints: []
+  joint_note: 瞬时运动关系已经联动，请仅将 crank_speed 设为 -2 后开始。
