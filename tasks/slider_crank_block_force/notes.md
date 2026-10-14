@@ -19,7 +19,7 @@
 
 ## 网页操作
 
-1. 在“控制”页把 constant_speed_drive 设为便于观察的正值，例如 1 rad/s。
+1. 默认曲柄角速度为 1 rad/s；可在“控制”页修改“曲柄角速度”。
 2. 点击“开始”，在曲柄转角接近 1.047198 rad 时暂停。
 3. 记录 joint.crank_hinge.velocity、joint.slider_x.velocity 和 body.connecting_rod.velocity.wz。
 4. 滑块速度大小取 joint.slider_x.velocity 的绝对值。连杆绕 +z 的角速度为正，表示逆时针；负值表示顺时针。

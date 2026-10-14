@@ -3,8 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 import sys
 import xml.etree.ElementTree as ET
+import math
 
 from .task_io import REQUIRED_FILES, TaskValidationError, load_task, list_tasks
+from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,8 +42,11 @@ def validate_task(task_id: str) -> list[str]:
 
     try:
         task = load_task(TASKS_DIR, task_id)
-        names = _xml_names(task["model_xml"])
-    except (TaskValidationError, ET.ParseError) as exc:
+        prepared = prepare_browser_model(task, {})
+        names = _xml_names(prepared["xml"])
+        if task["task"].get("id") != task_id:
+            errors.append("task.yaml id must match its folder name")
+    except (TaskValidationError, SimulationError, ET.ParseError, TypeError, ValueError) as exc:
         return [str(exc)]
 
     parameters = task.get("parameters", {}).get("parameters", {})
@@ -134,6 +139,20 @@ def validate_task(task_id: str) -> list[str]:
     for series in ui_series:
         if series not in observed_series:
             errors.append(f"ui chart references unavailable observation series {series}")
+
+    camera = task.get("ui", {}).get("camera")
+    if camera:
+        for field in ("position", "target"):
+            vector = camera.get(field, [])
+            if not isinstance(vector, list) or len(vector) != 3 or not all(isinstance(v, (int, float)) and math.isfinite(v) for v in vector):
+                errors.append(f"camera {field} must contain three finite numbers")
+        if camera.get("position") == camera.get("target"):
+            errors.append("camera position and target must differ")
+    try:
+        timestep = float(task["task"].get("simulation", {}).get("timestep", .01))
+        run_mujoco_task(task, {}, min(timestep * 10, .1), timestep)
+    except (SimulationError, TypeError, ValueError, KeyError) as exc:
+        errors.append(f"MuJoCo compile / initial-state check: {exc}")
 
     return errors
 

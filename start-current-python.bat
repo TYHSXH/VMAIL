@@ -7,7 +7,7 @@ python -c "import sys; print(sys.executable)"
 
 echo.
 echo Checking required packages...
-python -c "import fastapi, yaml, numpy, mujoco; print('Dependencies OK')"
+python -c "import fastapi, yaml, numpy, mujoco, uvicorn; assert mujoco.__version__ == '3.13.0'; print('Dependencies OK')"
 if errorlevel 1 (
   echo.
   echo Missing dependency. Install requirements in the current environment with:
@@ -18,4 +18,5 @@ if errorlevel 1 (
 echo.
 echo Starting VMAIL at http://127.0.0.1:8000
 echo Press Ctrl+C to stop.
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+python -m backend.launch
+if errorlevel 1 pause

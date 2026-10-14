@@ -1,5 +1,8 @@
 import "./styles.css";
 import { MujocoBrowserViewer } from "./mujoco-viewer.js";
+import { ChartStack } from "./charts.js";
+import { shortName } from "./labels.js";
+import { renderTaskNotes } from "./task-notes.js";
 
 const state = {
   tasks: [],
@@ -17,6 +20,12 @@ const state = {
   modelLoadVersion: 0,
   chartFrameId: null,
   latestSampleValues: null,
+  selectionVersion: 0,
+  experimentVersion: 0,
+  batch: null,
+  seriesMode: "realtime",
+  modelLoading: false,
+  runtimeRows: [],
 };
 
 const colors = ["#38bdf8", "#34d399", "#fb923c", "#f472b6", "#a78bfa", "#facc15"];
@@ -24,506 +33,303 @@ const el = Object.fromEntries(
   [
     "taskSidebar", "collapseTasks", "expandTasks", "refreshTasks", "taskList", "engineBadge",
     "taskTitle", "simTime", "toggleInspector", "mujocoViewport", "viewerLoading", "resetButton",
-    "stepButton", "playButton", "cameraMode", "dragMode", "contactButton", "homeCameraButton",
+    "stepButton", "playButton", "cameraMode", "panMode", "dragMode", "contactButton", "homeCameraButton",
     "mouseHint", "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
-    "timestepInput", "applyParameters", "runButton", "clearData", "exportData", "chartCanvas", "chartLegend",
-    "liveValues", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
+    "timestepInput", "applyParameters", "runButton", "clearData", "exportData", "chartStack", "dataSource", "resultHistory", "cancelRun", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
     "taskResizeHandle", "inspectorResizeHandle",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
+const charts = new ChartStack(el.chartStack, state);
+let messageTimer;
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function showMessage(text, error = false) {
+  clearTimeout(messageTimer);
   el.message.textContent = text;
   el.message.classList.toggle("hidden", !text);
   el.message.classList.toggle("error", error);
-  if (text) window.setTimeout(() => el.message.classList.add("hidden"), error ? 7000 : 3500);
+  if (text) messageTimer = window.setTimeout(() => el.message.classList.add("hidden"), error ? 10000 : 5000);
 }
-
 async function requestJson(url, options) {
   const response = await fetch(url, options);
-  const data = await response.json();
-  if (!response.ok) throw new Error(data.detail || "请求失败");
+  const text = await response.text();
+  let data;
+  try { data = JSON.parse(text); } catch { throw new Error(`服务返回异常（${response.status}），请查看启动窗口。`); }
+  if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "输入无效，请检查参数和数值范围。");
   return data;
 }
-
+function activateTab(name) {
+  document.querySelectorAll(".tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
+  document.querySelectorAll(".tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
+  el.inspector.classList.remove("collapsed");
+  if(name==="data")charts.draw();
+}
+function setPlaybackEnabled(enabled) {
+  for(const button of [el.resetButton,el.stepButton,el.playButton,el.contactButton,el.homeCameraButton])button.disabled=!enabled;
+}
+function simulationSettings() {
+  const duration=Number(el.durationInput.value),timestep=Number(el.timestepInput.value);
+  if(!el.durationInput.value || !Number.isFinite(duration) || duration<=0 || duration>3600)throw new Error("仿真时长应大于 0 且不超过 3600 秒。");
+  if(!el.timestepInput.value || !Number.isFinite(timestep) || timestep<.00001)throw new Error("时间步长至少为 0.00001 秒。");
+  if(Math.ceil(duration/timestep)>200000)throw new Error("单次实验最多 200000 步，请缩短时长或增大步长。");
+  return {duration,timestep};
+}
 async function initViewer() {
-  state.viewer = new MujocoBrowserViewer(el.mujocoViewport, {
-    onTime: (time) => { el.simTime.textContent = `t = ${time.toFixed(3)} s`; },
-    onSample: appendSample,
-    onSelection: (label) => { el.selectionLabel.textContent = label ? `已选中 ${label}` : ""; },
-    onBeforeDrag: () => {
-      if (state.parametersDirty) {
-        showMessage("参数已修改，请先应用参数后再拖动物体。", true);
-        return false;
-      }
-      if (state.simulationCompleted) {
-        showMessage("仿真已达到设定时长，请重新开始后再拖动物体。", true);
-        return false;
-      }
-      return true;
-    },
-    onPausedChange: (paused) => {
-      if (!paused) {
-        state.simulationStarted = true;
-        state.simulationCompleted = false;
-      }
-      updatePlaybackButton();
-    },
-    onComplete: (time, duration) => {
-      state.simulationStarted = true;
-      state.simulationCompleted = true;
-      updatePlaybackButton();
-      showMessage(`已完成 ${duration.toFixed(3)} s 仿真，自动暂停于 t = ${time.toFixed(3)} s`);
-    },
-  });
   try {
-    await state.viewer.init();
-    state.viewerReady = true;
-    el.engineBadge.textContent = "MuJoCo 3.13 · Browser WASM";
-    el.engineBadge.classList.remove("loading");
-    el.engineBadge.classList.add("ready");
-    if (state.task) await loadBrowserModel();
-    else {
-      el.viewerLoading.innerHTML = "<strong>请选择学习任务</strong><span>从左侧任务栏选择一个模型，再设置参数并开始仿真。</span>";
-    }
-  } catch (error) {
-    el.viewerLoading.innerHTML = `<strong>MuJoCo WASM 启动失败</strong><span>${error.message}</span>`;
-    el.engineBadge.textContent = "WASM 启动失败";
-    el.engineBadge.classList.add("failed");
-    showMessage(error.message, true);
-  }
+    state.viewer=new MujocoBrowserViewer(el.mujocoViewport,{
+      onTime:time=>{el.simTime.textContent=`t = ${time.toFixed(3)} s`;},
+      onSample:appendSample,
+      onSelection:label=>{el.selectionLabel.textContent=label?`已选中 ${label}`:"";},
+      onBeforeDrag:()=>{
+        if(state.modelLoading || state.batch || state.parametersDirty){showMessage("请先应用参数或等待批量计算完成，再拖动调整姿态。",true);return false;}
+        return true;
+      },
+      onDragStart:()=>{
+        state.experimentVersion++;
+        clearSeries("preparing");resetPlaybackState();setPlaybackEnabled(false);
+        el.dataSource.textContent="正在拖动调整姿态，不计时、不采集数据。";
+        el.mouseHint.textContent="姿态调整中 · 控制量暂时停用 · 松开后点击开始仿真";
+      },
+      onDragEnd:()=>{
+        resetPlaybackState();
+        setPlaybackEnabled(!state.modelLoading && !state.batch);
+        syncRuntimeControls();
+        el.dataSource.textContent="姿态已调整，点击开始仿真后才计时并采集数据。";
+        el.mouseHint.textContent="按住物体调整姿态，松开后点击开始仿真";
+      },
+      onPausedChange:paused=>{
+        if(!paused){activateTab("data");state.simulationStarted=true;state.simulationCompleted=false;}
+        updatePlaybackButton();
+      },
+      onComplete:(time,duration)=>{state.simulationStarted=true;state.simulationCompleted=true;updatePlaybackButton();showMessage(`仿真完成：${duration.toFixed(3)} s`);},
+      onError:message=>showMessage(message,true),
+    });
+    await state.viewer.init();state.viewerReady=true;
+    el.engineBadge.textContent="MuJoCo 3.13 · 浏览器";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
+    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>请选择学习任务</strong><span>从左侧选择任务，先阅读操作说明。</span>";
+  }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
-
-async function loadTasks() {
-  const data = await requestJson("/api/tasks");
-  state.tasks = data.tasks || [];
-  renderTaskList();
-}
-
+async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}
 function renderTaskList() {
-  el.taskList.innerHTML = "";
-  if (!state.tasks.length) {
-    el.taskList.innerHTML = '<p class="empty-state">暂无任务。让 AI 在 tasks 文件夹中创建一个任务包。</p>';
-    return;
-  }
-  for (const task of state.tasks) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = `task-item ${state.task?.id === task.id ? "active" : ""}`;
-    button.innerHTML = `<strong>${task.title || task.id}</strong><span>${task.description || task.status || ""}</span>`;
-    button.addEventListener("click", () => selectTask(task.id));
-    el.taskList.appendChild(button);
+  el.taskList.replaceChildren();
+  if(!state.tasks.length){const p=document.createElement("p");p.className="empty-state";p.textContent="暂无任务，让 AI 创建学习任务包。";el.taskList.append(p);return;}
+  for(const task of state.tasks){
+    const row=document.createElement("div");row.className=`task-entry ${state.task?.id===task.id?"active":""}`;
+    const button=document.createElement("button");button.type="button";button.className="task-item";button.textContent=task.title || task.id;button.addEventListener("click",()=>selectTask(task.id));
+    const edit=document.createElement("button");edit.type="button";edit.className="rename-task";edit.textContent="✎";edit.title="修改任务标题";edit.setAttribute("aria-label",`修改${task.title || task.id}的标题`);
+    edit.addEventListener("click",()=>{
+      const input=document.createElement("input");input.value=task.title || task.id;input.maxLength=80;input.setAttribute("aria-label","任务新标题");
+      const save=document.createElement("button");save.type="button";save.textContent="保存";
+      const cancel=document.createElement("button");cancel.type="button";cancel.textContent="取消";cancel.addEventListener("click",renderTaskList);
+      const submit=async()=>{
+        if(!input.value.trim()){showMessage("标题不能为空。",true);input.focus();return;}
+        save.disabled=true;cancel.disabled=true;input.disabled=true;
+        try{
+          const result=await requestJson(`/api/tasks/${task.id}/title`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({title:input.value.trim()})});
+          task.title=result.title;
+          if(state.task?.id===task.id){state.task.task.title=result.title;el.taskTitle.textContent=result.title;}
+          renderTaskList();showMessage("标题已保存，下次打开仍会使用新标题。");
+        }catch(error){showMessage(error.message,true);save.disabled=false;cancel.disabled=false;input.disabled=false;}
+      };
+      save.addEventListener("click",submit);input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();submit();}if(event.key==="Escape")renderTaskList();});
+      row.classList.add("editing");row.replaceChildren(input,save,cancel);input.focus();input.select();
+    });
+    row.append(button,edit);el.taskList.append(row);
   }
 }
-
 async function selectTask(taskId) {
-  try {
-    rememberViewerControls();
-    state.task = await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
-    state.seriesUnits = { time: "s" };
-    renderTaskList();
-    renderTask();
-    resetSeriesSelection();
-    clearSeries();
-    if (state.viewerReady) await loadBrowserModel();
-  } catch (error) {
-    showMessage(error.message, true);
-  }
+  const version=++state.selectionVersion;++state.modelLoadVersion;
+  state.viewer?.setPaused(true);setPlaybackEnabled(false);rememberViewerControls();
+  if(state.batch)await cancelBatch();
+  try{
+    const task=await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
+    if(version!==state.selectionVersion)return;
+    state.task=task;state.parametersDirty=false;state.seriesUnits={time:"s"};state.experimentVersion++;
+    renderTaskList();renderTask();resetSeriesSelection();charts.rebuild();clearSeries();activateTab("task");
+    if(state.viewerReady)await loadBrowserModel();loadResultHistory();
+  }catch(error){if(version===state.selectionVersion)showMessage(error.message,true);}
 }
-
 function renderTask() {
-  const task = state.task;
-  el.taskTitle.textContent = task.task.title || task.id;
-  el.taskQuestion.textContent = task.task.question || "这个任务还没有填写研究问题。";
-  el.taskNotes.textContent = task.notes || "";
-  el.durationInput.value = task.task.simulation?.duration ?? 5;
-  el.timestepInput.value = task.task.simulation?.timestep ?? 0.01;
-  el.topicTags.innerHTML = "";
-  for (const topic of task.task.theory_topics || []) {
-    const tag = document.createElement("span");
-    tag.textContent = topic;
-    el.topicTags.appendChild(tag);
-  }
-  renderParameters();
-  for (const button of [el.applyParameters, el.runButton]) button.disabled = false;
+  const task=state.task;
+  el.taskTitle.textContent=task.task.title || task.id;el.taskQuestion.textContent=task.task.question || "请补充研究问题。";
+  renderTaskNotes(el.taskNotes,task.notes);el.durationInput.value=task.task.simulation?.duration ?? 5;el.timestepInput.value=task.task.simulation?.timestep ?? .01;
+  el.topicTags.replaceChildren();
+  for(const topic of task.task.theory_topics || []){const tag=document.createElement("span");tag.textContent=topic;el.topicTags.append(tag);}
+  renderParameters();el.applyParameters.disabled=false;el.runButton.disabled=Boolean(state.batch);
 }
-
 function renderParameters() {
-  const params = state.task.parameters.parameters || {};
-  const groups = state.task.ui.layout?.parameter_groups || [{ title: "模型参数", parameters: Object.keys(params) }];
-  el.parameterForm.innerHTML = "";
-  for (const group of groups) {
-    const fieldset = document.createElement("fieldset");
-    fieldset.innerHTML = `<legend>${group.title || "模型参数"}</legend>`;
-    for (const name of group.parameters || []) {
-      const spec = params[name];
-      if (!spec) continue;
-      const label = document.createElement("label");
-      label.className = "parameter-row";
-      label.innerHTML = `<span><strong>${name}</strong><small>${spec.description || ""}</small></span><span class="input-unit"><input name="${name}" type="number" value="${spec.value ?? 0}" min="${spec.min ?? ""}" max="${spec.max ?? ""}" step="${spec.step ?? "any"}" /><em>${spec.unit || ""}</em></span>`;
-      fieldset.appendChild(label);
+  const params=state.task.parameters.parameters || {};
+  const groups=state.task.ui.layout?.parameter_groups || [{title:"模型参数",parameters:Object.keys(params)}];
+  el.parameterForm.replaceChildren();
+  for(const group of groups){
+    const fieldset=document.createElement("fieldset");const legend=document.createElement("legend");legend.textContent=group.title || "模型参数";fieldset.append(legend);
+    for(const name of group.parameters || []){
+      const spec=params[name];if(!spec)continue;
+      const label=document.createElement("label");label.className="parameter-row";
+      label.innerHTML=`<span><strong>${escapeHtml(spec.label || shortName(name))}</strong><small>${escapeHtml(spec.description || "")}</small></span><span class="input-unit"><input name="${escapeHtml(name)}" type="number" value="${Number(spec.value ?? 0)}" step="any" required /><em>${escapeHtml(spec.unit || "1")}</em></span>`;
+      const input=label.querySelector("input");if(spec.min!=null)input.min=spec.min;if(spec.max!=null)input.max=spec.max;
+      fieldset.append(label);
     }
-    el.parameterForm.appendChild(fieldset);
+    el.parameterForm.append(fieldset);
   }
 }
-
 function collectParameters() {
-  return Object.fromEntries([...new FormData(el.parameterForm).entries()].map(([key, value]) => [key, Number(value)]));
-}
-
-function rememberViewerControls() {
-  if (!state.viewerTaskId || !state.viewer) return;
-  state.actuatorControlsByTask.set(state.viewerTaskId, state.viewer.getActuatorControlValues());
-}
-
-function restoreViewerControls() {
-  if (!state.task || !state.viewer) return {};
-  const saved = state.actuatorControlsByTask.get(state.task.id) || {};
-  const restored = state.viewer.setActuatorControlValues(saved);
-  state.actuatorControlsByTask.set(state.task.id, state.viewer.getActuatorControlValues());
-  return restored;
-}
-
-function resetViewerPreservingControls() {
-  rememberViewerControls();
-  state.viewer.reset(true);
-  restoreViewerControls();
-}
-
-async function loadBrowserModel() {
-  if (!state.task || !state.viewerReady) return;
-  const task = state.task;
-  const loadVersion = ++state.modelLoadVersion;
-  el.viewerLoading.classList.remove("hidden");
-  el.viewerLoading.innerHTML = "<strong>正在编译 MJCF 模型</strong><span>物理引擎运行在当前浏览器中。</span>";
-  try {
-    rememberViewerControls();
-    const duration = Number(el.durationInput.value);
-    if (!(duration > 0)) throw new Error("仿真时长必须大于 0 秒。");
-    const model = await requestJson(`/api/tasks/${encodeURIComponent(task.id)}/browser-model`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ parameters: collectParameters(), timestep: Number(el.timestepInput.value) }),
-    });
-    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
-    await state.viewer.loadModel(model.xml, model.initial_state, model.observe);
-    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
-    state.viewerTaskId = task.id;
-    state.seriesUnits = state.viewer.getObservationUnits();
-    restoreViewerControls();
-    clearSeries();
-    state.viewer.reset(true);
-    state.viewer.setDuration(duration);
-    renderRuntimeControls();
-    state.parametersDirty = false;
-    resetPlaybackState();
-    for (const button of [el.resetButton, el.stepButton, el.playButton, el.contactButton, el.homeCameraButton]) button.disabled = false;
-    el.viewerLoading.classList.add("hidden");
-  } catch (error) {
-    if (loadVersion !== state.modelLoadVersion || state.task?.id !== task.id) return false;
-    el.viewerLoading.innerHTML = `<strong>模型载入失败</strong><span>${error.message}</span>`;
-    showMessage(error.message, true);
-    return false;
-  }
-  return true;
-}
-
-function updatePlaybackButton() {
-  const running = state.viewer && !state.viewer.paused;
-  el.playButton.textContent = running ? "暂停" : state.simulationCompleted ? "重新开始" : (state.simulationStarted ? "继续" : "开始");
-  el.playButton.classList.toggle("active", Boolean(running));
-}
-
-function resetPlaybackState() {
-  state.simulationStarted = false;
-  state.simulationCompleted = false;
-  state.viewer?.setPaused(true);
-  updatePlaybackButton();
-}
-
-function controlRow(item, onChange) {
-  const row = document.createElement("label");
-  row.className = "runtime-control";
-  row.innerHTML = `<span><strong>${item.name}</strong><small>${item.kindLabel}</small></span><input class="runtime-slider" type="range" min="${item.min}" max="${item.max}" step="any" value="${item.value}" /><input class="runtime-number" type="number" min="${item.min}" max="${item.max}" step="any" value="${item.value}" aria-label="Set ${item.name} value" />`;
-  const slider = row.querySelector(".runtime-slider");
-  const numberInput = row.querySelector(".runtime-number");
-  const commitValue = (rawValue) => {
-    if (!Number.isFinite(rawValue)) {
-      numberInput.value = slider.value;
-      return;
+  const values={};
+  for(const input of el.parameterForm.querySelectorAll("input")){
+    if(!input.value.trim() || !Number.isFinite(Number(input.value)) || !input.checkValidity()){
+      activateTab("parameters");input.reportValidity();input.focus();throw new Error(`请检查${state.task.parameters.parameters[input.name]?.label || shortName(input.name)}的数值和范围。`);
     }
-    const value = Math.min(Number(item.max), Math.max(Number(item.min), rawValue));
-    slider.value = String(value);
-    numberInput.value = String(value);
-    onChange(value);
-  };
-  slider.addEventListener("input", () => {
-    const min = Number(item.min);
-    const step = Number(item.step);
-    const rawValue = Number(slider.value);
-    const value = step > 0 ? min + Math.round((rawValue - min) / step) * step : rawValue;
-    commitValue(Number(value.toFixed(12)));
-  });
-  numberInput.addEventListener("change", () => commitValue(Number(numberInput.value)));
-  numberInput.addEventListener("keydown", (event) => {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    numberInput.blur();
-  });
-  return row;
+    values[input.name]=Number(input.value);
+  }
+  return values;
 }
-
+function rememberViewerControls(){if(state.viewerTaskId && state.viewer)state.actuatorControlsByTask.set(state.viewerTaskId,state.viewer.getActuatorControlValues());}
+function restoreViewerControls() {
+  const defaults=Object.fromEntries(Object.entries(state.task.ui.controls?.actuators || {}).map(([name,spec])=>[name,spec.value ?? 0]));
+  state.viewer.setActuatorControlValues({...defaults,...(state.actuatorControlsByTask.get(state.task.id) || {})});rememberViewerControls();
+}
+async function loadBrowserModel() {
+  if(!state.task || !state.viewerReady)return false;
+  const task=state.task,version=++state.modelLoadVersion;
+  state.modelLoading=true;state.viewer.setPaused(true);setPlaybackEnabled(false);
+  el.viewerLoading.classList.remove("hidden");el.viewerLoading.innerHTML="<strong>正在载入模型</strong><span>请稍候</span>";
+  try{
+    rememberViewerControls();const {duration,timestep}=simulationSettings();
+    const payload=await requestJson(`/api/tasks/${task.id}/browser-model`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters:collectParameters(),timestep,duration})});
+    if(version!==state.modelLoadVersion || state.task!==task)return false;
+    state.seriesMode="loading";
+    await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera);
+    state.viewerTaskId=task.id;state.seriesUnits=state.viewer.getObservationUnits();restoreViewerControls();charts.rebuild();clearSeries();
+    state.viewer.setDuration(duration);state.viewer.reset(true);renderRuntimeControls();
+    state.parametersDirty=false;state.modelLoading=false;resetPlaybackState();setPlaybackEnabled(!state.batch);el.viewerLoading.classList.add("hidden");return true;
+  }catch(error){
+    if(version!==state.modelLoadVersion || state.task!==task)return false;
+    state.modelLoading=false;state.parametersDirty=true;
+    el.viewerLoading.innerHTML=`<strong>模型载入失败</strong><span>${escapeHtml(error.message)}</span>`;showMessage(error.message,true);return false;
+  }
+}
+function updatePlaybackButton(){const running=state.viewer && !state.viewer.paused;el.playButton.textContent=running?"暂停仿真":state.simulationCompleted?"重新开始":state.simulationStarted?"继续仿真":"开始仿真";el.playButton.classList.toggle("active",Boolean(running));el.playButton.setAttribute("aria-pressed",String(Boolean(running)));}
+function resetPlaybackState(){state.simulationStarted=false;state.simulationCompleted=false;state.viewer?.setPaused(true);updatePlaybackButton();}
+function resetViewerPreservingControls(){rememberViewerControls();state.viewer.reset(true);restoreViewerControls();state.viewer.emitSample(true);syncRuntimeControls();}
+function actuatorUnit(name) {
+  const xml=new DOMParser().parseFromString(state.task.model_xml,"application/xml");
+  const actuator=[...xml.querySelectorAll("actuator > *")].find(node=>node.getAttribute("name")===name);
+  const joint=[...xml.querySelectorAll("joint")].find(node=>node.getAttribute("name")===actuator?.getAttribute("joint"));
+  const angular=joint?.getAttribute("type")!=="slide";
+  if(actuator?.tagName==="velocity")return angular?"rad/s":"m/s";
+  if(actuator?.tagName==="position")return angular?"rad":"m";
+  return "1";
+}
+function controlRow(item,onChange) {
+  const row=document.createElement("label");row.className="runtime-control";
+  row.innerHTML=`<span><strong>${escapeHtml(item.label || shortName(item.name))}</strong><small>${escapeHtml(item.unit)}</small></span><input class="runtime-slider" type="range" min="${item.min}" max="${item.max}" step="any" value="${item.value}"/><input class="runtime-number" type="number" min="${item.min}" max="${item.max}" step="any" value="${item.value}" aria-label="${escapeHtml(item.label || shortName(item.name))}"/>`;
+  const slider=row.querySelector(".runtime-slider"),number=row.querySelector(".runtime-number");
+  const commit=raw=>{if(raw==="" || !Number.isFinite(Number(raw))){number.value=slider.value;return;}const value=Math.min(item.max,Math.max(item.min,Number(raw)));slider.value=value;number.value=value;onChange(value);};
+  slider.addEventListener("input",()=>commit(slider.value));number.addEventListener("change",()=>commit(number.value));
+  number.addEventListener("input",()=>{
+    if(number.value!=="" && Number.isFinite(Number(number.value))){
+      const value=Math.min(item.max,Math.max(item.min,Number(number.value)));
+      slider.value=value;onChange(value);
+    }
+  });
+  number.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();commit(number.value);number.blur();}});
+  state.runtimeRows.push({item,slider,number});return row;
+}
 function renderRuntimeControls() {
-  const controls = state.viewer?.getInteractiveControls() || { joints: [], actuators: [] };
-  const configuredJoints = state.task?.ui?.controls?.joints;
-  const kinematicControls = state.task?.ui?.controls?.kinematic || [];
-  const joints = Array.isArray(configuredJoints)
-    ? controls.joints.filter((item) => configuredJoints.includes(item.name))
-    : controls.joints;
-  el.jointControls.innerHTML = "<h2>一维关节</h2>";
-  el.actuatorControls.innerHTML = "<h2>执行器</h2>";
-  const jointNote = state.task?.ui?.controls?.joint_note;
-  if (jointNote || (!joints.length && !kinematicControls.length)) {
-    const note = jointNote || "模型没有可直接定位的滑动或转动关节。";
-    const paragraph = document.createElement("p");
-    paragraph.className = "empty-state";
-    paragraph.textContent = note;
-    el.jointControls.appendChild(paragraph);
+  state.runtimeRows=[];const controls=state.viewer.getInteractiveControls();
+  el.jointControls.innerHTML="<h2>姿态调整</h2>";el.actuatorControls.innerHTML="<h2>运动控制</h2>";
+  const config=state.task.ui.controls || {};
+  if(config.joint_note){const p=document.createElement("p");p.className="empty-state";p.textContent=config.joint_note;el.jointControls.append(p);}
+  for(const item of controls.joints.filter(item=>!Array.isArray(config.joints) || config.joints.includes(item.name))){
+    Object.assign(item,{unit:item.kindLabel.includes("(rad)")?"rad":"m",controlType:"joint"});
+    el.jointControls.append(controlRow(item,value=>{state.viewer.setPaused(true);state.viewer.setJointPosition(item.id,value);updatePlaybackButton();}));
   }
-  if (!controls.actuators.length) el.actuatorControls.insertAdjacentHTML("beforeend", '<p class="empty-state">模型没有执行器。可让 AI 在 model.xml 中添加 motor、position 或 velocity actuator。</p>');
-  for (const item of joints) {
-    el.jointControls.appendChild(controlRow(item, (value) => {
-      state.viewer.setPaused(true);
-      updatePlaybackButton();
-      state.viewer.setJointPosition(item.id, value);
-    }));
+  for(const spec of config.kinematic || []){
+    if(spec.type!=="slider_crank")continue;
+    const item={name:spec.crank_joint,label:spec.label || "曲柄转角",unit:"rad",controlType:"joint",min:spec.min ?? -Math.PI,max:spec.max ?? Math.PI,value:state.viewer.getJointPosition(spec.crank_joint)};
+    el.jointControls.append(controlRow(item,value=>{state.viewer.setPaused(true);state.viewer.setKinematicPosition(spec,value);updatePlaybackButton();}));
   }
-  for (const config of kinematicControls) {
-    if (config.type !== "slider_crank") continue;
-    const item = {
-      name: config.label || config.crank_joint,
-      kindLabel: "闭环联动位置 (rad)",
-      min: Number(config.min ?? -Math.PI),
-      max: Number(config.max ?? Math.PI),
-      step: Number(config.step ?? 0.01),
-      value: state.viewer.getJointPosition(config.crank_joint),
-    };
-    el.jointControls.appendChild(controlRow(item, (value) => {
-      state.viewer.setPaused(true);
-      updatePlaybackButton();
-      state.viewer.setKinematicPosition(config, value);
-    }));
+  for(const item of controls.actuators){
+    const spec=config.actuators?.[item.name] || {};
+    Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name),controlType:"actuator"});
+    el.actuatorControls.append(controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);}));
   }
-  for (const item of controls.actuators) {
-    el.actuatorControls.appendChild(controlRow(item, (value) => {
-      state.viewer.setActuatorControl(item.id, value);
-      rememberViewerControls();
-    }));
+  if(!controls.actuators.length){const p=document.createElement("p");p.className="empty-state";p.textContent="本任务没有运动控制量。";el.actuatorControls.append(p);}
+}
+function syncRuntimeControls() {
+  for(const {item,slider,number} of state.runtimeRows){
+    if(document.activeElement===slider || document.activeElement===number)continue;
+    const value=item.controlType==="actuator"?state.viewer.data?.ctrl[item.id]:state.viewer.getJointPosition(item.name);
+    slider.value=value;number.value=Number(Number(value).toFixed(5));
   }
 }
-
+function resetSeriesSelection(){state.visibleSeries=new Set((state.task?.ui.layout?.charts || []).flatMap(chart=>chart.series || []));}
 function appendSample(sample) {
-  if (!state.task) return;
-  state.series.time.push(sample.time);
-  for (const [key, value] of Object.entries(sample.values)) {
-    if (!state.series[key]) state.series[key] = Array(state.series.time.length - 1).fill(null);
-    state.series[key].push(Number(value));
+  if(!state.task || state.seriesMode!=="realtime" || state.batch)return;
+  if(state.series.time.length && sample.time<state.series.time.at(-1)-1e-9)clearSeries();
+  const replace=state.series.time.length && Math.abs(sample.time-state.series.time.at(-1))<1e-12;
+  if(!replace)state.series.time.push(sample.time);
+  const length=state.series.time.length;
+  for(const key of new Set([...Object.keys(state.series).filter(key=>key!=="time"),...Object.keys(sample.values)])){
+    if(!state.series[key])state.series[key]=Array(length-1).fill(null);
+    const value=sample.values[key];
+    if(replace)state.series[key][length-1]=Number.isFinite(value)?value:null;else state.series[key].push(Number.isFinite(value)?value:null);
   }
-  if (state.series.time.length > 10000) {
-    for (const values of Object.values(state.series)) values.shift();
-  }
-  state.latestSampleValues = sample.values;
-  if (state.chartFrameId === null) {
-    state.chartFrameId = requestAnimationFrame(() => {
-      state.chartFrameId = null;
-      drawChart();
-      if (state.latestSampleValues) renderLiveValues(state.latestSampleValues);
-    });
-  }
-  el.exportData.disabled = state.series.time.length === 0;
+  if(length>10000)for(const values of Object.values(state.series))values.shift();
+  if(state.chartFrameId===null)state.chartFrameId=requestAnimationFrame(()=>{state.chartFrameId=null;charts.draw();syncRuntimeControls();});
+  el.exportData.disabled=false;el.dataSource.textContent=`实时实验 · t = ${sample.time.toFixed(3)} s`;
 }
-
-function clearSeries() {
-  if (state.chartFrameId !== null) cancelAnimationFrame(state.chartFrameId);
-  state.chartFrameId = null;
-  state.latestSampleValues = null;
-  state.series = { time: [] };
-  drawChart();
-  el.liveValues.innerHTML = "";
-  el.exportData.disabled = true;
+function clearSeries(mode="realtime") {
+  if(state.chartFrameId!==null)cancelAnimationFrame(state.chartFrameId);
+  state.chartFrameId=null;state.series={time:[]};state.seriesMode=mode;charts.viewRange=null;charts.hoverTime=null;charts.draw();el.exportData.disabled=true;el.dataSource.textContent="暂无数据";
 }
-
 function exportCurrentData() {
-  const time = state.series.time || [];
-  if (!time.length) {
-    showMessage("当前没有可导出的数据。", true);
-    return;
-  }
-  const columns = Object.keys(state.series).filter((key) => key !== "time");
-  const escapeCell = (value) => {
-    if (value === null || value === undefined) return "";
-    const text = String(value);
-    return /[\",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
-  };
-  const heading = (key) => `${key} [${state.seriesUnits[key] || "-"}]`;
-  const lines = [[heading("time"), ...columns.map(heading)].map(escapeCell).join(",")];
-  for (let index = 0; index < time.length; index += 1) {
-    lines.push([
-      time[index],
-      ...columns.map((column) => state.series[column]?.[index] ?? ""),
-    ].map(escapeCell).join(","));
-  }
-  const stamp = new Date().toISOString().replaceAll(":", "-").replace(/\.\d{3}Z$/, "Z");
-  const taskId = state.task?.id || "vmail";
-  const filename = `${taskId}_current_${stamp}.csv`;
-  const url = URL.createObjectURL(new Blob(["\ufeff", lines.join("\r\n")], { type: "text/csv;charset=utf-8" }));
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = filename;
-  document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 0);
-  showMessage(`已导出当前数据：${filename}`);
+  const time=state.series.time;if(!time.length)return;
+  const columns=Object.keys(state.series).filter(key=>key!=="time");
+  const escape=value=>value==null?"":`"${String(value).replaceAll('"','""')}"`;
+  const heading=key=>`${key} [${state.seriesUnits[key] || "1"}]`;
+  const lines=[[heading("time"),...columns.map(heading)].map(escape).join(",")];
+  time.forEach((t,i)=>lines.push([t,...columns.map(key=>state.series[key][i])].map(escape).join(",")));
+  const url=URL.createObjectURL(new Blob(["\ufeff",lines.join("\r\n")],{type:"text/csv;charset=utf-8"}));
+  const a=document.createElement("a");a.href=url;a.download=`${state.task.id}_${state.seriesMode}_${new Date().toISOString().replaceAll(":","-")}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-
-function declaredSeriesKeys() {
-  const declared = (state.task?.ui?.layout?.charts || []).flatMap((chart) => chart.series || []);
-  return [...new Set(declared)];
+async function loadResultHistory() {
+  const task=state.task;if(!task)return;
+  try{
+    const result=await requestJson(`/api/tasks/${task.id}/results`);if(state.task!==task)return;
+    el.resultHistory.replaceChildren();if(!result.runs.length)el.resultHistory.textContent="尚未保存实验。";
+    for(const run of result.runs){const a=document.createElement("a");a.href=run.download;a.download="";a.textContent=`下载 ${run.run_id.replace("run_","")}`;el.resultHistory.append(a);}
+  }catch(error){showMessage(error.message,true);}
 }
-
-function resetSeriesSelection() {
-  state.visibleSeries = new Set(declaredSeriesKeys());
+async function cancelBatch() {
+  const batch=state.batch;if(!batch)return;batch.cancelled=true;
+  try{await requestJson(`/api/runs/${batch.token}/cancel`,{method:"POST"});}catch(error){showMessage(error.message,true);}
 }
-
-function seriesColor(key) {
-  const index = declaredSeriesKeys().indexOf(key);
-  return colors[(index < 0 ? 0 : index) % colors.length];
-}
-
-function seriesLabel(key) {
-  return `${key} [${state.seriesUnits[key] || "-"}]`;
-}
-
-function seriesKeys() {
-  return declaredSeriesKeys().filter((key) => state.visibleSeries.has(key) && state.series[key]);
-}
-
-function renderChartLegend() {
-  el.chartLegend.innerHTML = "";
-  for (const key of declaredSeriesKeys()) {
-    const label = document.createElement("label");
-    label.className = "legend-item";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.checked = state.visibleSeries.has(key);
-    checkbox.setAttribute("aria-label", `显示曲线 ${key}`);
-    checkbox.addEventListener("change", () => {
-      if (checkbox.checked) state.visibleSeries.add(key);
-      else state.visibleSeries.delete(key);
-      drawChart();
-    });
-
-    const swatch = document.createElement("i");
-    swatch.style.background = seriesColor(key);
-    const text = document.createElement("span");
-    text.textContent = seriesLabel(key);
-    label.append(checkbox, swatch, text);
-    el.chartLegend.appendChild(label);
-  }
-}
-
-function drawChart() {
-  const canvas = el.chartCanvas;
-  const ctx = canvas.getContext("2d");
-  const width = canvas.width;
-  const height = canvas.height;
-  ctx.fillStyle = "#121922";
-  ctx.fillRect(0, 0, width, height);
-  renderChartLegend();
-  const time = state.series.time;
-  const keys = seriesKeys();
-  if (time.length < 2 || !keys.length) {
-    ctx.fillStyle = "#7f8b99";
-    ctx.font = "28px Microsoft YaHei, sans-serif";
-    ctx.fillText(time.length < 2 ? "仿真运行后显示实时曲线" : "请选择至少一条曲线", 34, 64);
-    return;
-  }
-  const pad = { left: 64, right: 22, top: 24, bottom: 44 };
-  const plotW = width - pad.left - pad.right;
-  const plotH = height - pad.top - pad.bottom;
-  const finite = keys.flatMap((key) => state.series[key].filter(Number.isFinite));
-  let minY = Math.min(...finite);
-  let maxY = Math.max(...finite);
-  if (minY === maxY) { minY -= 1; maxY += 1; }
-  const minT = time[0];
-  const maxT = time.at(-1);
-  const x = (v) => pad.left + ((v - minT) / (maxT - minT || 1)) * plotW;
-  const y = (v) => pad.top + plotH - ((v - minY) / (maxY - minY)) * plotH;
-  ctx.strokeStyle = "#283341";
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 5; i += 1) {
-    const yy = pad.top + (plotH * i) / 5;
-    ctx.beginPath(); ctx.moveTo(pad.left, yy); ctx.lineTo(width - pad.right, yy); ctx.stroke();
-  }
-  ctx.fillStyle = "#9ba8b8";
-  ctx.font = "22px Segoe UI, sans-serif";
-  ctx.fillText(maxY.toFixed(2), 8, pad.top + 8);
-  ctx.fillText(minY.toFixed(2), 8, pad.top + plotH);
-  keys.forEach((key) => {
-    ctx.strokeStyle = seriesColor(key);
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    state.series[key].forEach((value, point) => {
-      if (!Number.isFinite(value)) return;
-      if (point === 0) ctx.moveTo(x(time[point]), y(value));
-      else ctx.lineTo(x(time[point]), y(value));
-    });
-    ctx.stroke();
-  });
-}
-
-function renderLiveValues(values) {
-  el.liveValues.innerHTML = Object.entries(values).map(([key, value]) => {
-    const unit = state.seriesUnits[key] || "-";
-    return `<div><span>${key}</span><strong>${Number(value).toFixed(4)} <em>${unit}</em></strong></div>`;
-  }).join("");
-}
-
 async function runBatchSimulation() {
-  try {
-    el.runButton.disabled = true;
-    el.runButton.textContent = "计算中...";
-    const result = await requestJson(`/api/tasks/${encodeURIComponent(state.task.id)}/simulate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        parameters: collectParameters(),
-        controls: state.viewer?.getActuatorControlValues() || {},
-        duration: Number(el.durationInput.value),
-        timestep: Number(el.timestepInput.value),
-      }),
-    });
-    state.series = result.series;
-    state.seriesUnits = result.units || state.seriesUnits;
-    el.exportData.disabled = state.series.time.length === 0;
-    drawChart();
-    const controls = Object.entries(result.controls || {}).map(([name, value]) => `${name}=${value}`).join(", ");
-    showMessage(`计算完成，数据已保存到 ${result.saved.run_id}${controls ? `，控制：${controls}` : ""}`);
-  } catch (error) {
-    showMessage(error.message, true);
-  } finally {
-    el.runButton.disabled = false;
-    el.runButton.textContent = "计算并保存";
+  if(state.batch || !state.task || state.modelLoading)return;
+  let batch,timer;
+  try{
+    const parameters=collectParameters(),settings=simulationSettings();
+    const id=state.task.id,version=state.selectionVersion,experiment=state.experimentVersion;
+    state.viewer?.setPaused(true);batch={token:crypto.randomUUID(),cancelled:false};state.batch=batch;
+    el.runButton.disabled=true;el.runButton.textContent="计算中…";el.cancelRun.classList.remove("hidden");setPlaybackEnabled(false);
+    el.dataSource.textContent="批量计算中：从初始状态重新运行…";
+    timer=setInterval(async()=>{if(state.batch!==batch)return;try{const progress=await requestJson(`/api/runs/${batch.token}`);if(state.batch===batch)el.runButton.textContent=`计算中 ${Math.round(progress.progress*100)}%`;}catch{}},700);
+    const result=await requestJson(`/api/tasks/${id}/simulate`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters,controls:state.viewerTaskId===id?state.viewer.getActuatorControlValues():{},...settings,run_token:batch.token})});
+    if(batch.cancelled || version!==state.selectionVersion || state.task?.id!==id)return;
+    if(experiment!==state.experimentVersion){showMessage("计算期间输入发生变化，结果已保存，可在已保存的实验中下载。");loadResultHistory();return;}
+    clearSeries("batch");state.series=result.series;state.seriesUnits=result.units;charts.rebuild();el.exportData.disabled=!state.series.time.length;
+    el.dataSource.textContent=`批量实验 · 初始状态 · 时长 ${result.duration} s · 步长 ${result.timestep} s`;
+    showMessage(`计算完成，已保存 ${result.saved.run_id}`);loadResultHistory();
+  }catch(error){showMessage(error.message,true);}
+  finally{
+    clearInterval(timer);
+    if(batch && state.batch===batch){state.batch=null;el.cancelRun.classList.add("hidden");el.runButton.disabled=!state.task;el.runButton.textContent="批量计算并保存";setPlaybackEnabled(Boolean(state.viewer?.model) && !state.modelLoading && state.viewerTaskId===state.task?.id);}
   }
 }
-
 function setMode(mode) {
-  state.viewer?.setMode(mode);
-  el.cameraMode.classList.toggle("active", mode === "camera");
-  el.dragMode.classList.toggle("active", mode === "drag");
-  el.mouseHint.textContent = mode === "camera" ? "左键旋转，右键平移，滚轮缩放" : "按住物体拖动，MuJoCo 将施加跟随力";
+  state.viewer?.setMode(mode);el.cameraMode.classList.toggle("active",mode==="camera");el.panMode.classList.toggle("active",mode==="pan");el.dragMode.classList.toggle("active",mode==="drag");
+  el.mouseHint.textContent=mode==="drag"?"按住物体调整姿态，松开后点击开始仿真":mode==="pan"?"左键平移，滚轮缩放":"左键旋转，Shift＋左键平移，滚轮缩放";
 }
 
 function setupResizableSidebars() {
@@ -609,67 +415,58 @@ function setupResizableSidebars() {
   }
 }
 
-document.querySelectorAll(".tab").forEach((button) => button.addEventListener("click", () => {
-  document.querySelectorAll(".tab").forEach((tab) => tab.classList.toggle("active", tab === button));
-  document.querySelectorAll(".tab-panel").forEach((panel) => panel.classList.toggle("active", panel.dataset.panel === button.dataset.tab));
-}));
-el.refreshTasks.addEventListener("click", () => loadTasks().catch((error) => showMessage(error.message, true)));
-el.applyParameters.addEventListener("click", () => loadBrowserModel());
-el.parameterForm.addEventListener("input", () => {
-  state.parametersDirty = true;
-  resetPlaybackState();
-});
-el.timestepInput.addEventListener("input", () => {
-  state.parametersDirty = true;
-  resetPlaybackState();
-});
-el.durationInput.addEventListener("input", () => {
-  const duration = Number(el.durationInput.value);
-  if (!(duration > 0) || !state.viewer) return;
-  state.viewer.setDuration(duration);
-  if (state.viewer.getTime() + 1e-9 < duration) state.simulationCompleted = false;
-  updatePlaybackButton();
-});
-el.runButton.addEventListener("click", runBatchSimulation);
-el.clearData.addEventListener("click", clearSeries);
-el.exportData.addEventListener("click", exportCurrentData);
-el.resetButton.addEventListener("click", () => { resetViewerPreservingControls(); clearSeries(); resetPlaybackState(); });
-el.stepButton.addEventListener("click", () => { state.viewer.setPaused(true); state.viewer.step(); state.simulationStarted = true; updatePlaybackButton(); });
-el.playButton.addEventListener("click", async () => {
-  const shouldRun = state.viewer.paused;
-  const duration = Number(el.durationInput.value);
-  if (shouldRun && !(duration > 0)) {
-    showMessage("仿真时长必须大于 0 秒。", true);
-    el.durationInput.focus();
-    return;
-  }
-  if (shouldRun && state.parametersDirty && !await loadBrowserModel()) return;
-  if (shouldRun && state.simulationCompleted) {
-    clearSeries();
-    resetViewerPreservingControls();
-    resetPlaybackState();
-  }
-  if (shouldRun) {
-    state.viewer.setDuration(duration);
-    state.simulationStarted = true;
-    state.simulationCompleted = false;
-  }
-  state.viewer.setPaused(!shouldRun);
-  updatePlaybackButton();
-});
-el.cameraMode.addEventListener("click", () => setMode("camera"));
-el.dragMode.addEventListener("click", () => setMode("drag"));
-el.contactButton.addEventListener("click", () => el.contactButton.classList.toggle("active", state.viewer.toggleContacts()));
-el.homeCameraButton.addEventListener("click", () => state.viewer.homeCamera());
-el.collapseTasks.addEventListener("click", () => { el.taskSidebar.classList.add("collapsed"); el.expandTasks.classList.remove("hidden"); });
-el.expandTasks.addEventListener("click", () => { el.taskSidebar.classList.remove("collapsed"); el.expandTasks.classList.add("hidden"); });
-el.toggleInspector.addEventListener("click", () => el.inspector.classList.toggle("collapsed"));
-el.closeInspector.addEventListener("click", () => el.inspector.classList.add("collapsed"));
-window.addEventListener("keydown", (event) => {
-  if (event.code === "Space" && !event.target.matches("input")) { event.preventDefault(); el.playButton.click(); }
-  if (event.code === "Backspace" && !event.target.matches("input")) { event.preventDefault(); el.resetButton.click(); }
-});
-window.addEventListener("beforeunload", () => state.viewer?.dispose());
 
+document.querySelectorAll(".tab").forEach((button)=>button.addEventListener("click",()=>activateTab(button.dataset.tab)));
+el.refreshTasks.addEventListener("click",()=>loadTasks().catch(error=>showMessage(error.message,true)));
+el.applyParameters.addEventListener("click",()=>{if(!state.batch)loadBrowserModel();});
+function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();}
+el.parameterForm.addEventListener("input",markDirty);
+el.timestepInput.addEventListener("input",markDirty);
+el.durationInput.addEventListener("input",()=>{
+  state.experimentVersion++;
+  try{const {duration}=simulationSettings();state.viewer?.setDuration(duration);if(state.viewer?.getTime()+1e-9<duration)state.simulationCompleted=false;updatePlaybackButton();}catch{/* Validate on start/apply. */}
+});
+el.runButton.addEventListener("click",runBatchSimulation);
+el.cancelRun.addEventListener("click",cancelBatch);
+el.clearData.addEventListener("click",()=>{state.viewer?.setPaused(true);clearSeries();state.viewer?.emitSample(true);});
+el.exportData.addEventListener("click",exportCurrentData);
+el.resetButton.addEventListener("click",()=>{clearSeries();resetViewerPreservingControls();resetPlaybackState();});
+el.stepButton.addEventListener("click",async()=>{
+  try{
+    simulationSettings();
+    if(state.parametersDirty && !await loadBrowserModel())return;
+    if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
+    if(state.seriesMode==="batch"){clearSeries();resetViewerPreservingControls();resetPlaybackState();}
+    state.viewer.setPaused(true);state.viewer.step();state.simulationStarted=true;updatePlaybackButton();activateTab("data");
+  }catch(error){showMessage(error.message,true);}
+});
+el.playButton.addEventListener("click",async()=>{
+  try{
+    if(state.modelLoading || state.batch || !state.viewer?.model)return;
+    const shouldRun=state.viewer.paused;
+    if(!shouldRun){state.viewer.setPaused(true);return;}
+    const {duration}=simulationSettings();
+    if(state.parametersDirty && !await loadBrowserModel())return;
+    if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
+    else if(state.simulationCompleted || state.seriesMode==="batch"){
+      clearSeries();resetViewerPreservingControls();resetPlaybackState();
+    }
+    state.viewer.setDuration(duration);state.simulationStarted=true;state.simulationCompleted=false;state.viewer.setPaused(false);activateTab("data");
+  }catch(error){showMessage(error.message,true);}
+});
+el.cameraMode.addEventListener("click",()=>setMode("camera"));
+el.panMode.addEventListener("click",()=>setMode("pan"));
+el.dragMode.addEventListener("click",()=>setMode("drag"));
+el.contactButton.addEventListener("click",()=>el.contactButton.classList.toggle("active",state.viewer.toggleContacts()));
+el.homeCameraButton.addEventListener("click",()=>state.viewer.homeCamera());
+el.collapseTasks.addEventListener("click",()=>{el.taskSidebar.classList.add("collapsed");el.expandTasks.classList.remove("hidden");});
+el.expandTasks.addEventListener("click",()=>{el.taskSidebar.classList.remove("collapsed");el.expandTasks.classList.add("hidden");});
+el.toggleInspector.addEventListener("click",()=>el.inspector.classList.toggle("collapsed"));
+el.closeInspector.addEventListener("click",()=>el.inspector.classList.add("collapsed"));
+window.addEventListener("keydown",(event)=>{
+  if(event.target.matches("input,textarea,select,[contenteditable]") || event.code!=="Space")return;
+  event.preventDefault();el.playButton.click();
+});
+window.addEventListener("beforeunload",()=>state.viewer?.dispose());
 setupResizableSidebars();
-Promise.all([initViewer(), loadTasks()]).catch((error) => showMessage(error.message, true));
+Promise.all([initViewer(),loadTasks()]).catch(error=>showMessage(error.message,true));

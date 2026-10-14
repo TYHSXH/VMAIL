@@ -20,6 +20,12 @@ if not exist ".venv\Scripts\python.exe" (
 )
 
 echo Installing VMAIL Python dependencies and MuJoCo...
+".venv\Scripts\python.exe" -c "import sys; assert sys.version_info >= (3,11) and sys.maxsize > 2**32"
+if errorlevel 1 (
+  echo VMAIL requires 64-bit Python 3.11 or newer. Recreate .venv using a supported Python.
+  pause
+  exit /b 1
+)
 ".venv\Scripts\python.exe" -m pip install --upgrade pip
 if errorlevel 1 goto install_failed
 ".venv\Scripts\python.exe" -m pip install -r requirements.txt

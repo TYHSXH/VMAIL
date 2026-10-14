@@ -1,19 +1,33 @@
 layout:
   parameter_groups: []
   charts:
-    - title: 曲柄运动状态
-      series:
-        - joint.crank_hinge.position
-        - joint.crank_hinge.velocity
-        - joint.crank_hinge.acceleration
-    - title: B、C点速度大小
-      series:
-        - site.point_b.velocity.magnitude
-        - site.point_c.velocity.magnitude
-    - title: B、C点加速度大小
-      series:
-        - site.point_b.acceleration.magnitude
-        - site.point_c.acceleration.magnitude
+  - title: 曲柄运动状态
+    series:
+    - joint.crank_hinge.position
+    - joint.crank_hinge.velocity
+    - joint.crank_hinge.acceleration
+  - title: B、C点速度大小
+    series:
+    - site.point_b.velocity.magnitude
+    - site.point_c.velocity.magnitude
+  - title: B、C点加速度大小
+    series:
+    - site.point_b.acceleration.magnitude
+    - site.point_c.acceleration.magnitude
 controls:
   joints: []
-  joint_note: 闭环铰接与纯滚约束已经联动，请仅将 crank_speed 设为 -2 后开始。
+  joint_note: 曲柄默认以 2 rad/s 顺时针转动；闭环与纯滚约束自动联动。
+  actuators:
+    crank_speed:
+      label: 曲柄角速度
+      unit: rad/s
+      value: -2
+camera:
+  position:
+  - 1
+  - -0.15
+  - 3.7
+  target:
+  - 1
+  - 0.75
+  - 0

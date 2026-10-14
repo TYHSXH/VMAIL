@@ -85,6 +85,7 @@ site: endpoint, mass_center
 ```yaml
 parameters:
   stiffness:
+    label: 刚度
     value: 1000
     unit: N/m
     min: 100
@@ -119,6 +120,7 @@ initial_state:
 每个参数必须包含 `unit`；无量纲参数写 `unit: "1"`。同时建议包含：
 
 - `value`
+- `label`：简短中文显示名称；内部参数键保持稳定。
 - `unit`
 - `min`
 - `max`
@@ -219,6 +221,26 @@ layout:
 
 actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `kp`、`kv` 等模型参数可以通过 `parameters.yaml` 指向 actuator 的 MJCF 属性，应用参数后重新编译生效。
 
+可在 `ui.yaml` 中配置中文控制名、单位、默认输入与默认视角：
+
+```yaml
+controls:
+  actuators:
+    crank_speed:
+      label: 曲柄角速度
+      unit: rad/s
+      value: -2
+camera:
+  position: [1, -0.15, 3.7]
+  target: [1, 0.75, 0]
+```
+
+`value` 同时用于首次网页载入与没有显式覆盖值的 Python 批量计算。为 motor、general、非单位 gear 等控制声明真实单位，不要仅根据执行器名称猜测。网页会优先使用参数与观测项的中文 `label`；CSV 保留稳定字段名。
+
+曲线按 `layout.charts` 分组；一个组内如果存在不同单位，会自动拆分为独立图。每张图都有时间横轴、物理量纵轴及单位，图下显示勾选开关和当前读数，悬停显示历史时刻的读数。
+
+MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能引用 results）。资源总量最多 32 MB，框架会解析 include 并把资源传给 Python 与浏览器 VFS。资源路径按主 model.xml 所在任务目录解析。校验器会实际编译模型并进行短时初始状态检查。
+
 ## 实时仿真与批量实验
 
 浏览器载入任务后默认保持暂停。学生设置参数并点击“开始”后，网页从初始状态运行至 `simulation.duration` 并自动暂停；“计算并保存”的 Python 批量实验使用相同的时长。`simulation.timestep` 也同时用于浏览器模型和批量实验。
@@ -257,6 +279,8 @@ task_id/
 ```
 
 这份说明帮助学生理解“为什么这样建模”，而不是只看一个会动的图。
+
+网页会渲染 `notes.md` 的标题、列表、表格、代码等 Markdown 格式；数学公式支持 `$...$`、`$$...$$`、`\(...\)`、`\[...\]`，以及标记为 `math` / `latex` / `tex` 的公式代码块。请把数学公式与程序代码、数据字段名称区分开。
 
 ## 闭环约束力与关节控件
 

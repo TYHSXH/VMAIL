@@ -44,17 +44,20 @@
           <div class="viewer-toolbar" role="toolbar" aria-label="仿真控制">
             <button id="resetButton" type="button" disabled>重置</button>
             <button id="stepButton" type="button" disabled>单步</button>
-            <button id="playButton" type="button" disabled>开始</button>
             <span class="toolbar-divider"></span>
             <div class="mode-switch" aria-label="鼠标模式">
-              <button id="cameraMode" class="active" type="button">相机</button>
+              <button id="cameraMode" class="active" type="button">旋转</button>
+              <button id="panMode" type="button">平移</button>
               <button id="dragMode" type="button">拖动物体</button>
             </div>
             <button id="contactButton" type="button" disabled>接触点</button>
             <button id="homeCameraButton" type="button" disabled>复位视角</button>
           </div>
+          <div class="playback-dock">
+            <button id="playButton" class="playback-primary" type="button" disabled>开始仿真</button>
+          </div>
           <div class="viewer-help">
-            <span id="mouseHint">左键旋转，右键平移，滚轮缩放</span>
+            <span id="mouseHint">左键旋转，Shift＋左键平移，滚轮缩放</span>
             <span id="selectionLabel"></span>
           </div>
         </section>
@@ -64,19 +67,19 @@
         <div id="inspectorResizeHandle" class="resize-handle resize-handle-left" role="separator" aria-label="调整参数与数据面板宽度" aria-orientation="vertical" tabindex="0"></div>
         <header class="inspector-header">
           <nav class="tabs" aria-label="任务面板">
-            <button class="tab active" data-tab="parameters" type="button">参数</button>
+            <button class="tab active" data-tab="task" type="button">任务</button>
+            <button class="tab" data-tab="parameters" type="button">参数</button>
             <button class="tab" data-tab="controls" type="button">控制</button>
             <button class="tab" data-tab="data" type="button">数据</button>
-            <button class="tab" data-tab="task" type="button">任务</button>
           </nav>
           <button id="closeInspector" class="icon-button" type="button" title="收起面板" aria-label="收起面板"></button>
         </header>
 
-        <section class="tab-panel active" data-panel="parameters">
+        <section class="tab-panel" data-panel="parameters">
           <form id="parameterForm" class="parameter-form"></form>
           <div class="simulation-settings">
             <label title="同时控制三维实时仿真与数据页批量计算的持续时间">仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
-            <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.0001" step="0.001" value="0.005" /></label>
+            <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.00001" step="any" value="0.005" /></label>
           </div>
           <p class="field-help">点击开始后，三维仿真运行至设定时长并自动暂停；实时数据按仿真时间高频采集（每次最多约 5000 点），曲线按屏幕帧率刷新。</p>
           <button id="applyParameters" class="primary-button wide" type="button" disabled>应用参数并重载模型</button>
@@ -92,19 +95,22 @@
           <div class="data-actions">
             <button id="clearData" class="quiet-button" type="button">清空曲线</button>
             <button id="exportData" class="quiet-button" type="button" disabled>导出当前数据</button>
-            <button id="runButton" class="primary-button" type="button" disabled>计算并保存</button>
+            <button id="runButton" class="primary-button" type="button" disabled>批量计算并保存</button>
+            <button id="cancelRun" class="quiet-button hidden" type="button">取消计算</button>
           </div>
-          <canvas id="chartCanvas" width="720" height="440"></canvas>
-          <div id="chartLegend" class="legend"></div>
-          <div id="liveValues" class="live-values"></div>
+          <p class="field-help">导出当前数据保存当前曲线。批量计算会从初始状态重新运行，使用当前固定控制值，不包含拖拽历史。</p>
+          <p id="dataSource" class="data-source" role="status"></p>
+          <p class="field-help">悬停联动读取同一时刻；Shift＋滚轮缩放时间轴，双击图表恢复全程。</p>
+          <div id="chartStack" class="chart-stack"></div>
+          <details class="result-history"><summary>已保存的实验</summary><div id="resultHistory"></div></details>
         </section>
 
-        <section class="tab-panel" data-panel="task">
+        <section class="tab-panel active" data-panel="task">
           <p id="taskQuestion" class="question">从左侧选择学习任务。</p>
           <div id="topicTags" class="tags"></div>
-          <details class="notes">
-            <summary>建模说明</summary>
-            <pre id="taskNotes"></pre>
+          <details class="notes" open>
+            <summary>操作步骤与建模说明</summary>
+            <div id="taskNotes" class="task-prose"></div>
           </details>
         </section>
       </aside>

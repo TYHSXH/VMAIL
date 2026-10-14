@@ -1,29 +1,40 @@
 layout:
   parameter_groups:
-    - title: 物理参数
-      parameters:
-        - mass
-        - stiffness
-        - damping
-    - title: 初始条件
-      parameters:
-        - initial_displacement
-        - initial_velocity
+  - title: 物理参数
+    parameters:
+    - mass
+    - stiffness
+    - damping
+  - title: 初始条件
+    parameters:
+    - initial_displacement
+    - initial_velocity
   charts:
-    - title: 位移
-      series:
-        - joint.slide_x.position
-    - title: 速度
-      series:
-        - joint.slide_x.velocity
-    - title: 加速度
-      series:
-        - joint.slide_x.acceleration
-    - title: 等效关节力
-      series:
-        - joint.slide_x.force
-    - title: 滑块中心点运动
-      series:
-        - site.slider_center.position.x
-        - site.slider_center.velocity.vx
-        - site.slider_center.acceleration.ax
+  - title: 位移
+    series:
+    - joint.slide_x.position
+  - title: 速度
+    series:
+    - joint.slide_x.velocity
+  - title: 加速度
+    series:
+    - joint.slide_x.acceleration
+  - title: 等效关节力
+    series:
+    - joint.slide_x.force
+  - title: 滑块中心点运动
+    series:
+    - site.slider_center.position.x
+    - site.slider_center.velocity.vx
+    - site.slider_center.acceleration.ax
+controls:
+  actuators: {}
+camera:
+  position:
+  - 0.6
+  - -2.5
+  - 1.8
+  target:
+  - 0.6
+  - 0
+  - 0

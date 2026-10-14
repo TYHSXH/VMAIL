@@ -10,6 +10,7 @@ parameters:
       tag: geom
       name: slider_geom
       attribute: mass
+    label: 质量
   stiffness:
     value: 12.0
     unit: N/m
@@ -21,6 +22,7 @@ parameters:
       tag: joint
       name: slide_x
       attribute: stiffness
+    label: 刚度
   damping:
     value: 0.8
     unit: N*s/m
@@ -32,6 +34,7 @@ parameters:
       tag: joint
       name: slide_x
       attribute: damping
+    label: 阻尼
   initial_displacement:
     value: 0.6
     unit: m
@@ -42,6 +45,7 @@ parameters:
     initial_state:
       joint: slide_x
       field: qpos
+    label: 初始位移
   initial_velocity:
     value: 0.0
     unit: m/s
@@ -52,4 +56,4 @@ parameters:
     initial_state:
       joint: slide_x
       field: qvel
-
+    label: 初始速度

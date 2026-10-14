@@ -31,11 +31,14 @@ export class MujocoBrowserViewer {
     this.geometryCache = new Map();
     this.paused = true;
     this.duration = Infinity;
+    this.configuredTimestep = 0.001;
+    this.cameraConfig = null;
     this.completionNotified = false;
     this.mode = "camera";
     this.showContacts = false;
     this.initialState = [];
     this.drag = null;
+    this.posePrepared = false;
     this.lastFrame = performance.now();
     this.sampleInterval = 0.001;
     this.nextSampleTime = 0;
@@ -58,6 +61,12 @@ export class MujocoBrowserViewer {
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.screenSpacePanning = true;
+    // Left-button pan and Shift+left-button pan remain available when a browser
+    // intercepts right-button gestures before they reach this page.
+    this.onContextMenu = (event) => event.preventDefault();
+    this.onMouseDown = (event) => { if (event.button === 2) event.preventDefault(); };
+    this.renderer.domElement.addEventListener("contextmenu", this.onContextMenu);
+    this.renderer.domElement.addEventListener("mousedown", this.onMouseDown, { capture: true });
     this.raycaster = new THREE.Raycaster();
     this.pointer = new THREE.Vector2();
     this.dragPlane = new THREE.Plane();
@@ -72,6 +81,7 @@ export class MujocoBrowserViewer {
     this.renderer.domElement.addEventListener("pointermove", this.onPointerMove);
     this.renderer.domElement.addEventListener("pointerup", this.onPointerUp);
     this.renderer.domElement.addEventListener("pointercancel", this.onPointerUp);
+    this.renderer.domElement.addEventListener("lostpointercapture", this.onPointerUp);
     this.resize();
   }
 
@@ -97,13 +107,26 @@ export class MujocoBrowserViewer {
     this.scene.add(fill);
   }
 
-  async loadModel(xml, initialState = [], observe = {}) {
+  async loadModel(xml, initialState = [], observe = {}, assets = {}, cameraConfig = null) {
+    const vfs = new this.mujoco.MjVFS();
+    let model;
+    try {
+      for (const [name, encoded] of Object.entries(assets)) {
+        vfs.addBuffer(name, Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0)));
+      }
+      model = this.mujoco.MjModel.from_xml_string(xml, vfs);
+    } finally {
+      vfs.delete();
+    }
+    if (!model) throw new Error("MuJoCo 无法编译这个模型。");
+    this.clearDrag();
     this.disposeModel();
     this.paused = true;
     this.initialState = initialState;
     this.observe = observe;
-    this.model = this.mujoco.MjModel.from_xml_string(xml);
-    if (!this.model) throw new Error("MuJoCo 无法编译这个模型。");
+    this.model = model;
+    this.configuredTimestep = Number(model.opt.timestep);
+    this.cameraConfig = cameraConfig;
     this.data = new this.mujoco.MjData(this.model);
     this.mjScene = new this.mujoco.MjvScene(this.model, 2 ** 15);
     this.reset();
@@ -135,9 +158,11 @@ export class MujocoBrowserViewer {
     if (!this.model || !this.data) return;
     const controls = preserveControls ? Array.from(this.data.ctrl) : null;
     this.clearDrag();
+    this.posePrepared = false;
     this.paused = true;
     this.completionNotified = false;
     this.mujoco.mj_resetData(this.model, this.data);
+    this.model.opt.timestep = this.configuredTimestep;
     if (controls) {
       controls.forEach((value, index) => {
         if (index < this.data.ctrl.length) this.data.ctrl[index] = value;
@@ -172,6 +197,7 @@ export class MujocoBrowserViewer {
         break;
       }
       this.applyDragForce();
+      this.model.opt.timestep = Math.min(this.configuredTimestep, this.duration - this.getTime());
       this.mujoco.mj_step(this.model, this.data);
       if (this.hasReachedDuration()) {
         this.finishDuration();
@@ -192,7 +218,7 @@ export class MujocoBrowserViewer {
   setDuration(duration) {
     const value = Number(duration);
     this.duration = Number.isFinite(value) && value > 0 ? value : Infinity;
-    const timestep = Number(this.model?.opt?.timestep || 0.001);
+    const timestep = this.configuredTimestep;
     const boundedDuration = Number.isFinite(this.duration) ? this.duration : 5;
     this.sampleInterval = Math.max(timestep, boundedDuration / 5000);
     this.nextSampleTime = this.getTime() + this.sampleInterval;
@@ -318,7 +344,8 @@ export class MujocoBrowserViewer {
 
   setActuatorControl(actuatorId, value) {
     if (!this.model || !this.data || actuatorId < 0 || actuatorId >= this.model.nu) return;
-    this.data.ctrl[actuatorId] = Number(value);
+    if (this.drag) this.drag.controls[actuatorId] = Number(value);
+    else this.data.ctrl[actuatorId] = Number(value);
   }
 
   setActuatorControlValues(values = {}) {
@@ -336,7 +363,8 @@ export class MujocoBrowserViewer {
       const upper = Number(this.model.actuator_ctrlrange[actuatorId * 2 + 1]);
       const hasRange = Number.isFinite(lower) && Number.isFinite(upper) && upper > lower;
       const applied = hasRange ? Math.min(upper, Math.max(lower, value)) : value;
-      this.data.ctrl[actuatorId] = applied;
+      if (this.drag) this.drag.controls[actuatorId] = applied;
+      else this.data.ctrl[actuatorId] = applied;
       restored[name] = applied;
     }
     return restored;
@@ -351,14 +379,15 @@ export class MujocoBrowserViewer {
         this.mujoco.mjtObj.mjOBJ_ACTUATOR.value,
         id,
       ) || `actuator_${id}`;
-      values[name] = Number(this.data.ctrl[id]);
+      values[name] = Number(this.drag ? this.drag.controls[id] : this.data.ctrl[id]);
     }
     return values;
   }
 
   setMode(mode) {
     this.mode = mode;
-    this.controls.enabled = mode === "camera";
+    this.controls.enabled = mode === "camera" || mode === "pan";
+    this.controls.mouseButtons.LEFT = mode === "pan" ? THREE.MOUSE.PAN : THREE.MOUSE.ROTATE;
     this.renderer.domElement.classList.toggle("drag-mode", mode === "drag");
     if (mode !== "drag") this.clearDrag();
   }
@@ -373,6 +402,13 @@ export class MujocoBrowserViewer {
   }
 
   homeCamera() {
+    if (this.cameraConfig?.position && this.cameraConfig?.target) {
+      this.camera.position.fromArray(this.cameraConfig.position);
+      this.controls.target.fromArray(this.cameraConfig.target);
+      this.camera.position.sub(this.controls.target).multiplyScalar(1 / Math.min(1, this.camera.aspect)).add(this.controls.target);
+      this.controls.update();
+      return;
+    }
     const extent = this.model?.stat?.extent || 2;
     const center = this.model?.stat?.center || [0, 0, 0];
     this.camera.position.set(
@@ -387,7 +423,13 @@ export class MujocoBrowserViewer {
   resize() {
     const width = Math.max(1, this.container.clientWidth);
     const height = Math.max(1, this.container.clientHeight);
+    const previousAspect = this.camera.aspect;
     this.camera.aspect = width / height;
+    if (this.model && previousAspect > 0 && this.controls) {
+      const scale = Math.min(1, previousAspect) / Math.min(1, this.camera.aspect);
+      this.camera.position.sub(this.controls.target).multiplyScalar(scale).add(this.controls.target);
+      this.controls.update();
+    }
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
   }
@@ -489,9 +531,13 @@ export class MujocoBrowserViewer {
     const frame = (now) => {
       const elapsed = Math.min((now - this.lastFrame) / 1000, 0.05);
       this.lastFrame = now;
-      if (this.model && this.data && !this.paused) {
-        const timestep = this.model.opt.timestep;
-        this.timeAccumulator = Math.min(this.timeAccumulator + elapsed, 0.1);
+      if (this.model && this.data && this.drag) {
+        // Dragging adjusts the pose in a separate phase. Physics enforces the
+        // constraints, but the experiment clock and recorder remain stopped.
+        this.advanceDragPose(elapsed);
+      } else if (this.model && this.data && !this.paused) {
+        const timestep = this.configuredTimestep;
+        this.timeAccumulator = Math.min(this.timeAccumulator + elapsed, Math.max(0.1, timestep));
         let stepped = false;
         let stateFresh = false;
         let completed = false;
@@ -502,6 +548,7 @@ export class MujocoBrowserViewer {
             break;
           }
           this.applyDragForce();
+          this.model.opt.timestep = Math.min(timestep, this.duration - this.getTime());
           this.mujoco.mj_step(this.model, this.data);
           this.timeAccumulator -= timestep;
           stepped = true;
@@ -530,12 +577,24 @@ export class MujocoBrowserViewer {
   }
 
   emitSample(force = false) {
+    if (this.drag || this.posePrepared) return false;
     const time = Number(this.data?.time || 0);
+    if (time + 1e-9 < this.lastSampleTime) {
+      this.setPaused(true);
+      this.callbacks.onError?.("仿真不稳定，物理引擎已自动重置；请检查模型或减小步长。");
+      return false;
+    }
     if (!force && time + 1e-12 < this.nextSampleTime) return false;
-    if (Math.abs(time - this.lastSampleTime) < 1e-12) return false;
+    if (!force && Math.abs(time - this.lastSampleTime) < 1e-12) return false;
     this.lastSampleTime = time;
     while (this.nextSampleTime <= time + 1e-12) this.nextSampleTime += this.sampleInterval;
-    this.callbacks.onSample?.({ time, values: this.readObservations() });
+    const values = this.readObservations();
+    if (Object.values(values).some((value) => !Number.isFinite(value))) {
+      this.setPaused(true);
+      this.callbacks.onError?.("仿真出现无效数值，已暂停；请检查模型或减小步长。");
+      return false;
+    }
+    this.callbacks.onSample?.({ time, values });
     return true;
   }
 
@@ -624,7 +683,7 @@ export class MujocoBrowserViewer {
           force.push(Number(this.data.efc_force[index]));
         }
       }
-      if ((item.fields || []).includes("force") && force.length) {
+      if ((item.fields || []).includes("force")) {
         const components = [force[0] || 0, force[1] || 0, force[2] || 0];
         const prefix = "equality." + item.name + ".force";
         "xyz".split("").forEach((axis, index) => {
@@ -643,8 +702,9 @@ export class MujocoBrowserViewer {
           });
         }
         if (field === "velocity") {
+          const vector = this.readObjectVector("mj_objectVelocity", this.mujoco.mjtObj.mjOBJ_BODY.value, bodyId);
           ["wx", "wy", "wz", "vx", "vy", "vz"].forEach((axis, index) => {
-            values[`body.${item.name}.velocity.${axis}`] = this.data.cvel[bodyId * 6 + index];
+            values[`body.${item.name}.velocity.${axis}`] = vector[index];
           });
         }
       }
@@ -718,9 +778,24 @@ export class MujocoBrowserViewer {
         + matrix[matrixOffset + 5] * worldOffset.y
         + matrix[matrixOffset + 8] * worldOffset.z,
     );
-    const resumeAfterDrag = this.paused && !this.hasReachedDuration();
-    this.drag = { bodyId, pointerId: event.pointerId, localPoint, resumeAfterDrag };
-    if (resumeAfterDrag) this.setPaused(false);
+    this.setPaused(true);
+    this.posePrepared = true;
+    this.completionNotified = false;
+    this.timeAccumulator = 0;
+    this.drag = {
+      bodyId, pointerId: event.pointerId, localPoint,
+      controls: Array.from(this.data.ctrl),
+      activation: Array.from(this.data.act),
+      disableflags: this.model.opt.disableflags,
+    };
+    this.model.opt.disableflags |= this.mujoco.mjtDisableBit.mjDSBL_ACTUATION.value;
+    this.data.ctrl.fill(0);
+    this.data.act.fill(0);
+    this.data.qvel.fill(0);
+    this.data.qacc_warmstart.fill(0);
+    this.data.time = 0;
+    this.mujoco.mj_forward(this.model, this.data);
+    this.callbacks.onDragStart?.();
     this.renderer.domElement.setPointerCapture(event.pointerId);
     this.callbacks.onSelection?.(`body #${this.drag.bodyId}`);
   }
@@ -737,6 +812,37 @@ export class MujocoBrowserViewer {
     this.clearDrag();
   }
 
+  advanceDragPose(elapsed) {
+    const timestep = Math.min(this.configuredTimestep, 0.002);
+    this.timeAccumulator = Math.min(this.timeAccumulator + elapsed, Math.max(0.05, timestep));
+    while (this.drag && this.timeAccumulator >= timestep) {
+      this.data.ctrl.fill(0);
+      this.data.act.fill(0);
+      this.applyDragForce();
+      this.model.opt.timestep = timestep;
+      this.mujoco.mj_step(this.model, this.data);
+      this.data.time = 0;
+      this.timeAccumulator -= timestep;
+      this.mujoco.mj_forward(this.model, this.data);
+    }
+    this.updateScene();
+  }
+
+  beginPreparedExperiment() {
+    if (!this.model || !this.data || !this.posePrepared || this.drag) return;
+    this.posePrepared = false;
+    this.data.time = 0;
+    this.data.qvel.fill(0);
+    this.data.qacc_warmstart.fill(0);
+    this.timeAccumulator = 0;
+    this.lastSampleTime = -Infinity;
+    this.nextSampleTime = 0;
+    this.completionNotified = false;
+    this.model.opt.timestep = this.configuredTimestep;
+    this.mujoco.mj_forward(this.model, this.data);
+    this.emitSample(true);
+  }
+
   applyDragForce() {
     if (!this.drag || !this.data) return;
     const bodyId = this.drag.bodyId;
@@ -745,16 +851,9 @@ export class MujocoBrowserViewer {
       this.data.xpos[bodyId * 3 + 1],
       this.data.xpos[bodyId * 3 + 2],
     );
-    const angularVelocity = new THREE.Vector3(
-      this.data.cvel[bodyId * 6],
-      this.data.cvel[bodyId * 6 + 1],
-      this.data.cvel[bodyId * 6 + 2],
-    );
-    const linearVelocity = new THREE.Vector3(
-      this.data.cvel[bodyId * 6 + 3],
-      this.data.cvel[bodyId * 6 + 4],
-      this.data.cvel[bodyId * 6 + 5],
-    );
+    const velocity = this.readObjectVector("mj_objectVelocity", this.mujoco.mjtObj.mjOBJ_BODY.value, bodyId);
+    const angularVelocity = new THREE.Vector3(...velocity.slice(0, 3));
+    const linearVelocity = new THREE.Vector3(...velocity.slice(3, 6));
     const matrixOffset = bodyId * 9;
     const matrix = this.data.xmat;
     const localPoint = this.drag.localPoint;
@@ -770,11 +869,12 @@ export class MujocoBrowserViewer {
         + matrix[matrixOffset + 8] * localPoint.z,
     );
     const grabPoint = position.clone().add(worldOffset);
-    const pointVelocity = angularVelocity.clone().cross(worldOffset).add(linearVelocity);
+    const centerOfMass = new THREE.Vector3(...Array.from(this.data.xipos.slice(bodyId * 3, bodyId * 3 + 3)));
+    const pointVelocity = angularVelocity.clone().cross(grabPoint.clone().sub(centerOfMass)).add(linearVelocity);
     const force = this.dragTarget.clone().sub(grabPoint).multiplyScalar(120)
       .addScaledVector(pointVelocity, -18);
     if (force.length() > 300) force.setLength(300);
-    const torque = worldOffset.clone().cross(force);
+    const torque = grabPoint.clone().sub(centerOfMass).cross(force);
     const offset = bodyId * 6;
     this.data.xfrc_applied[offset] = force.x;
     this.data.xfrc_applied[offset + 1] = force.y;
@@ -785,13 +885,25 @@ export class MujocoBrowserViewer {
   }
 
   clearDrag() {
-    const resumeAfterDrag = this.drag?.resumeAfterDrag;
-    if (this.drag && this.data) {
-      const offset = this.drag.bodyId * 6;
-      for (let i = 0; i < 6; i += 1) this.data.xfrc_applied[offset + i] = 0;
-    }
+    const drag = this.drag;
     this.drag = null;
-    if (resumeAfterDrag) this.setPaused(true);
+    if (drag && this.data && this.model) {
+      const offset = drag.bodyId * 6;
+      for (let i = 0; i < 6; i += 1) this.data.xfrc_applied[offset + i] = 0;
+      this.model.opt.disableflags = drag.disableflags;
+      this.model.opt.timestep = this.configuredTimestep;
+      this.data.ctrl.set(drag.controls);
+      this.data.act.set(drag.activation);
+      this.data.qvel.fill(0);
+      this.data.qacc_warmstart.fill(0);
+      this.data.time = 0;
+      this.timeAccumulator = 0;
+      this.mujoco.mj_forward(this.model, this.data);
+      this.updateScene();
+      this.setPaused(true);
+      if (this.renderer.domElement.hasPointerCapture(drag.pointerId)) this.renderer.domElement.releasePointerCapture(drag.pointerId);
+      this.callbacks.onDragEnd?.();
+    }
     this.callbacks.onSelection?.("");
   }
 
