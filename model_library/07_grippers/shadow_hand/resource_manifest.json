@@ -1,0 +1,149 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "shadow_hand/assets/f_distal_pst.obj",
+      "bytes": 341254,
+      "sha256": "350fcd33bc8ead915c0f646c8303d6b7554ad50ce546a128671d8d1fc75d5807",
+      "git_blob_sha": "ab556802561e2d09b91c8a48e4f2edc2300b762e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_distal_pst.obj",
+      "lfs": false,
+      "path": "assets/f_distal_pst.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_distal_pst.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/f_knuckle.obj",
+      "bytes": 34351,
+      "sha256": "e997543c6c635fa80d152655869fe1d5bc1000a55f7fb648544a8755f068a075",
+      "git_blob_sha": "70d01bd89ec3cb4d0ad0045db3a4a05b7bcd52dc",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_knuckle.obj",
+      "lfs": false,
+      "path": "assets/f_knuckle.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_knuckle.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/f_middle.obj",
+      "bytes": 25738,
+      "sha256": "8e78001a2ff735088cd71e009498ac73e4f966a6055d3bc864db049eacdbda11",
+      "git_blob_sha": "2d9332e2a75bfb22c0faf4157c8ba3e891ea31e5",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_middle.obj",
+      "lfs": false,
+      "path": "assets/f_middle.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_middle.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/f_proximal.obj",
+      "bytes": 64846,
+      "sha256": "ec7741fb5a9ee379faec68091de1086ade627b46a73f0a32b3cc09fec72524e3",
+      "git_blob_sha": "98a4dbaab0b4c5e69f57b63780bad35c681ffa15",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_proximal.obj",
+      "lfs": false,
+      "path": "assets/f_proximal.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/f_proximal.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/forearm_0.obj",
+      "bytes": 80439,
+      "sha256": "4d175854bbd3c93627eb6b9f09296efd4e133cd72885b9bc57c82f902c8c94c4",
+      "git_blob_sha": "c60d78e64509224e2accb0a02d151a68d251a52d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_0.obj",
+      "lfs": false,
+      "path": "assets/forearm_0.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_0.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/forearm_1.obj",
+      "bytes": 1433615,
+      "sha256": "6ada902a47f61f000fb14cbb8245e2093ff32e3e6b43deea790fe5d034864774",
+      "git_blob_sha": "3791270923ad6ac7c0b04fd454699937328c92b7",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_1.obj",
+      "lfs": false,
+      "path": "assets/forearm_1.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_1.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/forearm_collision.obj",
+      "bytes": 26812,
+      "sha256": "38328466d52194888812a15da0dd3d5a1ef786a005121338f6a5a8ce3057602d",
+      "git_blob_sha": "7281bdbdb8f3a28cbe90f842685a7f28a2c9e9d6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_collision.obj",
+      "lfs": false,
+      "path": "assets/forearm_collision.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/forearm_collision.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/lf_metacarpal.obj",
+      "bytes": 88696,
+      "sha256": "71d5317a6c0a5dcf6070791981f2a4720919d0419d0c17b400aef91343ce6baa",
+      "git_blob_sha": "a34f617285afa466b01dfa6a28a5f4b4685d4587",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/lf_metacarpal.obj",
+      "lfs": false,
+      "path": "assets/lf_metacarpal.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/lf_metacarpal.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/mounting_plate.obj",
+      "bytes": 118690,
+      "sha256": "32897f8d46e463657a822943c31f440dc6bbac87b5c7939d10cdbf971291e8d9",
+      "git_blob_sha": "6cb2644f60ad304daf12d353c3db940a0194f322",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/mounting_plate.obj",
+      "lfs": false,
+      "path": "assets/mounting_plate.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/mounting_plate.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/palm.obj",
+      "bytes": 775747,
+      "sha256": "614cf65374fafaceb713f4ee711692be6a3a0a7851ff2e720925f3a858cb3882",
+      "git_blob_sha": "1237d1c4cf28f04e699a0a433ae4f20865cc291d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/palm.obj",
+      "lfs": false,
+      "path": "assets/palm.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/palm.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/th_distal_pst.obj",
+      "bytes": 300842,
+      "sha256": "ca87b937114face76a91810f2ee60ea4fc217b57ffa9a7a7f166169a3ebf7da1",
+      "git_blob_sha": "3611a875048605f2528ddafc3f84b1302e10cda9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_distal_pst.obj",
+      "lfs": false,
+      "path": "assets/th_distal_pst.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_distal_pst.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/th_middle.obj",
+      "bytes": 75080,
+      "sha256": "a83bd4451f98d88c6c43ca0bbba30b6fd95b205da13adf9aff5a56c5aff3b4a8",
+      "git_blob_sha": "39305053aac9512f87ef3f718907fbe3104bccf6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_middle.obj",
+      "lfs": false,
+      "path": "assets/th_middle.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_middle.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/th_proximal.obj",
+      "bytes": 23772,
+      "sha256": "71ffd5329c80a0cef890da0ff490b8e04200ff53154e5b416ce0be24a6a1b256",
+      "git_blob_sha": "9002b2468aa45865f077aca56b0e98eab5477dff",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_proximal.obj",
+      "lfs": false,
+      "path": "assets/th_proximal.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/th_proximal.obj"
+    },
+    {
+      "upstream_path": "shadow_hand/assets/wrist.obj",
+      "bytes": 110838,
+      "sha256": "fc5620e4d9ea46d9526f0b40f8586bb5607e8ca763e5e23dab907a1baaf4890d",
+      "git_blob_sha": "5d510cdf5ab17bdc271fbff06a6e88cd8d09841f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/wrist.obj",
+      "lfs": false,
+      "path": "assets/wrist.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/shadow_hand/assets/wrist.obj"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene_left.xml": 3382030,
+    "scene_right.xml": 3382030
+  }
+}

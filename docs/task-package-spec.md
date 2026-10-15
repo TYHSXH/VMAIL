@@ -239,7 +239,7 @@ camera:
 
 曲线按 `layout.charts` 分组；一个组内如果存在不同单位，会自动拆分为独立图。每张图都有时间横轴、物理量纵轴及单位，图下显示勾选开关和当前读数，悬停显示历史时刻的读数。
 
-MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能引用 results）。资源总量最多 32 MB，框架会解析 include 并把资源传给 Python 与浏览器 VFS。资源路径按主 model.xml 所在任务目录解析。校验器会实际编译模型并进行短时初始状态检查。
+MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能引用 results）。单次加载引用资源总量最多 128 MiB（134217728 字节），不计 XML 文本及未引用文件；同一文件的多处引用会重复计数。框架会解析 include 并把资源传给 Python 与浏览器 VFS。资源路径按主 model.xml 所在任务目录解析。校验器会实际编译模型并进行短时初始状态检查。
 
 ## 实时仿真与批量实验
 
@@ -286,6 +286,6 @@ task_id/
 
 observe.yaml 还可以通过 equalities 列表读取 MJCF 闭环 equality 约束的反力。条目使用 equality 名称，并在 fields 中声明 force。系统会产生 equality.名称.force.x、y、z 和 magnitude 四列；connect 约束的三个分量采用世界坐标系。
 
-闭环机构中相互依赖的广义坐标不应作为独立位置控件。任务可以在 ui.yaml 顶层增加 controls.joints，只列出允许直接定位的关节。设置为空列表会隐藏全部关节位置控件，但不会隐藏 actuator。controls.joint_note 可用于向学生说明原因。
+“参数”页自动显示编译模型中的全部刚体转动、滑动关节，柔性顶点和节点的内部关节除外。`controls.joints` 旧名单不再用于隐藏关节。有限位关节遵守模型范围，无限位转动关节提供 0–360°（0–2π rad）设置。`controls.joint_note` 可以补充任务说明。
 
-标准曲柄滑块机构还可以在 controls.kinematic 中声明 slider_crank 联动控件。配置需要给出 crank_joint、rod_joint、slider_joint、crank_length 和 rod_length；网页只显示曲柄转角，拖动时按闭环几何同步更新三个关节位置。
+闭环机构调节关节时，网页固定学生选择的关节值，并根据 MuJoCo 的 equality 约束同步调整其他刚体转动、滑动关节，不推进仿真时间、不记录数据；无法满足约束的值会提示并恢复原姿态。旧 `controls.kinematic` 配置不再替换模型关节。恢复姿态返回任务的初始状态。

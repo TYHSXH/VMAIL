@@ -1,0 +1,39 @@
+{
+  "references": [
+    {
+      "from_xml": "gripper.xml",
+      "element": "include",
+      "file": "scene.xml",
+      "upstream_path": "model/flex/scene.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/scene.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/scene.xml",
+      "local_path": "scene.xml"
+    },
+    {
+      "from_xml": "gripper.xml",
+      "element": "flexcomp",
+      "file": "cap.obj",
+      "upstream_path": "model/flex/asset/cap.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj",
+      "local_path": "asset/cap.obj"
+    },
+    {
+      "from_xml": "gripper.xml",
+      "element": "flexcomp",
+      "file": "cap.obj",
+      "upstream_path": "model/flex/asset/cap.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj",
+      "local_path": "asset/cap.obj"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

@@ -1,0 +1,248 @@
+{
+  "references": [
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "pelvis.stl",
+      "upstream_path": "unitree_h1/assets/pelvis.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/pelvis.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/pelvis.stl",
+      "local_path": "assets/pelvis.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_hip_yaw_link.stl",
+      "upstream_path": "unitree_h1/assets/left_hip_yaw_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_yaw_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_yaw_link.stl",
+      "local_path": "assets/left_hip_yaw_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_hip_roll_link.stl",
+      "upstream_path": "unitree_h1/assets/left_hip_roll_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_roll_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_roll_link.stl",
+      "local_path": "assets/left_hip_roll_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_hip_pitch_link.stl",
+      "upstream_path": "unitree_h1/assets/left_hip_pitch_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_pitch_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_pitch_link.stl",
+      "local_path": "assets/left_hip_pitch_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_knee_link.stl",
+      "upstream_path": "unitree_h1/assets/left_knee_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_knee_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_knee_link.stl",
+      "local_path": "assets/left_knee_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_ankle_link.stl",
+      "upstream_path": "unitree_h1/assets/left_ankle_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_ankle_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_ankle_link.stl",
+      "local_path": "assets/left_ankle_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_hip_yaw_link.stl",
+      "upstream_path": "unitree_h1/assets/right_hip_yaw_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_yaw_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_yaw_link.stl",
+      "local_path": "assets/right_hip_yaw_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_hip_roll_link.stl",
+      "upstream_path": "unitree_h1/assets/right_hip_roll_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_roll_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_roll_link.stl",
+      "local_path": "assets/right_hip_roll_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_hip_pitch_link.stl",
+      "upstream_path": "unitree_h1/assets/right_hip_pitch_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_pitch_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_pitch_link.stl",
+      "local_path": "assets/right_hip_pitch_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_knee_link.stl",
+      "upstream_path": "unitree_h1/assets/right_knee_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_knee_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_knee_link.stl",
+      "local_path": "assets/right_knee_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_ankle_link.stl",
+      "upstream_path": "unitree_h1/assets/right_ankle_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_ankle_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_ankle_link.stl",
+      "local_path": "assets/right_ankle_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "torso_link.stl",
+      "upstream_path": "unitree_h1/assets/torso_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/torso_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/torso_link.stl",
+      "local_path": "assets/torso_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_shoulder_pitch_link.stl",
+      "upstream_path": "unitree_h1/assets/left_shoulder_pitch_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_pitch_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_pitch_link.stl",
+      "local_path": "assets/left_shoulder_pitch_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_shoulder_roll_link.stl",
+      "upstream_path": "unitree_h1/assets/left_shoulder_roll_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_roll_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_roll_link.stl",
+      "local_path": "assets/left_shoulder_roll_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_shoulder_yaw_link.stl",
+      "upstream_path": "unitree_h1/assets/left_shoulder_yaw_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_yaw_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_yaw_link.stl",
+      "local_path": "assets/left_shoulder_yaw_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "left_elbow_link.stl",
+      "upstream_path": "unitree_h1/assets/left_elbow_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_elbow_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_elbow_link.stl",
+      "local_path": "assets/left_elbow_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_shoulder_pitch_link.stl",
+      "upstream_path": "unitree_h1/assets/right_shoulder_pitch_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_pitch_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_pitch_link.stl",
+      "local_path": "assets/right_shoulder_pitch_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_shoulder_roll_link.stl",
+      "upstream_path": "unitree_h1/assets/right_shoulder_roll_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_roll_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_roll_link.stl",
+      "local_path": "assets/right_shoulder_roll_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_shoulder_yaw_link.stl",
+      "upstream_path": "unitree_h1/assets/right_shoulder_yaw_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_yaw_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_yaw_link.stl",
+      "local_path": "assets/right_shoulder_yaw_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "right_elbow_link.stl",
+      "upstream_path": "unitree_h1/assets/right_elbow_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_elbow_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_elbow_link.stl",
+      "local_path": "assets/right_elbow_link.stl"
+    },
+    {
+      "from_xml": "h1.xml",
+      "element": "mesh",
+      "file": "logo_link.stl",
+      "upstream_path": "unitree_h1/assets/logo_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/logo_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/logo_link.stl",
+      "local_path": "assets/logo_link.stl"
+    },
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "h1.xml",
+      "upstream_path": "unitree_h1/h1.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/h1.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/h1.xml",
+      "local_path": "h1.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

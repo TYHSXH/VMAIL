@@ -1,0 +1,39 @@
+{
+  "references": [
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "x2.xml",
+      "upstream_path": "skydio_x2/x2.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/x2.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/x2.xml",
+      "local_path": "x2.xml"
+    },
+    {
+      "from_xml": "x2.xml",
+      "element": "texture",
+      "file": "X2_lowpoly_texture_SpinningProps_1024.png",
+      "upstream_path": "skydio_x2/assets/X2_lowpoly_texture_SpinningProps_1024.png",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/assets/X2_lowpoly_texture_SpinningProps_1024.png",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/assets/X2_lowpoly_texture_SpinningProps_1024.png",
+      "local_path": "assets/X2_lowpoly_texture_SpinningProps_1024.png"
+    },
+    {
+      "from_xml": "x2.xml",
+      "element": "mesh",
+      "file": "X2_lowpoly.obj",
+      "upstream_path": "skydio_x2/assets/X2_lowpoly.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/assets/X2_lowpoly.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/skydio_x2/assets/X2_lowpoly.obj",
+      "local_path": "assets/X2_lowpoly.obj"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

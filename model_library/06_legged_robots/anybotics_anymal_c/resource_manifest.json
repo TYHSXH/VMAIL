@@ -1,0 +1,438 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base.png",
+      "bytes": 596390,
+      "sha256": "c85872e7e662dbfe342b7450d9be8332dbe9da3cc46e73e5c44960d1bd6f1b97",
+      "git_blob_sha": "2d19c7e215db68d13bca88c33c403137253ed108",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base.png",
+      "lfs": false,
+      "path": "assets/base.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_0.obj",
+      "bytes": 8494,
+      "sha256": "72ce71522d12cbea774fc53b21114571b540ea2a4601ea002be8010cef882671",
+      "git_blob_sha": "08cb7478ba22b2a1ede9fca693ee56f1c2a63161",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_0.obj",
+      "lfs": false,
+      "path": "assets/base_0.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_0.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_1.obj",
+      "bytes": 56342,
+      "sha256": "a3a47ce38a65d1502db9385a8f7946ad60befb67be3ec08ce9b5349ee8628aed",
+      "git_blob_sha": "a14b49cbf073c28c656e6e710581392eeb3cb65d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_1.obj",
+      "lfs": false,
+      "path": "assets/base_1.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_1.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_2.obj",
+      "bytes": 47409,
+      "sha256": "9d9ef6510bdb9e7e3d0607d4132bd1a2d2c4b9f058acec88c81b48bb03fc2b84",
+      "git_blob_sha": "5069fb7ddb06918cb7a6dde96d8c58ba24a14101",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_2.obj",
+      "lfs": false,
+      "path": "assets/base_2.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_2.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_3.obj",
+      "bytes": 408386,
+      "sha256": "7a3c6829dc3ff2b4889df63df3f0fd5a380499f2ef6d6ab56fdb724d9bab5fc2",
+      "git_blob_sha": "58df00ef168dd2356a25f28108996339d7691039",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_3.obj",
+      "lfs": false,
+      "path": "assets/base_3.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_3.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_4.obj",
+      "bytes": 44276,
+      "sha256": "5ffc5f36cfc0ad40066294b743de56c10effe1089eca0010a22e3675e92d3de7",
+      "git_blob_sha": "89f831b94cbfa084c7426505ceefcffb7412a49d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_4.obj",
+      "lfs": false,
+      "path": "assets/base_4.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_4.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/base_5.obj",
+      "bytes": 27761,
+      "sha256": "6672630cecff1b3aa731ef04e4035158bf1553aaa9a305791891bf4bfe429f93",
+      "git_blob_sha": "51548cdaf5f6abf862ebd435f82d714f2c9d4a75",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_5.obj",
+      "lfs": false,
+      "path": "assets/base_5.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/base_5.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/battery.obj",
+      "bytes": 1724,
+      "sha256": "14055cc0a83b9e3d3d11dbbe68927bd643760220f11a0ec3a344af2018e11aca",
+      "git_blob_sha": "cc457f373d067285041095f7e13981dc55d6b71e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/battery.obj",
+      "lfs": false,
+      "path": "assets/battery.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/battery.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/battery.png",
+      "bytes": 217165,
+      "sha256": "4376d81adfc74952fa436d818c3a6265758e592f1bfe0aefc518eb689410bd41",
+      "git_blob_sha": "d19935cabccfd27ffeae05a023a4f24334bc081e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/battery.png",
+      "lfs": false,
+      "path": "assets/battery.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/battery.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/bottom_shell.obj",
+      "bytes": 727634,
+      "sha256": "81dee5e360c21ed46d17e0bac1a63b4f8f1b16abc525bbba58a3affe83c6343d",
+      "git_blob_sha": "23c94750886f499d5b3f13ed1dab6c69cde7eda6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/bottom_shell.obj",
+      "lfs": false,
+      "path": "assets/bottom_shell.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/bottom_shell.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/bottom_shell.png",
+      "bytes": 706714,
+      "sha256": "e8f5017a1e5d37262c20f124c59baf7eebc00b30b3011eb14480664a80aa8e61",
+      "git_blob_sha": "5c75b1a581c58989eab22a65e9614cf684f9f172",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/bottom_shell.png",
+      "lfs": false,
+      "path": "assets/bottom_shell.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/bottom_shell.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/depth_camera.obj",
+      "bytes": 1720,
+      "sha256": "d9a33307c7bc1774dab3ef98d203c50a02b7f28a948f1be98a54741c97843f2c",
+      "git_blob_sha": "61f22e83935f2d12873a0dd354d67c5e884b9a4d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/depth_camera.obj",
+      "lfs": false,
+      "path": "assets/depth_camera.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/depth_camera.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/depth_camera.png",
+      "bytes": 661987,
+      "sha256": "0528317164108af038c4cf95401f2960d2a7ed40ec74d2a840dd12eba50450a4",
+      "git_blob_sha": "210040a49bb2113f370225cfaaac2eb04ec2450b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/depth_camera.png",
+      "lfs": false,
+      "path": "assets/depth_camera.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/depth_camera.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/drive.obj",
+      "bytes": 17973,
+      "sha256": "4f537162db7fe80e1cbf70eb239c7ad6257f226e8da15713981ae978deab0606",
+      "git_blob_sha": "ebdc4f8e9cb3524ede8c8d735493849a0d6bd008",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/drive.obj",
+      "lfs": false,
+      "path": "assets/drive.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/drive.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/drive.png",
+      "bytes": 558330,
+      "sha256": "a7bfe1e5a04b617bab07544e0856cc92003a368624f827a46c6be756c4bf3d9b",
+      "git_blob_sha": "d1d6c05caa146ce780826b0ccee4afe0c21dbd1a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/drive.png",
+      "lfs": false,
+      "path": "assets/drive.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/drive.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/face.obj",
+      "bytes": 405295,
+      "sha256": "ae0fe279f9d4bb9903d85f65ffd508fa9440af34793537b411bfef4bd40b1995",
+      "git_blob_sha": "1d456f16267cc87342f0dbbe2f9cb5aa539f946d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/face.obj",
+      "lfs": false,
+      "path": "assets/face.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/face.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/face.png",
+      "bytes": 1391179,
+      "sha256": "0d71ddc915f9a8baf0f225669a576ca27263e9bad9474b847bb0762fa7a2bcde",
+      "git_blob_sha": "d4075df56e7481c59f26f83f90179b575f111d89",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/face.png",
+      "lfs": false,
+      "path": "assets/face.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/face.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/foot.obj",
+      "bytes": 59343,
+      "sha256": "bea4989f973561f468bda26e1ca062b13df03b1be813aa7c57db1b1039bcd6e6",
+      "git_blob_sha": "c2d7a47d79cf6d88a5a8a25bfa4860bcc5c83548",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/foot.obj",
+      "lfs": false,
+      "path": "assets/foot.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/foot.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/foot.png",
+      "bytes": 628089,
+      "sha256": "1a63a3f3ddb77cfa56189dd3bc30fadea1f04d3464695b8533de02d94ba490cd",
+      "git_blob_sha": "fcc8c8e025cedb96dc290ba449b6793e370ab17e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/foot.png",
+      "lfs": false,
+      "path": "assets/foot.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/foot.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/handle.obj",
+      "bytes": 19615,
+      "sha256": "04ebd8554ef96021923511f58520e8f216c1f57d83f665a3b23c88588b0da8fb",
+      "git_blob_sha": "2d19658f06022b35338d35c9bb02b96ca1551ce6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/handle.obj",
+      "lfs": false,
+      "path": "assets/handle.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/handle.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/handle.png",
+      "bytes": 478198,
+      "sha256": "ed0ea6805961b41904f94398c783115e4cff71cf0e887a3fca3e5fa60c0972ef",
+      "git_blob_sha": "4a3a64922f4e9df2d408b9e2945fab696181e1c9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/handle.png",
+      "lfs": false,
+      "path": "assets/handle.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/handle.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hatch.obj",
+      "bytes": 5804,
+      "sha256": "b1f5cd8f322dba16d45f39b095f7f313ef1e17f785d3c2b189ecfed18f9a6c77",
+      "git_blob_sha": "61d203a1437590dab2957229674adf3b07a6aa8f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hatch.obj",
+      "lfs": false,
+      "path": "assets/hatch.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hatch.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hatch.png",
+      "bytes": 209268,
+      "sha256": "2a22cbfef3bf5d305dc9f2c429b44f7a914144151ff95fece1db8f7abd157cda",
+      "git_blob_sha": "6052cc3213835251a96c8113304f98389ca09a3c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hatch.png",
+      "lfs": false,
+      "path": "assets/hatch.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hatch.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hip_l.obj",
+      "bytes": 27957,
+      "sha256": "3eba208035323fcabc5bdfcdc8c45141705bf1aa0e4f6c1562b53351433fbe31",
+      "git_blob_sha": "ef8fa5e98e50a53d6c20a6e636170328e2a67921",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_l.obj",
+      "lfs": false,
+      "path": "assets/hip_l.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_l.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hip_l.png",
+      "bytes": 910528,
+      "sha256": "c7a3207c0f541a418241e5027c7325d1774c1a558597dfac0d17fe59d2708d70",
+      "git_blob_sha": "bca9cd9226cd4254ee825758b1b61c34877a26c6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_l.png",
+      "lfs": false,
+      "path": "assets/hip_l.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_l.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hip_r.obj",
+      "bytes": 28357,
+      "sha256": "f819e2c964d6e1cef9b2f4f78b80edfb094cb09de5c577472d3e6d72d81c9f9d",
+      "git_blob_sha": "c6b9d4fc8d4de7b46471a08d4ff1788022ee0a49",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_r.obj",
+      "lfs": false,
+      "path": "assets/hip_r.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_r.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/hip_r.png",
+      "bytes": 910528,
+      "sha256": "c7a3207c0f541a418241e5027c7325d1774c1a558597dfac0d17fe59d2708d70",
+      "git_blob_sha": "bca9cd9226cd4254ee825758b1b61c34877a26c6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_r.png",
+      "lfs": false,
+      "path": "assets/hip_r.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/hip_r.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/lidar.obj",
+      "bytes": 19993,
+      "sha256": "052bc2763ee33917f185b97e08a3b18b586280c8b16f3038ed124f06e42d12af",
+      "git_blob_sha": "edb2e6c3da09ace53a90762fcda78f8d974964a8",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar.obj",
+      "lfs": false,
+      "path": "assets/lidar.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/lidar.png",
+      "bytes": 664599,
+      "sha256": "71977fe401550113b7ba2765b70a6d66431b31123a38d72c5ff88826b27425e1",
+      "git_blob_sha": "e5846326dc656ce464b5421c3c8f0ed001222d0c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar.png",
+      "lfs": false,
+      "path": "assets/lidar.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/lidar_cage.obj",
+      "bytes": 68929,
+      "sha256": "062d7bb73b9851f49da56fdb6d61d88d1785ccb4eec5da540378c04dd966b7f3",
+      "git_blob_sha": "d7014fb3bb95c94e16995e13463aeb8aa7a6b936",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar_cage.obj",
+      "lfs": false,
+      "path": "assets/lidar_cage.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar_cage.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/lidar_cage.png",
+      "bytes": 1099654,
+      "sha256": "428af55b37f4ae3a91288cc7e4d5153671ff5df38442d9af4807653a27a5b0a3",
+      "git_blob_sha": "a23c56071824c8f653e193c04a16da4e2e63ee69",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar_cage.png",
+      "lfs": false,
+      "path": "assets/lidar_cage.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/lidar_cage.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/remote.obj",
+      "bytes": 40860,
+      "sha256": "4adb2625193d97fbe366dee61482cc754e0605687db4d8037c0903a960f61fcc",
+      "git_blob_sha": "34356aa61d241f9423dfe3a27c0058817e11bcf6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/remote.obj",
+      "lfs": false,
+      "path": "assets/remote.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/remote.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/remote.png",
+      "bytes": 186422,
+      "sha256": "98f7c8faae8653e3ece45f67d2f420cd64a647bc41d52183d1411f3e97a39115",
+      "git_blob_sha": "7cd43f0980e6689ed4669e51bc6156c9232c5bc9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/remote.png",
+      "lfs": false,
+      "path": "assets/remote.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/remote.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/shank_l.obj",
+      "bytes": 316317,
+      "sha256": "c8b9327bd8985c8239d63bfe8cd79a6848bab8c327e863ecccd854736ef2eefe",
+      "git_blob_sha": "60bdf2f282f0389b8116532b347eef5884464cc0",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_l.obj",
+      "lfs": false,
+      "path": "assets/shank_l.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_l.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/shank_l.png",
+      "bytes": 590323,
+      "sha256": "3abf0f871f65b66a330c09655797f1feb5332993112f888ca17d082decdce823",
+      "git_blob_sha": "a9ff8688b6e37d8036d3cdf14f86db31c40ce167",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_l.png",
+      "lfs": false,
+      "path": "assets/shank_l.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_l.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/shank_r.obj",
+      "bytes": 319809,
+      "sha256": "75a0a2233d2549ea5cc92d069d702b90cda14061756f8562886e859e84360dde",
+      "git_blob_sha": "48b16538f7caf980cc11142a00fdf1c370632b37",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_r.obj",
+      "lfs": false,
+      "path": "assets/shank_r.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_r.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/shank_r.png",
+      "bytes": 590323,
+      "sha256": "3abf0f871f65b66a330c09655797f1feb5332993112f888ca17d082decdce823",
+      "git_blob_sha": "a9ff8688b6e37d8036d3cdf14f86db31c40ce167",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_r.png",
+      "lfs": false,
+      "path": "assets/shank_r.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/shank_r.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/thigh.obj",
+      "bytes": 307758,
+      "sha256": "bffa716b73791f8bac4cb27ded83a606be324b4ac9887bd50ee5c441560638e3",
+      "git_blob_sha": "6af50ec023f9ee463af4e22e9004265c14003fb2",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/thigh.obj",
+      "lfs": false,
+      "path": "assets/thigh.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/thigh.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/thigh.png",
+      "bytes": 897590,
+      "sha256": "35875b0cdaf9669493143a28dc6cbab919d4e9429313b530976f1e8ae3f9cc4b",
+      "git_blob_sha": "801f353215eb38c36893c33bae2ce0c9c0e7422b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/thigh.png",
+      "lfs": false,
+      "path": "assets/thigh.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/thigh.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/top_shell.obj",
+      "bytes": 647686,
+      "sha256": "2e4addfd7d041ed38df197517397c2fd23389ec0fa7116c8021a4b2710b5e43c",
+      "git_blob_sha": "59fbee11e6b4dcdcf1241504539b7d4ddacbf598",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/top_shell.obj",
+      "lfs": false,
+      "path": "assets/top_shell.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/top_shell.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/top_shell.png",
+      "bytes": 612686,
+      "sha256": "0d804ae204693933c470c674fe7192d1dd9262df056ab9d15e010678db80b7ed",
+      "git_blob_sha": "91cf7e9a7858e9b653ded41778a2d688f000dc53",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/top_shell.png",
+      "lfs": false,
+      "path": "assets/top_shell.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/top_shell.png"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/wide_angle_camera.obj",
+      "bytes": 16618,
+      "sha256": "a827d67756f78a0fb9cfaf6c0d8b3b8458bdc793bc6d82bbd28a7557fc47f78c",
+      "git_blob_sha": "e1de455d9682bbd85f05ac3c4961842031fcf275",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/wide_angle_camera.obj",
+      "lfs": false,
+      "path": "assets/wide_angle_camera.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/wide_angle_camera.obj"
+    },
+    {
+      "upstream_path": "anybotics_anymal_c/assets/wide_angle_camera.png",
+      "bytes": 467975,
+      "sha256": "15a07c60015de459965a2d7f1a7ad08e88f32c78fdbf4193b459a34f3af38ca5",
+      "git_blob_sha": "0294698da02b29f0dbc994598d7eecc95fee6524",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/wide_angle_camera.png",
+      "lfs": false,
+      "path": "assets/wide_angle_camera.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/anybotics_anymal_c/assets/wide_angle_camera.png"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 16004008
+  }
+}

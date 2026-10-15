@@ -1,0 +1,398 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_0.obj",
+      "bytes": 352369,
+      "sha256": "b6e1424d8752f110324c22d06c40fb83cedf0de4cec3423560a7c411e1c2a8d4",
+      "git_blob_sha": "01593e34b366d5ba09b31c02b6977825717de765",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_0.obj",
+      "lfs": false,
+      "path": "assets/cf2_0.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_0.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_1.obj",
+      "bytes": 6424,
+      "sha256": "d28a2c6ebca05dc62f39334669c014a8ceb1a73ea1072d22d208a5f4fe5f0bc9",
+      "git_blob_sha": "ca0c8569056fa7a243fdd3783dd4668a19b37abf",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_1.obj",
+      "lfs": false,
+      "path": "assets/cf2_1.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_1.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_2.obj",
+      "bytes": 335694,
+      "sha256": "712bee75469773c0d34bb09d3ae5af405617c1f0992be2ff2e80b0f436c323f2",
+      "git_blob_sha": "8e60adc94288f09bdd2f1ff68bd4bd890b3c9fd4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_2.obj",
+      "lfs": false,
+      "path": "assets/cf2_2.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_2.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_3.obj",
+      "bytes": 2000,
+      "sha256": "b8af754045ad9d4652072584b4fdfa127527c3de9d34c64614995c462b69fdc8",
+      "git_blob_sha": "0f59f77c46b89b8538de6de979569463e1fe3b6a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_3.obj",
+      "lfs": false,
+      "path": "assets/cf2_3.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_3.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_4.obj",
+      "bytes": 61396,
+      "sha256": "c60f8c2b3c74bf7b9d300ed71ba983cedc79da817bafe2baba56e2daa5003d78",
+      "git_blob_sha": "6b9ba51b4b14acb72571e555b6b58775d83009b9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_4.obj",
+      "lfs": false,
+      "path": "assets/cf2_4.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_4.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_5.obj",
+      "bytes": 133367,
+      "sha256": "88bd391a4c7fce1a07950799291123a952756903d4b648f5b6163ec94990e36f",
+      "git_blob_sha": "8c5de2d72e4d7d5579ac65ef00946658e117e1ee",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_5.obj",
+      "lfs": false,
+      "path": "assets/cf2_5.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_5.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_6.obj",
+      "bytes": 168508,
+      "sha256": "99063e076f297125c67ab49f86bac648f338667518b2f824005349d0ef2ab673",
+      "git_blob_sha": "056447fa39b2fa83e91dd72635b85bae6c5fa98c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_6.obj",
+      "lfs": false,
+      "path": "assets/cf2_6.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_6.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_0.obj",
+      "bytes": 1494,
+      "sha256": "2715202cd2c831ae6b99a5b0fb35648e2a0e0218d73553c3eaf0689a18119cfc",
+      "git_blob_sha": "d7d028b94eedd25a678ce4b630827a6ac5b2649f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_0.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_0.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_0.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_1.obj",
+      "bytes": 1637,
+      "sha256": "e1c99d02815a006fe5c362fa0d28b8db4c2424c22774ec3eba2670cb78b29914",
+      "git_blob_sha": "5eefc496175ec3b8d8c9d0d8666953b8914b1b84",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_1.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_1.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_1.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_10.obj",
+      "bytes": 1203,
+      "sha256": "fd49af478603928f08d50d60b4fadbb17a4455241ba8879e24287c7ac623ea94",
+      "git_blob_sha": "8a9eabb04c60526f0ba7607cd6d19290ab0fd1ff",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_10.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_10.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_10.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_11.obj",
+      "bytes": 527,
+      "sha256": "d01b42d54389e2cdd20c1b3b0837dffb966617b74d35d2575ba1aa7907b3dfdf",
+      "git_blob_sha": "61bcf8007a23d06a3bf4d37afa57f2d1f666a4ec",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_11.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_11.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_11.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_12.obj",
+      "bytes": 522,
+      "sha256": "ee5c880102440ad8fa574b9921a53dc97cca237b8e1610c2a195fdbe7cbe6494",
+      "git_blob_sha": "bb412ba8b4227f1b040c37d70c2958306d25b7f6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_12.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_12.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_12.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_13.obj",
+      "bytes": 708,
+      "sha256": "1fc029cdb38637252963983a54590fc560fa2c79fc9890c63d60f6e1f63342c7",
+      "git_blob_sha": "038fab6c1b859a1182a31e1c3231f545af3b3648",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_13.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_13.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_13.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_14.obj",
+      "bytes": 681,
+      "sha256": "d04ca1e3f96f625b3c7a8455e19541dc3a3e925cfa6f4a8a2dd252eaa81c08f5",
+      "git_blob_sha": "5484ad69dc8fc88dc31682de943610f1ed4336c1",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_14.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_14.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_14.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_15.obj",
+      "bytes": 707,
+      "sha256": "5d6787aa1ca17e48d43fa1e9875027bb36038015a0827e1488336487c337167b",
+      "git_blob_sha": "2e88eae998f4d35eb9e9a33477379f8315ce9de4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_15.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_15.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_15.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_16.obj",
+      "bytes": 842,
+      "sha256": "f2cc9bfe84e09eef87790440096c7580f33ad7cd805fc5cdc7b2f7549302e854",
+      "git_blob_sha": "ef7b2863ea8d384b0ebe82d4458678afb69f9975",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_16.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_16.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_16.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_17.obj",
+      "bytes": 638,
+      "sha256": "eedadc86582d4f654e80d9913eef414012ed4b597fc975546003a8756308cb1f",
+      "git_blob_sha": "b4c90ede71538873024bcc5eb9e3c6f15ba87d7b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_17.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_17.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_17.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_18.obj",
+      "bytes": 1389,
+      "sha256": "fddcebffa7e4ce1f22239fec38a0912edf0e9e8836eba50cfe34f1a508075b17",
+      "git_blob_sha": "c7dd14fccb95b0ae9238c1131274490781c1be82",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_18.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_18.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_18.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_19.obj",
+      "bytes": 1062,
+      "sha256": "23bfdbfd15d57b11b0b26306854a66a5faffaf10d63a59896f14e25a1f7bf565",
+      "git_blob_sha": "9742df07639a86265a454fcc79e6b906c9a03b46",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_19.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_19.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_19.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_2.obj",
+      "bytes": 1296,
+      "sha256": "86c18490088f823d2d0233d7be7a88bb1871a4093f48f429ce586892899f7e20",
+      "git_blob_sha": "9844f23e676b4faf5eab94f0726884069b074c4f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_2.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_2.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_2.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_20.obj",
+      "bytes": 992,
+      "sha256": "07793f71fad9248e44361fa56e9d5105229a171a220a63c78baf0219dd4d38e6",
+      "git_blob_sha": "de6e0ccfe0f400b755b76cb5c3da2df6fb85c518",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_20.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_20.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_20.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_21.obj",
+      "bytes": 1003,
+      "sha256": "673b7779025d0839c246bb75a6bc4a76ad0a09f4aa2ea812818589722c4bcbf4",
+      "git_blob_sha": "f76beafe90c9cb496af421e19a33877d7f22a8ef",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_21.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_21.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_21.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_22.obj",
+      "bytes": 782,
+      "sha256": "af15e2f7908c692a12155e8e69b3b33ef2d5d97c5dddde31e6d428788024beb4",
+      "git_blob_sha": "61b58d22b6d41bddabaf4297e0349a2039aeface",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_22.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_22.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_22.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_23.obj",
+      "bytes": 1242,
+      "sha256": "8fd369711d523faf77904bfbf6a5f2a48714be9ade0aa26007ca3c2c9a90ab3d",
+      "git_blob_sha": "92407c45b37a4dee1056a1327953599cfeed0007",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_23.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_23.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_23.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_24.obj",
+      "bytes": 1606,
+      "sha256": "1608b7173ab5655a00949d2c2a839c7a4043674ba2b53e2d479efaeffd0150da",
+      "git_blob_sha": "3d6269c6a2bde1df3bf20bb77039d3b939a0fbf4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_24.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_24.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_24.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_25.obj",
+      "bytes": 708,
+      "sha256": "db849bb0a87cf2b33fa6fd731f4a73b0730e2766caae5bde802c8979058e06dc",
+      "git_blob_sha": "c73ba62090e48efb366c11359f78b3c3e12f4bf8",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_25.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_25.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_25.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_26.obj",
+      "bytes": 1064,
+      "sha256": "4a026f1d2c670d8a2357578efc18339e57ceba5fd72ac02e49572af148dc0af2",
+      "git_blob_sha": "95da4c6f5d90faaf37a22e2828f9a24a46d4a4fb",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_26.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_26.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_26.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_27.obj",
+      "bytes": 1075,
+      "sha256": "5ecec9966aa5a7d4c86fa96e2ced9065a1dc627cdd305af8bf154bd5087c3456",
+      "git_blob_sha": "6d5e99a5b481940d504f21b35c142eaa3e9fe092",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_27.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_27.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_27.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_28.obj",
+      "bytes": 404,
+      "sha256": "00229becda358865dc960e79c2a5a79de6b7fe771f65642ea3eae31357c72062",
+      "git_blob_sha": "41785ceadee8ae06ce27abc754dff6411319bf98",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_28.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_28.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_28.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_29.obj",
+      "bytes": 404,
+      "sha256": "38f50fcc582c222a77b5b0f8a7667818f25b12a9b9e245af91aa1cd1e7d5b98c",
+      "git_blob_sha": "c2d95b476ac71b9631ec331f83858d87fe7514fd",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_29.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_29.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_29.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_3.obj",
+      "bytes": 1190,
+      "sha256": "01a3484e552fbe40d6813b425c76e51b2112ec92272d471895c62b270d4a2e8f",
+      "git_blob_sha": "9b128b3ff33108ecd85df1a4268c8991eb944b33",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_3.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_3.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_3.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_30.obj",
+      "bytes": 653,
+      "sha256": "e44b805232a0a2acc79abf7a7f2d54d58fc32350219fa41acb1e528881460f15",
+      "git_blob_sha": "f3b9f4adf7140fce78e75c56799bd9316b31d681",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_30.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_30.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_30.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_31.obj",
+      "bytes": 408,
+      "sha256": "c60a0fb12811b6251cf217f6e4258141055c0f735c98aa720fe888ae96ab30fb",
+      "git_blob_sha": "4eff1d4231b50116a610f14b97204d7a7a90c595",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_31.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_31.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_31.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_4.obj",
+      "bytes": 1213,
+      "sha256": "7d06b50d215fb704a80b2488a4dc0cbeaca442c7ef1a09fbc1b53bbe182f7e46",
+      "git_blob_sha": "9cb85e71cb17ae69877e2024abbccdd693f3b216",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_4.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_4.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_4.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_5.obj",
+      "bytes": 829,
+      "sha256": "d0ebb7fe50429cb7e80cbf3a6716c6a3984face949c60e6c9fa00dbb87682fa1",
+      "git_blob_sha": "3d1e482bd6bce072d0e97ce01ab541960bc4ae52",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_5.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_5.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_5.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_6.obj",
+      "bytes": 1184,
+      "sha256": "e874be08ff9957735759f1dcb71d86633e9b82f3f0ab904be2147b1df15a34de",
+      "git_blob_sha": "7df172450c8fb64e867eb4c780a627da7b447e7c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_6.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_6.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_6.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_7.obj",
+      "bytes": 766,
+      "sha256": "92c6c4d56b0437cc9fb13feaef345a3a5565b06628e1a8f431b6b4c44df74ee8",
+      "git_blob_sha": "4e73bb68647d61e870c9077f4c226306c4b13761",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_7.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_7.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_7.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_8.obj",
+      "bytes": 948,
+      "sha256": "d5497b2c1bec62802320932f03985cb56c6928e576206324ffd543a8161790da",
+      "git_blob_sha": "42ecdab2aa9261acb60cc4c0c861efa5e3626084",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_8.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_8.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_8.obj"
+    },
+    {
+      "upstream_path": "bitcraze_crazyflie_2/assets/cf2_collision_9.obj",
+      "bytes": 529,
+      "sha256": "914364e62252bf21f920861be13abf2e1e6c7a1814542095c25ff243ccf968a3",
+      "git_blob_sha": "6e6840ab112d595cdb883dbfd3ccb5fcfb97f5c6",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_9.obj",
+      "lfs": false,
+      "path": "assets/cf2_collision_9.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/bitcraze_crazyflie_2/assets/cf2_collision_9.obj"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 1089464
+  }
+}

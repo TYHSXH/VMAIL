@@ -1,0 +1,193 @@
+{
+  "references": [
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "base_0.obj",
+      "upstream_path": "unitree_go2/assets/base_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_0.obj",
+      "local_path": "assets/base_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "base_1.obj",
+      "upstream_path": "unitree_go2/assets/base_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_1.obj",
+      "local_path": "assets/base_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "base_2.obj",
+      "upstream_path": "unitree_go2/assets/base_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_2.obj",
+      "local_path": "assets/base_2.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "base_3.obj",
+      "upstream_path": "unitree_go2/assets/base_3.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_3.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_3.obj",
+      "local_path": "assets/base_3.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "base_4.obj",
+      "upstream_path": "unitree_go2/assets/base_4.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_4.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/base_4.obj",
+      "local_path": "assets/base_4.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "hip_0.obj",
+      "upstream_path": "unitree_go2/assets/hip_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/hip_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/hip_0.obj",
+      "local_path": "assets/hip_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "hip_1.obj",
+      "upstream_path": "unitree_go2/assets/hip_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/hip_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/hip_1.obj",
+      "local_path": "assets/hip_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "thigh_0.obj",
+      "upstream_path": "unitree_go2/assets/thigh_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_0.obj",
+      "local_path": "assets/thigh_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "thigh_1.obj",
+      "upstream_path": "unitree_go2/assets/thigh_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_1.obj",
+      "local_path": "assets/thigh_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "thigh_mirror_0.obj",
+      "upstream_path": "unitree_go2/assets/thigh_mirror_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_mirror_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_mirror_0.obj",
+      "local_path": "assets/thigh_mirror_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "thigh_mirror_1.obj",
+      "upstream_path": "unitree_go2/assets/thigh_mirror_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_mirror_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/thigh_mirror_1.obj",
+      "local_path": "assets/thigh_mirror_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "calf_0.obj",
+      "upstream_path": "unitree_go2/assets/calf_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_0.obj",
+      "local_path": "assets/calf_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "calf_1.obj",
+      "upstream_path": "unitree_go2/assets/calf_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_1.obj",
+      "local_path": "assets/calf_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "calf_mirror_0.obj",
+      "upstream_path": "unitree_go2/assets/calf_mirror_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_mirror_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_mirror_0.obj",
+      "local_path": "assets/calf_mirror_0.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "calf_mirror_1.obj",
+      "upstream_path": "unitree_go2/assets/calf_mirror_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_mirror_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/calf_mirror_1.obj",
+      "local_path": "assets/calf_mirror_1.obj"
+    },
+    {
+      "from_xml": "go2.xml",
+      "element": "mesh",
+      "file": "foot.obj",
+      "upstream_path": "unitree_go2/assets/foot.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/foot.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/assets/foot.obj",
+      "local_path": "assets/foot.obj"
+    },
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "go2.xml",
+      "upstream_path": "unitree_go2/go2.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/go2.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_go2/go2.xml",
+      "local_path": "go2.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

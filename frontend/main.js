@@ -3,6 +3,8 @@ import { MujocoBrowserViewer } from "./mujoco-viewer.js";
 import { ChartStack } from "./charts.js";
 import { shortName } from "./labels.js";
 import { renderTaskNotes } from "./task-notes.js";
+import { setupModelPreview } from "./model-preview.js";
+import { JointPanel } from "./joint-panel.js";
 
 const state = {
   tasks: [],
@@ -41,6 +43,22 @@ const el = Object.fromEntries(
 );
 
 const charts = new ChartStack(el.chartStack, state);
+const taskJointPanel = new JointPanel(el.jointControls, {
+  getViewer: () => state.viewerTaskId === state.task?.id ? state.viewer : null,
+  canEdit: () => !state.modelLoading && !state.parametersDirty && !state.batch && !state.viewer?.drag,
+  onBlocked: () => showMessage("请先应用模型参数或等待计算完成，再调整关节。", true),
+  onChange: () => {
+    state.experimentVersion++;
+    if (state.seriesMode !== "preparing") clearSeries("preparing");
+    resetPlaybackState();
+    el.dataSource.textContent = "关节姿态已调整，点击开始仿真后计时并采集数据。";
+  },
+  onReset: () => {
+    state.experimentVersion++; clearSeries("preparing"); resetViewerPreservingControls();
+    state.viewer.prepareJointPose(); resetPlaybackState();
+    el.dataSource.textContent = "已恢复任务初始姿态，点击开始仿真后采集数据。";
+  },
+});
 let messageTimer;
 const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function showMessage(text, error = false) {
@@ -63,9 +81,11 @@ function activateTab(name) {
   document.querySelectorAll(".tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
   el.inspector.classList.remove("collapsed");
   if(name==="data")charts.draw();
+  if(name==="parameters")taskJointPanel.sync(true);
 }
 function setPlaybackEnabled(enabled) {
   for(const button of [el.resetButton,el.stepButton,el.playButton,el.contactButton,el.homeCameraButton])button.disabled=!enabled;
+  taskJointPanel.sync(true);
 }
 function simulationSettings() {
   const duration=Number(el.durationInput.value),timestep=Number(el.timestepInput.value);
@@ -77,7 +97,7 @@ function simulationSettings() {
 async function initViewer() {
   try {
     state.viewer=new MujocoBrowserViewer(el.mujocoViewport,{
-      onTime:time=>{el.simTime.textContent=`t = ${time.toFixed(3)} s`;},
+      onTime:time=>{el.simTime.textContent=`t = ${time.toFixed(3)} s`;taskJointPanel.sync();},
       onSample:appendSample,
       onSelection:label=>{el.selectionLabel.textContent=label?`已选中 ${label}`:"";},
       onBeforeDrag:()=>{
@@ -106,7 +126,7 @@ async function initViewer() {
     });
     await state.viewer.init();state.viewerReady=true;
     el.engineBadge.textContent="MuJoCo 3.13 · 浏览器";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
-    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>请选择学习任务</strong><span>从左侧选择任务，先阅读操作说明。</span>";
+    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>请选择学习任务</strong><span>从左侧选择任务，或拖入 XML 预览模型。</span>";
   }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
 async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}
@@ -151,6 +171,7 @@ async function selectTask(taskId) {
 }
 function renderTask() {
   const task=state.task;
+  taskJointPanel.render([]);
   el.taskTitle.textContent=task.task.title || task.id;el.taskQuestion.textContent=task.task.question || "请补充研究问题。";
   renderTaskNotes(el.taskNotes,task.notes);el.durationInput.value=task.task.simulation?.duration ?? 5;el.timestepInput.value=task.task.simulation?.timestep ?? .01;
   el.topicTags.replaceChildren();
@@ -198,7 +219,7 @@ async function loadBrowserModel() {
     const payload=await requestJson(`/api/tasks/${task.id}/browser-model`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters:collectParameters(),timestep,duration})});
     if(version!==state.modelLoadVersion || state.task!==task)return false;
     state.seriesMode="loading";
-    await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera);
+    await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera,payload.joint_limits);
     state.viewerTaskId=task.id;state.seriesUnits=state.viewer.getObservationUnits();restoreViewerControls();charts.rebuild();clearSeries();
     state.viewer.setDuration(duration);state.viewer.reset(true);renderRuntimeControls();
     state.parametersDirty=false;state.modelLoading=false;resetPlaybackState();setPlaybackEnabled(!state.batch);el.viewerLoading.classList.add("hidden");return true;
@@ -237,18 +258,10 @@ function controlRow(item,onChange) {
 }
 function renderRuntimeControls() {
   state.runtimeRows=[];const controls=state.viewer.getInteractiveControls();
-  el.jointControls.innerHTML="<h2>姿态调整</h2>";el.actuatorControls.innerHTML="<h2>运动控制</h2>";
+  el.actuatorControls.innerHTML="<h2>运动控制</h2>";
   const config=state.task.ui.controls || {};
-  if(config.joint_note){const p=document.createElement("p");p.className="empty-state";p.textContent=config.joint_note;el.jointControls.append(p);}
-  for(const item of controls.joints.filter(item=>!Array.isArray(config.joints) || config.joints.includes(item.name))){
-    Object.assign(item,{unit:item.kindLabel.includes("(rad)")?"rad":"m",controlType:"joint"});
-    el.jointControls.append(controlRow(item,value=>{state.viewer.setPaused(true);state.viewer.setJointPosition(item.id,value);updatePlaybackButton();}));
-  }
-  for(const spec of config.kinematic || []){
-    if(spec.type!=="slider_crank")continue;
-    const item={name:spec.crank_joint,label:spec.label || "曲柄转角",unit:"rad",controlType:"joint",min:spec.min ?? -Math.PI,max:spec.max ?? Math.PI,value:state.viewer.getJointPosition(spec.crank_joint)};
-    el.jointControls.append(controlRow(item,value=>{state.viewer.setPaused(true);state.viewer.setKinematicPosition(spec,value);updatePlaybackButton();}));
-  }
+  // Model joints are authoritative; legacy task allowlists must not hide them.
+  taskJointPanel.render(controls.joints,config.joint_note || "");
   for(const item of controls.actuators){
     const spec=config.actuators?.[item.name] || {};
     Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name),controlType:"actuator"});
@@ -257,6 +270,7 @@ function renderRuntimeControls() {
   if(!controls.actuators.length){const p=document.createElement("p");p.className="empty-state";p.textContent="本任务没有运动控制量。";el.actuatorControls.append(p);}
 }
 function syncRuntimeControls() {
+  taskJointPanel.sync();
   for(const {item,slider,number} of state.runtimeRows){
     if(document.activeElement===slider || document.activeElement===number)continue;
     const value=item.controlType==="actuator"?state.viewer.data?.ctrl[item.id]:state.viewer.getJointPosition(item.name);
@@ -419,7 +433,7 @@ function setupResizableSidebars() {
 document.querySelectorAll(".tab").forEach((button)=>button.addEventListener("click",()=>activateTab(button.dataset.tab)));
 el.refreshTasks.addEventListener("click",()=>loadTasks().catch(error=>showMessage(error.message,true)));
 el.applyParameters.addEventListener("click",()=>{if(!state.batch)loadBrowserModel();});
-function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();}
+function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();taskJointPanel.sync(true);}
 el.parameterForm.addEventListener("input",markDirty);
 el.timestepInput.addEventListener("input",markDirty);
 el.durationInput.addEventListener("input",()=>{
@@ -469,4 +483,16 @@ window.addEventListener("keydown",(event)=>{
 });
 window.addEventListener("beforeunload",()=>state.viewer?.dispose());
 setupResizableSidebars();
-Promise.all([initViewer(),loadTasks()]).catch(error=>showMessage(error.message,true));
+const viewerInitialization = initViewer();
+setupModelPreview({
+  openButton: document.getElementById("openPreview"),
+  getEngine: async () => {
+    await viewerInitialization;
+    if (!state.viewerReady) throw new Error("MuJoCo 引擎尚未就绪，请刷新页面后重试。");
+    return state.viewer.mujoco;
+  },
+  onEnter: () => { state.viewer?.clearDrag(); state.viewer?.setPaused(true); state.viewer?.setSuspended(true); },
+  onExit: () => { state.viewer?.setSuspended(false); state.viewer?.resize(); },
+  onError: message => showMessage(message, true),
+});
+Promise.all([viewerInitialization,loadTasks()]).catch(error=>showMessage(error.message,true));

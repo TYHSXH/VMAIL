@@ -1,0 +1,160 @@
+{
+  "references": [
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_0.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_0.obj",
+      "local_path": "assets/link_0.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_1.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_1.obj",
+      "local_path": "assets/link_1.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_2_orange.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_2_orange.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_2_orange.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_2_orange.obj",
+      "local_path": "assets/link_2_orange.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_2_grey.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_2_grey.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_2_grey.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_2_grey.obj",
+      "local_path": "assets/link_2_grey.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_3.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_3.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_3.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_3.obj",
+      "local_path": "assets/link_3.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "band.obj",
+      "upstream_path": "kuka_iiwa_14/assets/band.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/band.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/band.obj",
+      "local_path": "assets/band.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "kuka.obj",
+      "upstream_path": "kuka_iiwa_14/assets/kuka.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/kuka.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/kuka.obj",
+      "local_path": "assets/kuka.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_4_orange.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_4_orange.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_4_orange.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_4_orange.obj",
+      "local_path": "assets/link_4_orange.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_4_grey.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_4_grey.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_4_grey.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_4_grey.obj",
+      "local_path": "assets/link_4_grey.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_5.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_5.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_5.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_5.obj",
+      "local_path": "assets/link_5.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_6_orange.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_6_orange.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_6_orange.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_6_orange.obj",
+      "local_path": "assets/link_6_orange.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_6_grey.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_6_grey.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_6_grey.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_6_grey.obj",
+      "local_path": "assets/link_6_grey.obj"
+    },
+    {
+      "from_xml": "iiwa14.xml",
+      "element": "mesh",
+      "file": "link_7.obj",
+      "upstream_path": "kuka_iiwa_14/assets/link_7.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_7.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/assets/link_7.obj",
+      "local_path": "assets/link_7.obj"
+    },
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "iiwa14.xml",
+      "upstream_path": "kuka_iiwa_14/iiwa14.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/iiwa14.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/kuka_iiwa_14/iiwa14.xml",
+      "local_path": "iiwa14.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

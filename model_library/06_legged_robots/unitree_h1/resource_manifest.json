@@ -1,0 +1,218 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "unitree_h1/assets/left_ankle_link.stl",
+      "bytes": 216684,
+      "sha256": "f623223b59d0f8cd86a799f409f4e8680da3e48d9b60e9f4bf9dad5c5dc8ac25",
+      "git_blob_sha": "2fb6869140aa6bf40538a0871a9d45784fa3ff49",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_ankle_link.stl",
+      "lfs": false,
+      "path": "assets/left_ankle_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_ankle_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_elbow_link.stl",
+      "bytes": 258684,
+      "sha256": "5ccf9bc83a751c1965b692e75534e57ee3c8a0916cbcff2ccccd8fe2b9d818d7",
+      "git_blob_sha": "5f798ca0768656ef8846059414370d51bf5d77c3",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_elbow_link.stl",
+      "lfs": false,
+      "path": "assets/left_elbow_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_elbow_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_hip_pitch_link.stl",
+      "bytes": 452384,
+      "sha256": "aa790c31ffc100cd182f2bf4480e7bfda675edc58ed8f361b6553a4975c9de3b",
+      "git_blob_sha": "e5898ab498d663eeaf261daae7b9beb9ac37d843",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_pitch_link.stl",
+      "lfs": false,
+      "path": "assets/left_hip_pitch_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_pitch_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_hip_roll_link.stl",
+      "bytes": 769284,
+      "sha256": "8ed880cf1171e048cfe50489fe2546c32790ac0c24a2b3b4c560495401013552",
+      "git_blob_sha": "5ade02bc0c560abaddfbf952589ec59891fa346e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_roll_link.stl",
+      "lfs": false,
+      "path": "assets/left_hip_roll_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_roll_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_hip_yaw_link.stl",
+      "bytes": 885884,
+      "sha256": "103a854e684b84e1baba7d073822079069c64d0fa7b1592f29d38bd29f545bfb",
+      "git_blob_sha": "3bcc4b8730b10e12c9be3d8b2b9b3409980221c5",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_yaw_link.stl",
+      "lfs": false,
+      "path": "assets/left_hip_yaw_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_hip_yaw_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_knee_link.stl",
+      "bytes": 660384,
+      "sha256": "efda8a6c54406c788102c0d6e59ea95e24114607bc2da9a2bf7f287ef7e48109",
+      "git_blob_sha": "18174eed93d892134384a75b2bd69a724df35974",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_knee_link.stl",
+      "lfs": false,
+      "path": "assets/left_knee_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_knee_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_shoulder_pitch_link.stl",
+      "bytes": 787484,
+      "sha256": "42e1db49464ca0f44f933114ee426e7f6d6310d20cf104bfa38b5ed4794cfab7",
+      "git_blob_sha": "be81370b2252d2e6b1799828d7c45db91442b867",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_pitch_link.stl",
+      "lfs": false,
+      "path": "assets/left_shoulder_pitch_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_pitch_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_shoulder_roll_link.stl",
+      "bytes": 903384,
+      "sha256": "8d3bcf767d72a9a5d7dae539eae79dc4132f0159b8803a6f6f2f9ad4b7e94d19",
+      "git_blob_sha": "a59bb640fdbd932c6eba299ef5d3ed63994ea524",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_roll_link.stl",
+      "lfs": false,
+      "path": "assets/left_shoulder_roll_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_roll_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/left_shoulder_yaw_link.stl",
+      "bytes": 644184,
+      "sha256": "e22a5b53f8f307e6c5d6c17f9ceae4852c6468547a951cb39dfdec9ee414b515",
+      "git_blob_sha": "01d3c75b2246df403f5d4a81b034067b58952107",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_yaw_link.stl",
+      "lfs": false,
+      "path": "assets/left_shoulder_yaw_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/left_shoulder_yaw_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/logo_link.stl",
+      "bytes": 145484,
+      "sha256": "ef9635c847ca7cd61aeaed86ad599935b648fb6f8688867c0448917b1811511b",
+      "git_blob_sha": "c396d51d80a93035ed399e4762de83ba2c2d0874",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/logo_link.stl",
+      "lfs": false,
+      "path": "assets/logo_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/logo_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/pelvis.stl",
+      "bytes": 672884,
+      "sha256": "dc2cbbeb07d3b63bce9fedeb8cf5252609dca1e89380734d22d5b3c8ded2f15c",
+      "git_blob_sha": "05e5512c79bbee0a324d401b1bfd40441b660c94",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/pelvis.stl",
+      "lfs": false,
+      "path": "assets/pelvis.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/pelvis.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_ankle_link.stl",
+      "bytes": 216284,
+      "sha256": "a72e7b10d3961b5c5bb7b0ca09f20cbc203619f5ded33ca030517c06298d2fd9",
+      "git_blob_sha": "5c85b2b0731d72ccf17a376e0247c3746aa34c93",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_ankle_link.stl",
+      "lfs": false,
+      "path": "assets/right_ankle_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_ankle_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_elbow_link.stl",
+      "bytes": 258584,
+      "sha256": "bc1b2aa33cffda279b3e6a40b5b932b86de9cce6c41f0c0d860b442e81edcdc2",
+      "git_blob_sha": "f4c03e3af8c6c3f985946026b6815ebca4adcc06",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_elbow_link.stl",
+      "lfs": false,
+      "path": "assets/right_elbow_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_elbow_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_hip_pitch_link.stl",
+      "bytes": 452384,
+      "sha256": "3c0300dd96432f218857886007e9d4e8be038cd8b85e04e84a59df4de7f90476",
+      "git_blob_sha": "1d4e515c1479609d2fb7c17fd2069a6d2487dd6d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_pitch_link.stl",
+      "lfs": false,
+      "path": "assets/right_hip_pitch_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_pitch_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_hip_roll_link.stl",
+      "bytes": 768484,
+      "sha256": "3e95b01b0a215e1d134545d4073cf7a72ab38ca33e35c606c03f1706d63588c6",
+      "git_blob_sha": "d2a0af9bb69888d159134451dd1c3fc5075689c8",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_roll_link.stl",
+      "lfs": false,
+      "path": "assets/right_hip_roll_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_roll_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_hip_yaw_link.stl",
+      "bytes": 884484,
+      "sha256": "10badbb0ac78e22fc220f421b1c919cfcf59406b412d78313e4b8b06cbc51e47",
+      "git_blob_sha": "6c8ffd59e6b80a710b7770248e357788b04059f9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_yaw_link.stl",
+      "lfs": false,
+      "path": "assets/right_hip_yaw_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_hip_yaw_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_knee_link.stl",
+      "bytes": 662184,
+      "sha256": "6183abbaef2afc775c220853e403b8479022a99954dbeef829b39d71916ddeda",
+      "git_blob_sha": "1ed90cc62457afbdb17915c47efe5f9cafcfae0b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_knee_link.stl",
+      "lfs": false,
+      "path": "assets/right_knee_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_knee_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_shoulder_pitch_link.stl",
+      "bytes": 788484,
+      "sha256": "850ffa7321993bfadcdb8bab1d422239f6a20abe27daa5ef99622f55d4da3217",
+      "git_blob_sha": "f77ab2b8b8a67d83c8960df0a75479f5b8471fa9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_pitch_link.stl",
+      "lfs": false,
+      "path": "assets/right_shoulder_pitch_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_pitch_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_shoulder_roll_link.stl",
+      "bytes": 908284,
+      "sha256": "b9e793e351e09027d27427c06df2c1cb6b37c0205d0f68686b0d73916c6821de",
+      "git_blob_sha": "a98398f9edcef9fd01ed91c3304e7610e5ab08e7",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_roll_link.stl",
+      "lfs": false,
+      "path": "assets/right_shoulder_roll_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_roll_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/right_shoulder_yaw_link.stl",
+      "bytes": 646884,
+      "sha256": "0c9e4bec895f24c07fb2c4d132fc5e3cc7146155547267e9c270789af6567781",
+      "git_blob_sha": "7943bab36d5f85416942ea4e682ca6453612b4b7",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_yaw_link.stl",
+      "lfs": false,
+      "path": "assets/right_shoulder_yaw_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/right_shoulder_yaw_link.stl"
+    },
+    {
+      "upstream_path": "unitree_h1/assets/torso_link.stl",
+      "bytes": 2339384,
+      "sha256": "3ab785cbfbd851b0e9c59a46871aabc4718f3f8e726e21a2d14360d217ec7ba8",
+      "git_blob_sha": "335b2f19100e5cdc9b751cb3a83c3d9f49e4a227",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/torso_link.stl",
+      "lfs": false,
+      "path": "assets/torso_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/unitree_h1/assets/torso_link.stl"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 14322164
+  }
+}

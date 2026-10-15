@@ -17,6 +17,7 @@ class SimulationError(Exception):
 
 MAX_STEPS = 200_000
 MAX_VALUES = 2_000_000
+MAX_MODEL_RESOURCE_BYTES = 128 * 1024 * 1024
 
 
 def _positive_number(value: Any, label: str) -> float:
@@ -78,17 +79,24 @@ def _model_source(task: dict[str, Any]) -> tuple[str, dict[str, bytes]]:
     if compiler is not None:
         for kind in directories:
             directories[kind] = compiler.get(f"{kind}dir", compiler.get("assetdir", ""))
+        directories["flexcomp"] = directories["mesh"]
+        directories["skin"] = compiler.get("assetdir", "")
+        directories["hfield"] = compiler.get("assetdir", "")
         for attr in ("meshdir", "texturedir", "assetdir"):
             compiler.attrib.pop(attr, None)
     for node in root.iter():
         if "file" not in node.attrib:
             continue
         path = resolve(str(Path(directories.get(node.tag, "")) / node.get("file")))
+        # MuJoCo derives asset names from file stems when name is omitted.
+        # Preserve that name before replacing the filename for the VFS.
+        if node.tag in {"mesh", "texture", "hfield", "skin", "model"} and not node.get("name"):
+            node.set("name", Path(node.get("file")).stem)
         key = f"asset_{len(assets)}{path.suffix}"
         blob = path.read_bytes()
         total += len(blob)
-        if total > 32 * 1024 * 1024:
-            raise SimulationError("模型资源总量不能超过 32 MB。")
+        if total > MAX_MODEL_RESOURCE_BYTES:
+            raise SimulationError("模型引用资源总量不能超过 128 MiB（134217728 字节）。")
         assets[key] = blob
         node.set("file", key)
     return ET.tostring(root, encoding="unicode"), assets
@@ -137,6 +145,7 @@ def prepare_browser_model(
     return {
         "xml": ET.tostring(root, encoding="unicode"),
         "initial_state": initial_state,
+        "joint_limits": model.jnt_limited.astype(bool).tolist(),
         "observe": task.get("observe", {}).get("observe", {}),
         "assets": {name: base64.b64encode(blob).decode("ascii") for name, blob in assets.items()},
     }

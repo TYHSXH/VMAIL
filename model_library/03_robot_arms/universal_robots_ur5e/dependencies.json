@@ -1,0 +1,237 @@
+{
+  "references": [
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "ur5e.xml",
+      "upstream_path": "universal_robots_ur5e/ur5e.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/ur5e.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/ur5e.xml",
+      "local_path": "ur5e.xml"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "base_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/base_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/base_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/base_0.obj",
+      "local_path": "assets/base_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "base_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/base_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/base_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/base_1.obj",
+      "local_path": "assets/base_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "shoulder_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/shoulder_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_0.obj",
+      "local_path": "assets/shoulder_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "shoulder_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/shoulder_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_1.obj",
+      "local_path": "assets/shoulder_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "shoulder_2.obj",
+      "upstream_path": "universal_robots_ur5e/assets/shoulder_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/shoulder_2.obj",
+      "local_path": "assets/shoulder_2.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "upperarm_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/upperarm_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_0.obj",
+      "local_path": "assets/upperarm_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "upperarm_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/upperarm_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_1.obj",
+      "local_path": "assets/upperarm_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "upperarm_2.obj",
+      "upstream_path": "universal_robots_ur5e/assets/upperarm_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_2.obj",
+      "local_path": "assets/upperarm_2.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "upperarm_3.obj",
+      "upstream_path": "universal_robots_ur5e/assets/upperarm_3.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_3.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/upperarm_3.obj",
+      "local_path": "assets/upperarm_3.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "forearm_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/forearm_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_0.obj",
+      "local_path": "assets/forearm_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "forearm_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/forearm_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_1.obj",
+      "local_path": "assets/forearm_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "forearm_2.obj",
+      "upstream_path": "universal_robots_ur5e/assets/forearm_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_2.obj",
+      "local_path": "assets/forearm_2.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "forearm_3.obj",
+      "upstream_path": "universal_robots_ur5e/assets/forearm_3.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_3.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/forearm_3.obj",
+      "local_path": "assets/forearm_3.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist1_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist1_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_0.obj",
+      "local_path": "assets/wrist1_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist1_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist1_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_1.obj",
+      "local_path": "assets/wrist1_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist1_2.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist1_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist1_2.obj",
+      "local_path": "assets/wrist1_2.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist2_0.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist2_0.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_0.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_0.obj",
+      "local_path": "assets/wrist2_0.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist2_1.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist2_1.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_1.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_1.obj",
+      "local_path": "assets/wrist2_1.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist2_2.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist2_2.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_2.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist2_2.obj",
+      "local_path": "assets/wrist2_2.obj"
+    },
+    {
+      "from_xml": "ur5e.xml",
+      "element": "mesh",
+      "file": "wrist3.obj",
+      "upstream_path": "universal_robots_ur5e/assets/wrist3.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist3.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/universal_robots_ur5e/assets/wrist3.obj",
+      "local_path": "assets/wrist3.obj"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

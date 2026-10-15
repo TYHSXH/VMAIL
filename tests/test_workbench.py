@@ -9,7 +9,7 @@ from unittest.mock import patch
 from fastapi import HTTPException
 
 from backend import main
-from backend.simulator import SimulationError, prepare_browser_model, run_mujoco_task
+from backend.simulator import SimulationError, prepare_browser_model, run_mujoco_task, _model_source, MAX_MODEL_RESOURCE_BYTES
 from backend.task_io import TaskValidationError, list_tasks, load_task, rename_task, save_run_result
 
 
@@ -113,6 +113,19 @@ class WorkbenchTests(unittest.TestCase):
         task["model_xml"] = '<mujoco><include file="missing.xml"/></mujoco>'
         with self.assertRaisesRegex(SimulationError, "不存在"):
             prepare_browser_model(task, {})
+
+    def test_resource_limit_counts_references_excludes_xml_and_unused_files(self):
+        folder = Path(self.task["path"])
+        (folder / "mesh.bin").write_bytes(b"0123456789")
+        (folder / "unused.bin").write_bytes(b"x" * 200)
+        task = {"path": str(folder), "model_xml": '<mujoco><asset><mesh file="mesh.bin"/></asset></mujoco>'}
+        self.assertEqual(MAX_MODEL_RESOURCE_BYTES, 128 * 1024 * 1024)
+        with patch("backend.simulator.MAX_MODEL_RESOURCE_BYTES", 10):
+            _, assets = _model_source(task)
+            self.assertEqual(sum(map(len, assets.values())), 10)
+            task["model_xml"] = '<mujoco><asset><mesh file="mesh.bin"/><mesh file="mesh.bin"/></asset></mujoco>'
+            with self.assertRaisesRegex(SimulationError, "128 MiB"):
+                _model_source(task)
 
 
 if __name__ == "__main__":

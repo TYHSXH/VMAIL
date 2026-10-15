@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import loadMujoco from "@mujoco/mujoco";
+import { projectJointPose } from "./joint-pose.js";
 
 class CapsuleGeometry extends THREE.BufferGeometry {
   constructor(radius, length) {
@@ -29,6 +30,9 @@ export class MujocoBrowserViewer {
     this.mjScene = null;
     this.meshes = [];
     this.geometryCache = new Map();
+    this.sceneDirty = true;
+    this.suspended = false;
+    this.resetKeyframe = -1;
     this.paused = true;
     this.duration = Infinity;
     this.configuredTimestep = 0.001;
@@ -60,6 +64,7 @@ export class MujocoBrowserViewer {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
+    this.controls.addEventListener("change", () => { this.sceneDirty = true; });
     this.controls.screenSpacePanning = true;
     // Left-button pan and Shift+left-button pan remain available when a browser
     // intercepts right-button gestures before they reach this page.
@@ -85,8 +90,8 @@ export class MujocoBrowserViewer {
     this.resize();
   }
 
-  async init() {
-    this.mujoco = await loadMujoco();
+  async init(sharedModule = null) {
+    this.mujoco = sharedModule || await loadMujoco();
     this.option = new this.mujoco.MjvOption();
     this.perturb = new this.mujoco.MjvPerturb();
     this.mjCamera = new this.mujoco.MjvCamera();
@@ -107,12 +112,18 @@ export class MujocoBrowserViewer {
     this.scene.add(fill);
   }
 
-  async loadModel(xml, initialState = [], observe = {}, assets = {}, cameraConfig = null) {
+  async loadModel(xml, initialState = [], observe = {}, assets = {}, cameraConfig = null, jointLimits = null) {
     const vfs = new this.mujoco.MjVFS();
     let model;
     try {
       for (const [name, encoded] of Object.entries(assets)) {
-        vfs.addBuffer(name, Uint8Array.from(atob(encoded), (char) => char.charCodeAt(0)));
+        let bytes = encoded;
+        if (!(bytes instanceof Uint8Array)) {
+          const decoded = atob(encoded);
+          bytes = new Uint8Array(decoded.length);
+          for (let i = 0; i < decoded.length; i++) bytes[i] = decoded.charCodeAt(i);
+        }
+        vfs.addBuffer(name, bytes);
       }
       model = this.mujoco.MjModel.from_xml_string(xml, vfs);
     } finally {
@@ -125,13 +136,26 @@ export class MujocoBrowserViewer {
     this.initialState = initialState;
     this.observe = observe;
     this.model = model;
+    this.jointLimits = Array.isArray(jointLimits) && jointLimits.length === model.njnt ? jointLimits
+      : Array.from({ length: model.njnt }, (_, id) => model.jnt_range[2 * id + 1] > model.jnt_range[2 * id]);
+    this.resetKeyframe = -1;
+    if (this.callbacks.useModelKeyframe && model.nkey > 0) {
+      for (const name of ["home", "default", "stand", "standing", "reset", "init"]) {
+        const id = this.mujoco.mj_name2id(model, this.mujoco.mjtObj.mjOBJ_KEY.value, name);
+        if (id >= 0) { this.resetKeyframe = id; break; }
+      }
+      if (this.resetKeyframe < 0) this.resetKeyframe = 0;
+    }
     this.configuredTimestep = Number(model.opt.timestep);
     this.cameraConfig = cameraConfig;
     this.data = new this.mujoco.MjData(this.model);
     this.mjScene = new this.mujoco.MjvScene(this.model, 2 ** 15);
     this.reset();
     this.homeCamera();
-    this.updateScene(true);
+    const complex = model.nflex > 0 || model.nskin > 0 || model.nmeshvert > 100000;
+    this.renderer.shadowMap.enabled = !complex;
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, complex ? 1 : 2));
+    this.sceneDirty = true;
   }
 
   disposeModel() {
@@ -162,6 +186,8 @@ export class MujocoBrowserViewer {
     this.paused = true;
     this.completionNotified = false;
     this.mujoco.mj_resetData(this.model, this.data);
+    if (this.resetKeyframe >= 0) this.mujoco.mj_resetDataKeyframe(this.model, this.data, this.resetKeyframe);
+    this.data.time = 0;
     this.model.opt.timestep = this.configuredTimestep;
     if (controls) {
       controls.forEach((value, index) => {
@@ -247,20 +273,29 @@ export class MujocoBrowserViewer {
     const joints = [];
     const hinge = this.mujoco.mjtJoint.mjJNT_HINGE.value;
     const slide = this.mujoco.mjtJoint.mjJNT_SLIDE.value;
+    const flexBodies = this.model.nflex ? new Set([...this.model.flex_vertbodyid, ...this.model.flex_nodebodyid]) : new Set();
     for (let id = 0; id < this.model.njnt; id += 1) {
       const type = this.model.jnt_type[id];
       if (type !== hinge && type !== slide) continue;
+      const name = this.mujoco.mj_id2name(this.model, this.mujoco.mjtObj.mjOBJ_JOINT.value, id);
+      // Flex vertices/nodes are solver degrees of freedom, not pose sliders.
+      if (flexBodies.has(this.model.jnt_bodyid[id])) continue;
       const value = Number(this.data.qpos[this.model.jnt_qposadr[id]]);
       const fallback = type === hinge ? Math.PI : Math.max(1, Math.abs(value) * 2);
       const rangeMin = Number(this.model.jnt_range[id * 2]);
       const rangeMax = Number(this.model.jnt_range[id * 2 + 1]);
-      const hasRange = Number.isFinite(rangeMin) && Number.isFinite(rangeMax) && rangeMax > rangeMin;
-      const min = hasRange ? rangeMin : -fallback;
-      const max = hasRange ? rangeMax : fallback;
+      const hasRange = this.jointLimits[id] && Number.isFinite(rangeMin) && Number.isFinite(rangeMax) && rangeMax > rangeMin;
+      const cyclic = type === hinge && !hasRange;
+      const min = hasRange ? rangeMin : cyclic ? 0 : Math.min(-fallback, value);
+      const max = hasRange ? rangeMax : cyclic ? 2 * Math.PI : Math.max(fallback, value);
       joints.push({
         id,
-        name: this.mujoco.mj_id2name(this.model, this.mujoco.mjtObj.mjOBJ_JOINT.value, id) || `joint_${id}`,
+        name: name || `joint_${id}`,
         kindLabel: type === hinge ? "转动关节位置 (rad)" : "滑动关节位置 (m)",
+        angular: type === hinge,
+        unit: type === hinge ? "rad" : "m",
+        limited: hasRange,
+        cyclic,
         min,
         max,
         step: Math.max((max - min) / 500, 0.0001),
@@ -290,22 +325,37 @@ export class MujocoBrowserViewer {
 
   setJointPosition(jointId, value) {
     if (!this.model || !this.data || jointId < 0 || jointId >= this.model.njnt) return;
-    this.clearDrag();
-    this.data.qpos[this.model.jnt_qposadr[jointId]] = Number(value);
-    this.data.qvel[this.model.jnt_dofadr[jointId]] = 0;
+    const type = this.model.jnt_type[jointId];
+    if (![this.mujoco.mjtJoint.mjJNT_HINGE.value, this.mujoco.mjtJoint.mjJNT_SLIDE.value].includes(type) || !Number.isFinite(Number(value))) return;
+    const range = this.model.jnt_range;
+    const target = this.jointLimits[jointId] ? Math.max(range[2 * jointId], Math.min(range[2 * jointId + 1], Number(value))) : Number(value);
+    const before = this.data.qpos.slice();
+    if (!projectJointPose(this, jointId, target)) {
+      this.data.qpos.set(before); this.mujoco.mj_forward(this.model, this.data);
+      this.callbacks.onError?.("该关节值无法满足机构的闭环或联动约束，已保留原姿态。请尝试其他数值或调节驱动关节。");
+      return false;
+    }
+    this.prepareJointPose();
     this.mujoco.mj_forward(this.model, this.data);
     this.updateScene();
     this.emitSample(true);
+    return true;
+  }
+
+  prepareJointPose() {
+    this.clearDrag(); this.setPaused(true); this.posePrepared = true;
+    this.data.time = 0; this.data.qvel.fill(0); this.data.qacc_warmstart.fill(0);
+    this.timeAccumulator = 0; this.lastSampleTime = -Infinity; this.nextSampleTime = 0; this.completionNotified = false;
   }
 
   getJointPosition(jointName) {
     if (!this.model || !this.data) return 0;
-    const jointId = this.mujoco.mj_name2id(
+    const jointId = typeof jointName === "number" ? jointName : this.mujoco.mj_name2id(
       this.model,
       this.mujoco.mjtObj.mjOBJ_JOINT.value,
       jointName,
     );
-    if (jointId < 0) return 0;
+    if (jointId < 0 || jointId >= this.model.njnt) return 0;
     return Number(this.data.qpos[this.model.jnt_qposadr[jointId]]);
   }
 
@@ -326,7 +376,7 @@ export class MujocoBrowserViewer {
       [config.slider_joint, sliderX - crankLength - rodLength],
     ]);
 
-    this.clearDrag();
+    this.prepareJointPose();
     for (const [jointName, position] of positions) {
       const jointId = this.mujoco.mj_name2id(
         this.model,
@@ -432,12 +482,14 @@ export class MujocoBrowserViewer {
     }
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height, false);
+    this.sceneDirty = true;
   }
 
   getGeometry(mjGeom) {
-    const key = JSON.stringify([mjGeom.type, Array.from(mjGeom.size), mjGeom.dataid]);
-    if (this.geometryCache.has(key)) return this.geometryCache.get(key);
     const types = this.mujoco.mjtGeom;
+    if (mjGeom.type === types.mjGEOM_FLEX.value || mjGeom.type === types.mjGEOM_SKIN.value) return this.getDeformableGeometry(mjGeom);
+    const key = `${mjGeom.type}:${mjGeom.size[0]},${mjGeom.size[1]},${mjGeom.size[2]}:${mjGeom.dataid}:${mjGeom.objtype}`;
+    if (this.geometryCache.has(key)) return this.geometryCache.get(key);
     let geometry;
     if (mjGeom.type === types.mjGEOM_PLANE.value) {
       geometry = new THREE.PlaneGeometry(
@@ -458,7 +510,10 @@ export class MujocoBrowserViewer {
       geometry = new THREE.SphereGeometry(1, 32, 20);
       geometry.scale(mjGeom.size[0], mjGeom.size[1], mjGeom.size[2]);
     } else if (mjGeom.type === types.mjGEOM_MESH.value) {
-      geometry = this.getMeshGeometry(mjGeom.dataid);
+      const modelGeom = mjGeom.objtype === this.mujoco.mjtObj.mjOBJ_GEOM.value && mjGeom.objid >= 0;
+      const meshId = modelGeom ? this.model.geom_dataid[mjGeom.objid]
+        : mjGeom.objtype === this.mujoco.mjtObj.mjOBJ_SITE.value ? mjGeom.dataid : Math.floor(mjGeom.dataid / 2);
+      geometry = this.getMeshGeometry(meshId);
     } else {
       geometry = new THREE.BufferGeometry();
     }
@@ -468,16 +523,73 @@ export class MujocoBrowserViewer {
 
   getMeshGeometry(meshId) {
     const geometry = new THREE.BufferGeometry();
-    if (meshId < 0 || !this.model.mesh_vertadr) return geometry;
+    if (meshId < 0 || meshId >= this.model.nmesh || !this.model.mesh_vertadr) return geometry;
     const vertexStart = this.model.mesh_vertadr[meshId];
     const vertexCount = this.model.mesh_vertnum[meshId];
     const faceStart = this.model.mesh_faceadr[meshId];
     const faceCount = this.model.mesh_facenum[meshId];
-    const positions = this.model.mesh_vert.slice(vertexStart * 3, (vertexStart + vertexCount) * 3);
-    const faces = this.model.mesh_face.slice(faceStart * 3, (faceStart + faceCount) * 3);
+    const positions = this.model.mesh_vert.subarray(vertexStart * 3, (vertexStart + vertexCount) * 3);
+    const faces = this.model.mesh_face.subarray(faceStart * 3, (faceStart + faceCount) * 3);
     geometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array(positions), 3));
     geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(faces), 1));
     geometry.computeVertexNormals();
+    return geometry;
+  }
+
+  getDeformableGeometry(mjGeom) {
+    const flex = mjGeom.type === this.mujoco.mjtGeom.mjGEOM_FLEX.value;
+    const id = mjGeom.objid, scn = this.mjScene;
+    const key = `${flex ? "flex" : "skin"}:${id}`;
+    let geometry = this.geometryCache.get(key);
+    if (!geometry) { geometry = new THREE.BufferGeometry(); this.geometryCache.set(key, geometry); }
+    const copy = (name, source, start, length) => {
+      let attribute = geometry.getAttribute(name);
+      if (!attribute || attribute.array.length < length) {
+        attribute = new THREE.BufferAttribute(new Float32Array(length), 3).setUsage(THREE.DynamicDrawUsage);
+        geometry.setAttribute(name, attribute);
+      }
+      if (source) attribute.array.set(source.subarray(start, start + length));
+      attribute.needsUpdate = true;
+    };
+    if (flex && this.model.flex_dim[id] === 1) {
+      const edges = scn.flexedgenum[id], edgeStart = scn.flexedgeadr[id], vertexStart = scn.flexvertadr[id];
+      const length = edges * 6 * 6 * 3;
+      copy("position", null, 0, length); copy("normal", null, 0, length);
+      const positions = geometry.getAttribute("position").array, normals = geometry.getAttribute("normal").array;
+      const a = new THREE.Vector3(), b = new THREE.Vector3(), axis = new THREE.Vector3(), u = new THREE.Vector3(), v = new THREE.Vector3();
+      const radius = this.model.flex_radius[id];
+      let offset = 0;
+      for (let edge = 0; edge < edges; edge++) {
+        a.fromArray(scn.flexvert, 3 * (vertexStart + scn.flexedge[2 * (edgeStart + edge)]));
+        b.fromArray(scn.flexvert, 3 * (vertexStart + scn.flexedge[2 * (edgeStart + edge) + 1]));
+        axis.subVectors(b, a).normalize();
+        u.set(Math.abs(axis.z) < .9 ? 0 : 1, 0, Math.abs(axis.z) < .9 ? 1 : 0).cross(axis).normalize();
+        v.crossVectors(axis, u);
+        for (let side = 0; side < 6; side++) {
+          for (const [end, corner] of [[0, side], [1, side], [1, side + 1], [0, side], [1, side + 1], [0, side + 1]]) {
+            const angle = corner * Math.PI / 3, cos = Math.cos(angle), sin = Math.sin(angle), center = end ? b : a;
+            for (let coordinate = 0; coordinate < 3; coordinate++) {
+              const normal = u.getComponent(coordinate) * cos + v.getComponent(coordinate) * sin;
+              normals[offset] = normal; positions[offset++] = center.getComponent(coordinate) + radius * normal;
+            }
+          }
+        }
+      }
+      geometry.setDrawRange(0, length / 3);
+    } else if (flex) {
+      const start = 9 * scn.flexfaceadr[id], length = 9 * scn.flexfaceused[id];
+      copy("position", scn.flexface, start, length); copy("normal", scn.flexnormal, start, length);
+      geometry.setDrawRange(0, length / 3);
+    } else {
+      const start = 3 * scn.skinvertadr[id], length = 3 * scn.skinvertnum[id];
+      copy("position", scn.skinvert, start, length); copy("normal", scn.skinnormal, start, length);
+      if (!geometry.index) {
+        const faceStart = this.model.skin_faceadr[id] * 3, count = this.model.skin_facenum[id] * 3;
+        geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(this.model.skin_face.subarray(faceStart, faceStart + count)), 1));
+      }
+      geometry.setDrawRange(0, this.model.skin_facenum[id] * 3);
+    }
+    geometry.boundingSphere = null;
     return geometry;
   }
 
@@ -497,15 +609,21 @@ export class MujocoBrowserViewer {
     if (forceRebuild) this.clearMeshes();
     for (let i = 0; i < count; i += 1) {
       const mjGeom = geoms.get(i);
+      const geometry = this.getGeometry(mjGeom);
       let mesh = this.meshes[i];
       if (!mesh) {
         const material = new THREE.MeshStandardMaterial({ roughness: 0.62, metalness: 0.04 });
-        mesh = new THREE.Mesh(this.getGeometry(mjGeom), material);
+        mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true;
         mesh.receiveShadow = true;
         this.meshes.push(mesh);
         this.scene.add(mesh);
       }
+      mesh.geometry = geometry;
+      const deformable = mjGeom.type === this.mujoco.mjtGeom.mjGEOM_FLEX.value || mjGeom.type === this.mujoco.mjtGeom.mjGEOM_SKIN.value;
+      mesh.frustumCulled = !deformable;
+      const side = deformable ? THREE.DoubleSide : THREE.FrontSide;
+      if (mesh.material.side !== side) { mesh.material.side = side; mesh.material.needsUpdate = true; }
       mesh.visible = true;
       mesh.material.color.setRGB(mjGeom.rgba[0], mjGeom.rgba[1], mjGeom.rgba[2]);
       mesh.material.opacity = mjGeom.rgba[3];
@@ -518,6 +636,8 @@ export class MujocoBrowserViewer {
         0, 0, 0, 1,
       );
       mesh.matrixWorldNeedsUpdate = true;
+      // Flex and skin vertices are already in world coordinates.
+      if (deformable) mesh.matrix.identity();
       const isModelGeom = mjGeom.objtype === this.mujoco.mjtObj.mjOBJ_GEOM.value && mjGeom.objid >= 0;
       mesh.userData.bodyId = isModelGeom ? this.model.geom_bodyid[mjGeom.objid] : -1;
       mesh.userData.geomId = isModelGeom ? mjGeom.objid : -1;
@@ -525,10 +645,23 @@ export class MujocoBrowserViewer {
     }
     for (let i = count; i < this.meshes.length; i += 1) this.meshes[i].visible = false;
     geoms.delete();
+    this.sceneDirty = true;
+  }
+
+  setSuspended(suspended) {
+    this.suspended = suspended;
+    if (suspended) {
+      if (this.frameId) cancelAnimationFrame(this.frameId);
+      this.frameId = null;
+    } else if (!this.frameId) {
+      this.lastFrame = performance.now(); this.sceneDirty = true; this.animate();
+    }
   }
 
   animate() {
+    if (this.frameId || this.suspended) return;
     const frame = (now) => {
+      if (this.suspended) { this.frameId = null; return; }
       const elapsed = Math.min((now - this.lastFrame) / 1000, 0.05);
       this.lastFrame = now;
       if (this.model && this.data && this.drag) {
@@ -541,6 +674,7 @@ export class MujocoBrowserViewer {
         let stepped = false;
         let stateFresh = false;
         let completed = false;
+        const deadline = performance.now() + 10;
         while (this.timeAccumulator >= timestep) {
           if (this.hasReachedDuration()) {
             this.finishDuration();
@@ -553,7 +687,7 @@ export class MujocoBrowserViewer {
           this.timeAccumulator -= timestep;
           stepped = true;
           stateFresh = false;
-          if (this.data.time + 1e-12 >= this.nextSampleTime) {
+          if (this.callbacks.recordSamples !== false && this.data.time + 1e-12 >= this.nextSampleTime) {
             this.mujoco.mj_forward(this.model, this.data);
             stateFresh = true;
             this.emitSample(false);
@@ -563,13 +697,14 @@ export class MujocoBrowserViewer {
             completed = true;
             break;
           }
+          if (performance.now() >= deadline) { this.timeAccumulator = Math.min(this.timeAccumulator, timestep); break; }
         }
         if (stepped && !stateFresh) this.mujoco.mj_forward(this.model, this.data);
         this.updateScene();
         this.emitSample(completed, now);
       }
-      this.controls.update();
-      this.renderer.render(this.scene, this.camera);
+      if (this.controls.update()) this.sceneDirty = true;
+      if (this.sceneDirty) { this.renderer.render(this.scene, this.camera); this.sceneDirty = false; }
       this.callbacks.onTime?.(this.data?.time || 0);
       this.frameId = requestAnimationFrame(frame);
     };
@@ -582,6 +717,14 @@ export class MujocoBrowserViewer {
     if (time + 1e-9 < this.lastSampleTime) {
       this.setPaused(true);
       this.callbacks.onError?.("仿真不稳定，物理引擎已自动重置；请检查模型或减小步长。");
+      return false;
+    }
+    if (this.callbacks.recordSamples === false) {
+      this.lastSampleTime = time;
+      if (!Number.isFinite(time) || this.data?.qpos.some(value => !Number.isFinite(value)) || this.data?.qvel.some(value => !Number.isFinite(value))) {
+        this.setPaused(true);
+        this.callbacks.onError?.("仿真出现无效数值，已暂停；请检查模型或减小步长。");
+      }
       return false;
     }
     if (!force && time + 1e-12 < this.nextSampleTime) return false;
@@ -815,6 +958,7 @@ export class MujocoBrowserViewer {
   advanceDragPose(elapsed) {
     const timestep = Math.min(this.configuredTimestep, 0.002);
     this.timeAccumulator = Math.min(this.timeAccumulator + elapsed, Math.max(0.05, timestep));
+    const deadline = performance.now() + 10;
     while (this.drag && this.timeAccumulator >= timestep) {
       this.data.ctrl.fill(0);
       this.data.act.fill(0);
@@ -824,6 +968,7 @@ export class MujocoBrowserViewer {
       this.data.time = 0;
       this.timeAccumulator -= timestep;
       this.mujoco.mj_forward(this.model, this.data);
+      if (performance.now() >= deadline) { this.timeAccumulator = 0; break; }
     }
     this.updateScene();
   }

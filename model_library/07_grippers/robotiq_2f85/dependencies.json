@@ -1,0 +1,105 @@
+{
+  "references": [
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "base_mount.stl",
+      "upstream_path": "robotiq_2f85/assets/base_mount.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/base_mount.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/base_mount.stl",
+      "local_path": "assets/base_mount.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "base.stl",
+      "upstream_path": "robotiq_2f85/assets/base.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/base.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/base.stl",
+      "local_path": "assets/base.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "driver.stl",
+      "upstream_path": "robotiq_2f85/assets/driver.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/driver.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/driver.stl",
+      "local_path": "assets/driver.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "coupler.stl",
+      "upstream_path": "robotiq_2f85/assets/coupler.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/coupler.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/coupler.stl",
+      "local_path": "assets/coupler.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "follower.stl",
+      "upstream_path": "robotiq_2f85/assets/follower.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/follower.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/follower.stl",
+      "local_path": "assets/follower.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "pad.stl",
+      "upstream_path": "robotiq_2f85/assets/pad.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/pad.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/pad.stl",
+      "local_path": "assets/pad.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "silicone_pad.stl",
+      "upstream_path": "robotiq_2f85/assets/silicone_pad.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/silicone_pad.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/silicone_pad.stl",
+      "local_path": "assets/silicone_pad.stl"
+    },
+    {
+      "from_xml": "2f85.xml",
+      "element": "mesh",
+      "file": "spring_link.stl",
+      "upstream_path": "robotiq_2f85/assets/spring_link.stl",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/spring_link.stl",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/assets/spring_link.stl",
+      "local_path": "assets/spring_link.stl"
+    },
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "2f85.xml",
+      "upstream_path": "robotiq_2f85/2f85.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/2f85.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robotiq_2f85/2f85.xml",
+      "local_path": "2f85.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

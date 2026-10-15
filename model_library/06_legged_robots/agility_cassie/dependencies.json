@@ -1,0 +1,303 @@
+{
+  "references": [
+    {
+      "from_xml": "cassie.xml",
+      "element": "texture",
+      "file": "cassie-texture.png",
+      "upstream_path": "agility_cassie/assets/cassie-texture.png",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/cassie-texture.png",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/cassie-texture.png",
+      "local_path": "assets/cassie-texture.png"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "pelvis.obj",
+      "upstream_path": "agility_cassie/assets/pelvis.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/pelvis.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/pelvis.obj",
+      "local_path": "assets/pelvis.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-roll.obj",
+      "upstream_path": "agility_cassie/assets/hip-roll.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj",
+      "local_path": "assets/hip-roll.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-yaw.obj",
+      "upstream_path": "agility_cassie/assets/hip-yaw.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj",
+      "local_path": "assets/hip-yaw.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-pitch.obj",
+      "upstream_path": "agility_cassie/assets/hip-pitch.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj",
+      "local_path": "assets/hip-pitch.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "achilles-rod.obj",
+      "upstream_path": "agility_cassie/assets/achilles-rod.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj",
+      "local_path": "assets/achilles-rod.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "knee.obj",
+      "upstream_path": "agility_cassie/assets/knee.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj",
+      "local_path": "assets/knee.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "knee-spring.obj",
+      "upstream_path": "agility_cassie/assets/knee-spring.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj",
+      "local_path": "assets/knee-spring.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "shin.obj",
+      "upstream_path": "agility_cassie/assets/shin.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj",
+      "local_path": "assets/shin.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "tarsus.obj",
+      "upstream_path": "agility_cassie/assets/tarsus.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj",
+      "local_path": "assets/tarsus.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "heel-spring.obj",
+      "upstream_path": "agility_cassie/assets/heel-spring.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj",
+      "local_path": "assets/heel-spring.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "foot-crank.obj",
+      "upstream_path": "agility_cassie/assets/foot-crank.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj",
+      "local_path": "assets/foot-crank.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "plantar-rod.obj",
+      "upstream_path": "agility_cassie/assets/plantar-rod.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj",
+      "local_path": "assets/plantar-rod.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "foot.obj",
+      "upstream_path": "agility_cassie/assets/foot.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj",
+      "local_path": "assets/foot.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-roll.obj",
+      "upstream_path": "agility_cassie/assets/hip-roll.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj",
+      "local_path": "assets/hip-roll.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-yaw.obj",
+      "upstream_path": "agility_cassie/assets/hip-yaw.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj",
+      "local_path": "assets/hip-yaw.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "hip-pitch.obj",
+      "upstream_path": "agility_cassie/assets/hip-pitch.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj",
+      "local_path": "assets/hip-pitch.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "achilles-rod.obj",
+      "upstream_path": "agility_cassie/assets/achilles-rod.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj",
+      "local_path": "assets/achilles-rod.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "knee.obj",
+      "upstream_path": "agility_cassie/assets/knee.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj",
+      "local_path": "assets/knee.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "knee-spring.obj",
+      "upstream_path": "agility_cassie/assets/knee-spring.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj",
+      "local_path": "assets/knee-spring.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "shin.obj",
+      "upstream_path": "agility_cassie/assets/shin.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj",
+      "local_path": "assets/shin.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "tarsus.obj",
+      "upstream_path": "agility_cassie/assets/tarsus.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj",
+      "local_path": "assets/tarsus.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "heel-spring.obj",
+      "upstream_path": "agility_cassie/assets/heel-spring.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj",
+      "local_path": "assets/heel-spring.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "foot-crank.obj",
+      "upstream_path": "agility_cassie/assets/foot-crank.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj",
+      "local_path": "assets/foot-crank.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "plantar-rod.obj",
+      "upstream_path": "agility_cassie/assets/plantar-rod.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj",
+      "local_path": "assets/plantar-rod.obj"
+    },
+    {
+      "from_xml": "cassie.xml",
+      "element": "mesh",
+      "file": "foot.obj",
+      "upstream_path": "agility_cassie/assets/foot.obj",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj",
+      "local_path": "assets/foot.obj"
+    },
+    {
+      "from_xml": "scene.xml",
+      "element": "include",
+      "file": "cassie.xml",
+      "upstream_path": "agility_cassie/cassie.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/cassie.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/cassie.xml",
+      "local_path": "cassie.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

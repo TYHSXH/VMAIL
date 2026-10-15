@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "test:renderer": "node --test tests/renderer.test.mjs",
     "dev": "vite"
   },
   "dependencies": {

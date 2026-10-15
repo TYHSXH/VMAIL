@@ -8,12 +8,13 @@ import re
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .task_io import TaskValidationError, load_task, list_tasks, save_run_result, rename_task
 from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
+from .preview import preview_choices, prepare_preview, pack_preview
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +32,13 @@ class SimulationRequest(BaseModel):
 
 class TitleRequest(BaseModel):
     title: str = Field(min_length=1, max_length=80)
+
+
+class PreviewRequest(BaseModel):
+    xml: str | None = Field(default=None, max_length=16 * 1024 * 1024)
+    filename: str = Field(default="", max_length=255)
+    model_id: str | None = Field(default=None, max_length=128)
+    entry: str | None = Field(default=None, max_length=255)
 
 
 RUNS: dict[str, dict[str, Any]] = {}
@@ -60,6 +68,22 @@ def api_list_tasks() -> dict[str, Any]:
         return {"tasks": list_tasks(TASKS_DIR)}
     except TaskValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@app.get("/api/preview-models")
+def api_preview_models():
+    return {"models": preview_choices()}
+
+
+@app.post("/api/preview-model")
+def api_preview_model(request: PreviewRequest, binary: bool = False):
+    try:
+        payload = prepare_preview(request.xml, request.filename, request.model_id, request.entry, binary_assets=binary)
+        if binary:
+            return Response(pack_preview(payload), media_type="application/octet-stream", headers={"Cache-Control": "no-store"})
+        return payload
+    except (SimulationError, OSError, ValueError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.patch("/api/tasks/{task_id}/title")

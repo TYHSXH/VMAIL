@@ -1,0 +1,219 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/base.stl",
+      "bytes": 1712484,
+      "sha256": "1c7b9f2bd92d705fc4e897c94e905973a3c05f406845e942229433deb7041453",
+      "git_blob_sha": "1b3bb6af165ee13361dec7b8346ba7f8b6c6b22d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/base.stl",
+      "lfs": false,
+      "path": "assets/2f85/base.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/base.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/coupler.stl",
+      "bytes": 89084,
+      "sha256": "d5ee95e62f8415bf5b6e503c831a958f5fc1990bf9b2865329ec38a28932727c",
+      "git_blob_sha": "170b0dad58d839c2d2f7d1d8328df4413a76057d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/coupler.stl",
+      "lfs": false,
+      "path": "assets/2f85/coupler.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/coupler.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/driver.stl",
+      "bytes": 67084,
+      "sha256": "bbd6e868b1778bead60d2516c7ede581d7ad4e431744b1828757d6ea5129c112",
+      "git_blob_sha": "57595939f486f75f55dc2ef49b8f805d56f78f58",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/driver.stl",
+      "lfs": false,
+      "path": "assets/2f85/driver.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/driver.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/follower.stl",
+      "bytes": 110484,
+      "sha256": "633793332c081641ce200df27a40643cc293b29956e3cb5cb29cb811c33ef1c7",
+      "git_blob_sha": "3cda9be71fb61d292b3c98848f0d820a11610422",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/follower.stl",
+      "lfs": false,
+      "path": "assets/2f85/follower.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/follower.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/pad.stl",
+      "bytes": 15084,
+      "sha256": "4af1fa8d9bb285abecbf5dfc88e74cb30f059a7a074c2030dc35e9ee4316019d",
+      "git_blob_sha": "fa0ef62b3dea4dd2e0c55005beb744c8fafc0066",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/pad.stl",
+      "lfs": false,
+      "path": "assets/2f85/pad.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/pad.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/silicone_pad.stl",
+      "bytes": 15084,
+      "sha256": "ca20c0fa61e6d3ce7b04bed25360e048e31dfd88ace04187aa6d9e8f4ca3fd0f",
+      "git_blob_sha": "9a0de4352fd9a9adbd48ee8768d78553b9a407f8",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/silicone_pad.stl",
+      "lfs": false,
+      "path": "assets/2f85/silicone_pad.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/silicone_pad.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/2f85/spring_link.stl",
+      "bytes": 84884,
+      "sha256": "4fb74a8a0d76c0e471cf19fd48bc676fd5b19123798e7a39eb6aa56869354283",
+      "git_blob_sha": "d92de810c4039750286e788d065008090086b06e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/spring_link.stl",
+      "lfs": false,
+      "path": "assets/2f85/spring_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/2f85/spring_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/base/arm_plate.stl",
+      "bytes": 7084,
+      "sha256": "373ce9aba1204fd58f1a5c1d0c48837e3294bb681e9bf7279830b1bb59c5c31c",
+      "git_blob_sha": "d10cac797d9d7d2d54e9098fa6cb8d36d95dd2e2",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/arm_plate.stl",
+      "lfs": false,
+      "path": "assets/base/arm_plate.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/arm_plate.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/base/body.stl",
+      "bytes": 18284,
+      "sha256": "5c14e25d607f2fdb25edb61da8caac79d12acaa9a0f06571eaa22de9b7f34b59",
+      "git_blob_sha": "f0bab861a5ce1e69b205d180bb72e2a394c2e83b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/body.stl",
+      "lfs": false,
+      "path": "assets/base/body.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/body.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/base/bottom_plate.stl",
+      "bytes": 11084,
+      "sha256": "329c784ee2e87155c9d85026586ccc524b089b59608ec3240e2350a73835cef2",
+      "git_blob_sha": "055b9b2ed6d615df5d370768b0d61f85f0c37589",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/bottom_plate.stl",
+      "lfs": false,
+      "path": "assets/base/bottom_plate.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/bottom_plate.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/base/bumper.stl",
+      "bytes": 157084,
+      "sha256": "712604bd2164514772c83275001aecb98adb57698a09692ce8614ddc28a3d163",
+      "git_blob_sha": "d96eabbe7524f7789a224589090066ebf03cab18",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/bumper.stl",
+      "lfs": false,
+      "path": "assets/base/bumper.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/bumper.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/base/top_plate.stl",
+      "bytes": 11084,
+      "sha256": "57d77eba37836197375bb5d0c420f1ea3f128f45a1147f1923b5090833e83177",
+      "git_blob_sha": "3197ed61101a104b9fa97f5dd4426cf9e41da797",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/top_plate.stl",
+      "lfs": false,
+      "path": "assets/base/top_plate.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/base/top_plate.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/base_link.stl",
+      "bytes": 183884,
+      "sha256": "3e38517e653d58f4160cfdcee34c9dea983d8b3ecb8f2c147444f58235335260",
+      "git_blob_sha": "0a35a8ae68fa0b8d24507f2cd2a142a59b8fc91e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/base_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/base_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/base_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/bracelet_no_vision_link.stl",
+      "bytes": 1334384,
+      "sha256": "5b2ec7dafbf6a3c9a2cac717d18132a8a1efd9fcb8f2c40d9c12c8ece7323ec8",
+      "git_blob_sha": "326b1d797fe0725450391d05fbd46f1cdcd8a8ca",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/bracelet_no_vision_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/bracelet_no_vision_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/bracelet_no_vision_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/bracelet_with_vision_link.stl",
+      "bytes": 1164084,
+      "sha256": "8bb05e420a88532b4eee3948a0047fb8e7f341c3e5cc971d54e97e2aaffcf878",
+      "git_blob_sha": "146b69b50b2fd61546c3dc7a4860a037874f084e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/bracelet_with_vision_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/bracelet_with_vision_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/bracelet_with_vision_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/forearm_link.stl",
+      "bytes": 456284,
+      "sha256": "a00d96d2c7ec37e9fe4c5fb6d3fa2b4386dfd48fea5ac25632f4cb83b3505105",
+      "git_blob_sha": "ac791a3548a21d8ae1650b4b14d173605e6f85bb",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/forearm_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/forearm_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/forearm_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/half_arm_1_link.stl",
+      "bytes": 514184,
+      "sha256": "8df461a71780d8e2d09104a507584424279d85173adf14867e359f7e58b3bba7",
+      "git_blob_sha": "1df304c0eb9e8630f3be09b39154c1955ad0771b",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/half_arm_1_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/half_arm_1_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/half_arm_1_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/half_arm_2_link.stl",
+      "bytes": 489184,
+      "sha256": "8a9f38de21648804b3ab7076ec73726031f2ade7c95eb2541d070553e025407b",
+      "git_blob_sha": "78bc722ab2d8ac217b57dc2b85860a9597c771ee",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/half_arm_2_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/half_arm_2_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/half_arm_2_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/shoulder_link.stl",
+      "bytes": 476984,
+      "sha256": "a98e232e5197f09e9cd520e7a450c21bcec74bc49e2a19ce7cf86c5dc25f2e18",
+      "git_blob_sha": "69ecb7695c73980fa9e76563d5a66fca373db44a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/shoulder_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/shoulder_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/shoulder_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/spherical_wrist_1_link.stl",
+      "bytes": 546484,
+      "sha256": "0b97a5e3b2de535344f8e8d4176d77f0cdb3455b235f35430fa0413208856e66",
+      "git_blob_sha": "3bbf04a6de017405f402d8b95c3b22d441389a57",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/spherical_wrist_1_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/spherical_wrist_1_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/spherical_wrist_1_link.stl"
+    },
+    {
+      "upstream_path": "stanford_tidybot/assets/gen3/spherical_wrist_2_link.stl",
+      "bytes": 516984,
+      "sha256": "12271fb7d0ee78fb5642424cf5078be20f0476061e74203db964b674031ce879",
+      "git_blob_sha": "14bbff58f2f200dd1e1b97ba5226da3f768b69e4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/spherical_wrist_2_link.stl",
+      "lfs": false,
+      "path": "assets/gen3/spherical_wrist_2_link.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/stanford_tidybot/assets/gen3/spherical_wrist_2_link.stl"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 6646880,
+    "scene_base.xml": 204620
+  }
+}

@@ -6,6 +6,16 @@ VMAIL is an interactive local MuJoCo workbench for students studying theoretical
 
 The browser runs physics through the official `@mujoco/mujoco` WebAssembly package and renders the 3D scene with Three.js/WebGL. The Python backend loads and validates task packages and runs batch experiments that save complete datasets.
 
+## XML Model Preview
+
+The task Parameters tab includes joint pose sliders and numeric inputs alongside mass, stiffness and other model parameters. Angular joints support degrees/radians; slide joints use meters. Joint edits pause playback and are excluded from experiment recording. The preview has the same collapsible joint panel, with a restore-pose action. Compiled joint limits are respected, while task-specific mechanism controls preserve linked motion.
+
+Click **模型预览** (Model preview), or drop one `.xml` file onto the page. The separate preview provides orbit, pan, zoom, body dragging, reset and physics playback/pause, without task parameters or data collection. Exit with **退出预览** or Esc to return to the paused task with its existing parameters and data. No tasks or result files are created.
+
+Select a model and entry XML from the library dropdown to load includes and binary meshes (including STL), along with referenced textures. Dropping an unchanged library XML also resolves its companions by filename and content; use the dropdown for ambiguous matches. Keep the complete model_library folder. Other self-contained MuJoCo XML files (up to 16 MiB) still work. Uploaded XML is sent only to the local backend for matching and parsing, without disk writes. External files of unknown or modified XML cannot be accessed through a single-file browser import; load these as complete task packages. Referenced resources are limited to 128 MiB. Preview physics uses the model's constraints and forces, without a trained robot controller or data recorder.
+
+Preview reset prefers the model's home keyframe, then another named initial keyframe or the first keyframe; task initial-state settings are preserved. Dynamic rendering includes 1D flex tubes, 2D/3D flex surfaces and skins. Binary resource transfers avoid Base64 overhead. Static views and background task views do not redraw unnecessarily. Complex scenes reduce shadows/pixel density and bound physics work per frame; heavy models can run slower than real time without increasing their configured timestep.
+
 ## First-Time Setup
 
 ### Option 1: One-click setup and launch (recommended)

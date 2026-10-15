@@ -1,0 +1,298 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "aloha/assets/angled_extrusion.stl",
+      "bytes": 448184,
+      "sha256": "10e6e10a1a5c1efcf743884f7f0dad14c6cc3e15790695bfe5b7038c43f8a4c4",
+      "git_blob_sha": "c4d67c0fa8b36c2554b28aa83235277d516bd745",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/angled_extrusion.stl",
+      "lfs": false,
+      "path": "assets/angled_extrusion.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/angled_extrusion.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/corner_bracket.stl",
+      "bytes": 234284,
+      "sha256": "75e40b0b807f51d238638cd44e787413d8590c1fcd28dff7beaa549c126f1fd0",
+      "git_blob_sha": "23806d779bcb59dfa3642914fe348c194a68dc44",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/corner_bracket.stl",
+      "lfs": false,
+      "path": "assets/corner_bracket.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/corner_bracket.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/d405_solid.stl",
+      "bytes": 1242284,
+      "sha256": "8a9a84dd9c9a67687e5ad0b37a7ed334dbfea6b0f995fef28524cc8da5f21ed2",
+      "git_blob_sha": "223b0f17810900c76ea9c6661f154a755d0da212",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/d405_solid.stl",
+      "lfs": false,
+      "path": "assets/d405_solid.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/d405_solid.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_1000.stl",
+      "bytes": 40084,
+      "sha256": "7a8b99ef84ffd7e91382af9aa733f815a7747c207f64e0499c5889a58d58c8de",
+      "git_blob_sha": "7393ead53c4115c080c94a19ab08e302f17308eb",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_1000.stl",
+      "lfs": false,
+      "path": "assets/extrusion_1000.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_1000.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_1220.stl",
+      "bytes": 40084,
+      "sha256": "5b5203c92dfe03b94ed5a679c6cec1f61e48d6d202b5fa03abb032d63313676e",
+      "git_blob_sha": "7af05c52a63b8afa1bb4e8ab35132e81d33fd836",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_1220.stl",
+      "lfs": false,
+      "path": "assets/extrusion_1220.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_1220.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_150.stl",
+      "bytes": 40084,
+      "sha256": "39029c2f95faef3dab1340e4beec221d6866e694e4df0b22795eed6f00b5f893",
+      "git_blob_sha": "68edb4ee26bccabe182e94279b05c459f81bc809",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_150.stl",
+      "lfs": false,
+      "path": "assets/extrusion_150.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_150.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_2040_1000.stl",
+      "bytes": 84084,
+      "sha256": "acaff3be15f686064b6ec8b985758866b2bf51aed0a9b793d8c8242dde43ee0a",
+      "git_blob_sha": "47a6d5c69817c003edc337f4cbc38664622879d3",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_2040_1000.stl",
+      "lfs": false,
+      "path": "assets/extrusion_2040_1000.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_2040_1000.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_2040_880.stl",
+      "bytes": 84084,
+      "sha256": "3bb04a77ca20a14178aa59f8ef1ef50d26695e748639677b24f0be11efc016d8",
+      "git_blob_sha": "d45b459173d91026651e5c184b71b576c4bde535",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_2040_880.stl",
+      "lfs": false,
+      "path": "assets/extrusion_2040_880.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_2040_880.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/extrusion_600.stl",
+      "bytes": 40084,
+      "sha256": "25c87bd6a975f1a561e547e8c490ffe4b59d8a962634548242b1f4a5c6607268",
+      "git_blob_sha": "71f2e0505083d0759a5c8d07101df96102a1265a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_600.stl",
+      "lfs": false,
+      "path": "assets/extrusion_600.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/extrusion_600.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/interbotix_black.png",
+      "bytes": 1994,
+      "sha256": "4cd224156bbaab1ddf1b92b90d46c54835a8b41f61bc258b2f216c2618e062cf",
+      "git_blob_sha": "e7443eb557636b895a5399b0659681f0c1063e49",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/interbotix_black.png",
+      "lfs": false,
+      "path": "assets/interbotix_black.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/interbotix_black.png"
+    },
+    {
+      "upstream_path": "aloha/assets/overhead_mount.stl",
+      "bytes": 1899284,
+      "sha256": "54d031aae8599f7ae69adaa834bd5435928484e5815ce4acce964522a115c2db",
+      "git_blob_sha": "0fec6998a247154f014eb5ba80cabe1a3fceb1b8",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/overhead_mount.stl",
+      "lfs": false,
+      "path": "assets/overhead_mount.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/overhead_mount.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/small_meta_table_diffuse.png",
+      "bytes": 339701,
+      "sha256": "25b1b7e25fb1066686a15538d6f01caba168a888e5be29679533f789e3da745d",
+      "git_blob_sha": "3745c09da6cd2628aaa324415f971bbb4942bdca",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/small_meta_table_diffuse.png",
+      "lfs": false,
+      "path": "assets/small_meta_table_diffuse.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/small_meta_table_diffuse.png"
+    },
+    {
+      "upstream_path": "aloha/assets/tablelegs.obj",
+      "bytes": 10174,
+      "sha256": "2514d9d8cd8974e29d95116d9f5b50c1beba5e746e3955f6ccb5ccb594ac6796",
+      "git_blob_sha": "80cfa0490187dec30cc292af9d411b670078262c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/tablelegs.obj",
+      "lfs": false,
+      "path": "assets/tablelegs.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/tablelegs.obj"
+    },
+    {
+      "upstream_path": "aloha/assets/tabletop.obj",
+      "bytes": 4702,
+      "sha256": "3d88abdc152ebe3dabec44100fcbcbb179c132b1b903c97220225a8ba0232687",
+      "git_blob_sha": "0a92e94122d6d5651c83ba9c05706071ba369bde",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/tabletop.obj",
+      "lfs": false,
+      "path": "assets/tabletop.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/tabletop.obj"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_1_base.stl",
+      "bytes": 99984,
+      "sha256": "d100cafe656671ca8fde98fb6a4cf2d1b746995c51c61c25ad9ea2715635d146",
+      "git_blob_sha": "5a7efda2fe330aeadad63ee4ce29e996ebdf2195",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_1_base.stl",
+      "lfs": false,
+      "path": "assets/vx300s_1_base.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_1_base.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_2_shoulder.stl",
+      "bytes": 63884,
+      "sha256": "139745a74055cb0b23430bb5bc032bf68cf7bea5e4975c8f4c04107ae005f7f0",
+      "git_blob_sha": "dc22aa7e51355a0a8d0439f85be356c6aa9e1c3c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_2_shoulder.stl",
+      "lfs": false,
+      "path": "assets/vx300s_2_shoulder.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_2_shoulder.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_3_upper_arm.stl",
+      "bytes": 102984,
+      "sha256": "900f236320dd3d500870c5fde763b2d47502d51e043a5c377875e70237108729",
+      "git_blob_sha": "111c586e18fb0f44cee7e4593d24c71382a6e9b4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_3_upper_arm.stl",
+      "lfs": false,
+      "path": "assets/vx300s_3_upper_arm.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_3_upper_arm.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_4_upper_forearm.stl",
+      "bytes": 49584,
+      "sha256": "4104fc54bbfb8a9b533029f1e7e3ade3d54d638372b3195daa0c98f57e0295b5",
+      "git_blob_sha": "8170d21ce81cb22b5ecca8fdf974e860ae61302f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_4_upper_forearm.stl",
+      "lfs": false,
+      "path": "assets/vx300s_4_upper_forearm.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_4_upper_forearm.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_5_lower_forearm.stl",
+      "bytes": 99884,
+      "sha256": "66814e27fa728056416e25e02e89eb7d34c51d51c51e7c3df873829037ddc6b8",
+      "git_blob_sha": "39581f83a627bee69717fc8d969f1b6bc20196e2",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_5_lower_forearm.stl",
+      "lfs": false,
+      "path": "assets/vx300s_5_lower_forearm.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_5_lower_forearm.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_6_wrist.stl",
+      "bytes": 70784,
+      "sha256": "90eb145c85627968c3776ae6de23ccff7e112c9dd713c46bc9acdfdaa859a048",
+      "git_blob_sha": "ab8423e99da86cb9e13c197f8137b670f789ea2a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_6_wrist.stl",
+      "lfs": false,
+      "path": "assets/vx300s_6_wrist.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_6_wrist.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper.stl",
+      "bytes": 450084,
+      "sha256": "786c1077bfd226f14219581b11d5f19464ca95b17132e0bb7532503568f5af90",
+      "git_blob_sha": "043db9caeaa59dcb0a6bf570956b0904eb60ba63",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper_bar.stl",
+      "bytes": 723384,
+      "sha256": "b76420544e84102b1cd30745f3c6c2675f9bf08a656808101f32b6466a33f2ee",
+      "git_blob_sha": "08b99ca6c5976f40bf3501914028184042132311",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_bar.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper_bar.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_bar.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper_camera.stl",
+      "bytes": 673384,
+      "sha256": "2c6e9cbe7ea071b375255bc2bb21e0bbb3fcdf021148d30caaccb3a0cbb4943e",
+      "git_blob_sha": "76e4995043253f4c67b8a10b7b8042a0f46d6063",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_camera.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper_camera.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_camera.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper_prop.stl",
+      "bytes": 456684,
+      "sha256": "4536e8975278953841f25391dccef10907859e69c71b9f06f794fef6dfc5959c",
+      "git_blob_sha": "4e59144e96f163f0ae7814152b5a1fca7a6f2e05",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_prop.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper_prop.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_prop.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper_prop_bar.stl",
+      "bytes": 1625384,
+      "sha256": "4405d670c359652c5d373af9d90326c143b57b0860c3046f7d831826dc1d5b4d",
+      "git_blob_sha": "1f8efef2a91c06175a0c35bc03eae5c16d3fa6a4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_prop_bar.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper_prop_bar.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_prop_bar.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_7_gripper_wrist_mount.stl",
+      "bytes": 2314484,
+      "sha256": "50c54e0486d3e349785163dbce209313f7b4b3feadc252ab2e2c9e55a5d0e7ef",
+      "git_blob_sha": "77557ec632a21daf3d77ca317d8755c9994739c1",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_wrist_mount.stl",
+      "lfs": false,
+      "path": "assets/vx300s_7_gripper_wrist_mount.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_7_gripper_wrist_mount.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_8_custom_finger_left.stl",
+      "bytes": 1531384,
+      "sha256": "5853af5b66dd9fc954b6705a883d8569c96536d86775d094f3670befaff67a93",
+      "git_blob_sha": "842f9e16ae60cae48eed82e9a15c852193447400",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_8_custom_finger_left.stl",
+      "lfs": false,
+      "path": "assets/vx300s_8_custom_finger_left.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_8_custom_finger_left.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/vx300s_8_custom_finger_right.stl",
+      "bytes": 1530484,
+      "sha256": "9a1bbd942b887f27e2680b4c99dd3b3d2f73578fa9a87cc0f4dd1da3cf88b2e2",
+      "git_blob_sha": "c3ec9e770312563a654269334ed9f0815ee8867e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_8_custom_finger_right.stl",
+      "lfs": false,
+      "path": "assets/vx300s_8_custom_finger_right.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/vx300s_8_custom_finger_right.stl"
+    },
+    {
+      "upstream_path": "aloha/assets/wormseye_mount.stl",
+      "bytes": 1955684,
+      "sha256": "0c939865a1adfc8a148817d6e12d8a04541a192ab9b6af37c94e3cae8330aa64",
+      "git_blob_sha": "9c1d93e48cb9baed925595920f19fc0a6182fd81",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/wormseye_mount.stl",
+      "lfs": false,
+      "path": "assets/wormseye_mount.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/aloha/assets/wormseye_mount.stl"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 13506325
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "model/flex/asset/cap.obj",
+      "bytes": 12869,
+      "sha256": "c7f3e061066c461052cad4794a2af4546136c14bce0a0f4b7caf2c0a035f942a",
+      "git_blob_sha": "05cce780182ccb22812c1465305cfc5d1a05b59d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj",
+      "lfs": false,
+      "path": "asset/cap.obj",
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/asset/cap.obj"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "gripper.xml": 12869
+  }
+}

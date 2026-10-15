@@ -1,0 +1,148 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "agility_cassie/assets/achilles-rod.obj",
+      "bytes": 200516,
+      "sha256": "8bbf95148db0a3b0df1ca9014f7ef2aa800a2947d44601a56c50632da4df39bb",
+      "git_blob_sha": "bb9e5c8bcd178c12fc3c627ea0e8bc0b2aaacc6c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj",
+      "lfs": false,
+      "path": "assets/achilles-rod.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/achilles-rod.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/cassie-texture.png",
+      "bytes": 4863,
+      "sha256": "2a4f2c50ff2891fb4408d41fbb1c168a88d1f0b5dd30e2afd2fa6e7ba3565e73",
+      "git_blob_sha": "4e3731c9842dd7c5bd802badf4e959bf847b5759",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/cassie-texture.png",
+      "lfs": false,
+      "path": "assets/cassie-texture.png",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/cassie-texture.png"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/foot-crank.obj",
+      "bytes": 64649,
+      "sha256": "21588e4ea034c26e7eb69df2824cb5007dfa6d36cebbed4df9fea8ea56d0a03f",
+      "git_blob_sha": "1f58845f187626218b63da2769881234b9e88485",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj",
+      "lfs": false,
+      "path": "assets/foot-crank.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot-crank.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/foot.obj",
+      "bytes": 119021,
+      "sha256": "a8df9e6ff35de70a94fa9942cb76729b0e6d6ab7c7f2273ceac092f812b8a010",
+      "git_blob_sha": "88dc821034993a4b3806464b54d57e67212ac13d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj",
+      "lfs": false,
+      "path": "assets/foot.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/foot.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/heel-spring.obj",
+      "bytes": 95513,
+      "sha256": "d9d30ee356544d9ace1cb57e84d0971c6a82f6d441607a9f053c7ab649e51e85",
+      "git_blob_sha": "7fe1a973212e2d060e6b5e3a9f1d35f95f59980f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj",
+      "lfs": false,
+      "path": "assets/heel-spring.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/heel-spring.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/hip-pitch.obj",
+      "bytes": 577928,
+      "sha256": "19bec989a3f966843708496e0670b64d44e3b3811ced179444d5e5e3f7d06f21",
+      "git_blob_sha": "b3fd9672bf3c5d2e68eab80d8a994a85ed2af775",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj",
+      "lfs": false,
+      "path": "assets/hip-pitch.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-pitch.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/hip-roll.obj",
+      "bytes": 290364,
+      "sha256": "d1d33d949bdae781cf15406cdec8ebc7318729d2410ce87030ae986cd9c8011c",
+      "git_blob_sha": "bc12f3761ecdb888f9638ac32dc98e7038dae6ba",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj",
+      "lfs": false,
+      "path": "assets/hip-roll.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-roll.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/hip-yaw.obj",
+      "bytes": 142199,
+      "sha256": "cd8f0fb370f8f5cf271e96438a00b1d4aed81bf31b075295ca299e0ad7ae1d2f",
+      "git_blob_sha": "d1f54f21c7a9b74b882f9b756d44b7b1a0b798b9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj",
+      "lfs": false,
+      "path": "assets/hip-yaw.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/hip-yaw.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/knee-spring.obj",
+      "bytes": 168934,
+      "sha256": "918d42bfc6991982a9de9c41748bb1cdb4c153a4f354b8f4a2bc527f72e6af55",
+      "git_blob_sha": "c5704d9a2afb0e5ea150f66d8f5b6c31af52c4f3",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj",
+      "lfs": false,
+      "path": "assets/knee-spring.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee-spring.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/knee.obj",
+      "bytes": 133899,
+      "sha256": "286d950322265b0e79e70d2e59df735d45272990dfd91138b3672f890cdda707",
+      "git_blob_sha": "98830d3f7300006cefc97b8ed5ad653453a440fa",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj",
+      "lfs": false,
+      "path": "assets/knee.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/knee.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/pelvis.obj",
+      "bytes": 1687073,
+      "sha256": "ddb1dac51a06931562482f13d87c8906f4c682175b2f435350e5c40cf8fab8ab",
+      "git_blob_sha": "f616aac0eb9ac0c0dddd1315063aa3cf985cba48",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/pelvis.obj",
+      "lfs": false,
+      "path": "assets/pelvis.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/pelvis.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/plantar-rod.obj",
+      "bytes": 151242,
+      "sha256": "c2d5c15c1c1232ab15554fcdfd8e0d8f4682f83f6f42789db4748fab1b3c70af",
+      "git_blob_sha": "c6e49adeec824ee5aafd7b5681903e8af0ac00ba",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj",
+      "lfs": false,
+      "path": "assets/plantar-rod.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/plantar-rod.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/shin.obj",
+      "bytes": 714864,
+      "sha256": "b896cab8f5606b16ceec2ae949a5aafb4514e3eba545981241746ccf430de27f",
+      "git_blob_sha": "5a875e909cae9b7ab0d1eeec9537626f372301c1",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj",
+      "lfs": false,
+      "path": "assets/shin.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/shin.obj"
+    },
+    {
+      "upstream_path": "agility_cassie/assets/tarsus.obj",
+      "bytes": 800668,
+      "sha256": "97fdde6c725cdee595dd6dc4bc224b27b62a190c8ba5def2fdecb37f113d6cf9",
+      "git_blob_sha": "fcfebf9df9c77558f3f5ca8ffae029c942e4edcf",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj",
+      "lfs": false,
+      "path": "assets/tarsus.obj",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/agility_cassie/assets/tarsus.obj"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 5151733
+  }
+}

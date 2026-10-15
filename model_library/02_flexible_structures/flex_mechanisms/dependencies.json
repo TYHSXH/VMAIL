@@ -1,0 +1,39 @@
+{
+  "references": [
+    {
+      "from_xml": "cantilever.xml",
+      "element": "include",
+      "file": "scene.xml",
+      "upstream_path": "model/flex/mechanisms/scene.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "local_path": "scene.xml"
+    },
+    {
+      "from_xml": "dipper.xml",
+      "element": "include",
+      "file": "scene.xml",
+      "upstream_path": "model/flex/mechanisms/scene.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "local_path": "scene.xml"
+    },
+    {
+      "from_xml": "slidercrank.xml",
+      "element": "include",
+      "file": "scene.xml",
+      "upstream_path": "model/flex/mechanisms/scene.xml",
+      "found_in_upstream_tree": true,
+      "downloaded": true,
+      "url": "https://github.com/google-deepmind/mujoco/blob/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco/91cc9e753d7e0747dff477c221b7566768bcbb4b/model/flex/mechanisms/scene.xml",
+      "local_path": "scene.xml"
+    }
+  ],
+  "required_plugins": [],
+  "missing_resources": []
+}

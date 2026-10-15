@@ -1,0 +1,318 @@
+{
+  "updated_on": "2026-10-15",
+  "resources": [
+    {
+      "upstream_path": "robot_soccer_kit/assets/18650.stl",
+      "bytes": 14484,
+      "sha256": "19f6a9eed65aa35324a2f98f644842f7e3e4fac3d171f9ff53961276e683ccf5",
+      "git_blob_sha": "8a309bdd9df8a51c3283573cff507efe91c06016",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/18650.stl",
+      "lfs": false,
+      "path": "assets/18650.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/18650.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/bearing.scad",
+      "bytes": 165,
+      "sha256": "390a1f3e9f353059964abec56c008deb8c41fce0fe7f9413adef626d44a37f45",
+      "git_blob_sha": "e1968ea920ef23512f3189357e567b70d7cc9357",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/bearing.scad",
+      "lfs": false,
+      "path": "assets/bearing.scad",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/bearing.scad"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/bearing.stl",
+      "bytes": 28884,
+      "sha256": "d1c0a73ee3a6eef929084a9476cb90698c6ae3a48d0643c7f3fa28ebabea22e3",
+      "git_blob_sha": "f1e6ce490f46e05afb695cb2e78bc02aaf333e30",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/bearing.stl",
+      "lfs": false,
+      "path": "assets/bearing.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/bearing.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/blue1_blue.stl",
+      "bytes": 3684,
+      "sha256": "05d158e6d949d4496a4b7333c7948a75c3332e619efd13d120d167ede3ff5d2c",
+      "git_blob_sha": "32cd2ebb4341a6bdf1d0f80597d2ed308a0c21af",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/blue1_blue.stl",
+      "lfs": false,
+      "path": "assets/blue1_blue.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/blue1_blue.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/blue1_white.stl",
+      "bytes": 1284,
+      "sha256": "07f03eaca509c76863f510be1ecce06e24f46e950272b6840bb050a9e61f279f",
+      "git_blob_sha": "9a25a103eb266213564f731dedfccc123ffc9777",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/blue1_white.stl",
+      "lfs": false,
+      "path": "assets/blue1_white.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/blue1_white.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/board.stl",
+      "bytes": 340484,
+      "sha256": "0a2d717341b76d1b75f37099a0410d54d61cb75cd418744ff461d87a8c5cb2cb",
+      "git_blob_sha": "2bbc37a05f9de0f029014a4429d52c066ee8fa2e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/board.stl",
+      "lfs": false,
+      "path": "assets/board.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/board.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/coil.stl",
+      "bytes": 28884,
+      "sha256": "719f466e03841cc1a4ad2c58e6ffd033b13f594d36da996cd4199bef34557670",
+      "git_blob_sha": "288e499b4b1c7091473f416c0ebf3c0ba29a161d",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coil.stl",
+      "lfs": false,
+      "path": "assets/coil.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coil.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/core.stl",
+      "bytes": 103284,
+      "sha256": "b553ea3d4833c5fa4126e8b296bd3ee474059f698575332d8313bd7630a6c5d1",
+      "git_blob_sha": "9b50966fa461551deb1519620ce059fc0261dadb",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/core.stl",
+      "lfs": false,
+      "path": "assets/core.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/core.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/coupler.stl",
+      "bytes": 17484,
+      "sha256": "742dfc3e95a2bab147e3a5d6a9e77d62e3858abe3f15552a93a6843e33004c67",
+      "git_blob_sha": "3938bd516d1046e467c3589538267256c77dc8ae",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coupler.stl",
+      "lfs": false,
+      "path": "assets/coupler.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coupler.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/coupler__2.stl",
+      "bytes": 128984,
+      "sha256": "cda408176599acf4ea2ad4b6c1dccb8f9d9a25fe5ff5fe423dee8ffb90bb8d8e",
+      "git_blob_sha": "32a3c93d352b3a058c2a7e3d19281208c99bc492",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coupler__2.stl",
+      "lfs": false,
+      "path": "assets/coupler__2.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/coupler__2.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/frame.stl",
+      "bytes": 323384,
+      "sha256": "9e4bf6074cce98a20435bdabad3892fed91a9567007890565a6ef1fc6c8a25d4",
+      "git_blob_sha": "7f93a6a16fc2f0c4d0e476d11b39455bbc0f7792",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/frame.stl",
+      "lfs": false,
+      "path": "assets/frame.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/frame.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/frame__2.stl",
+      "bytes": 74484,
+      "sha256": "0b62daf299153e57b28f7335071109e5cc90537e3462e4887ac3caf996af7a7a",
+      "git_blob_sha": "eaa269e819a7efce2f66b5e676b4c510be585d25",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/frame__2.stl",
+      "lfs": false,
+      "path": "assets/frame__2.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/frame__2.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/hex_nut_style_1_grade_a___b_m3x0_5__59e06dee1671df03e56ade283ea1f5ec.stl",
+      "bytes": 58284,
+      "sha256": "c53af100ecdfdd881a561ad420f7dabdd0eaf342b6949ffcad22bdd97182f035",
+      "git_blob_sha": "cbfea7c76a0fc2d483694571593c4c8dd5cfb4ba",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_nut_style_1_grade_a___b_m3x0_5__59e06dee1671df03e56ade283ea1f5ec.stl",
+      "lfs": false,
+      "path": "assets/hex_nut_style_1_grade_a___b_m3x0_5__59e06dee1671df03e56ade283ea1f5ec.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_nut_style_1_grade_a___b_m3x0_5__59e06dee1671df03e56ade283ea1f5ec.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_25_x_18__e477b94a6da3e3efbf1606183756b785.stl",
+      "bytes": 325284,
+      "sha256": "edc2e3450bdc0973b9d706255ff33dd9e543efe2c5b83f9dfdab7c6646734a6c",
+      "git_blob_sha": "05ed389e1051738911a40eda50cf414b5ee04a39",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_25_x_18__e477b94a6da3e3efbf1606183756b785.stl",
+      "lfs": false,
+      "path": "assets/hex_socket_head_cap_screw_m3x0_50_x_25_x_18__e477b94a6da3e3efbf1606183756b785.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_25_x_18__e477b94a6da3e3efbf1606183756b785.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_6__acf8a907a0472c0ae6086bf20401fa07.stl",
+      "bytes": 318084,
+      "sha256": "ac4cb2f96d4268ee203c21a1e17c37c353fb2d26211c5d469840f2d081ef72b1",
+      "git_blob_sha": "8c3adf32779ee1096a7195b4548084ba3af82f8f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_6__acf8a907a0472c0ae6086bf20401fa07.stl",
+      "lfs": false,
+      "path": "assets/hex_socket_head_cap_screw_m3x0_50_x_6__acf8a907a0472c0ae6086bf20401fa07.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_6__acf8a907a0472c0ae6086bf20401fa07.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_8__cca8b3192bff7455e4b9cc3364d29e0e.stl",
+      "bytes": 318084,
+      "sha256": "dbe34969b3e010103908d5e8d81bfd87512a58a274e2386818cf69e0a9a779e5",
+      "git_blob_sha": "cbd38e7abd12f1d372896dc99860663b970ad4e4",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_8__cca8b3192bff7455e4b9cc3364d29e0e.stl",
+      "lfs": false,
+      "path": "assets/hex_socket_head_cap_screw_m3x0_50_x_8__cca8b3192bff7455e4b9cc3364d29e0e.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/hex_socket_head_cap_screw_m3x0_50_x_8__cca8b3192bff7455e4b9cc3364d29e0e.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/kicker_tip_1.stl",
+      "bytes": 33484,
+      "sha256": "22324d86df15a622591ae836022cfe62921715db573d9595ccf8efde7a98f30b",
+      "git_blob_sha": "a5d642b89f2ca7781085257aab19f718ecf8814f",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/kicker_tip_1.stl",
+      "lfs": false,
+      "path": "assets/kicker_tip_1.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/kicker_tip_1.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/kicker_tip_2.stl",
+      "bytes": 40684,
+      "sha256": "cb71eb73f404add0eb110454defc7465afd7da610f04ee55a866b45a64548abc",
+      "git_blob_sha": "45871482c7ae4dc13663ac15cb7debf5dcb46ecc",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/kicker_tip_2.stl",
+      "lfs": false,
+      "path": "assets/kicker_tip_2.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/kicker_tip_2.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/m3_spacer__length_0_006_meter.stl",
+      "bytes": 30084,
+      "sha256": "604d6f69ecb5b0d3ccbcca4c9c6e31cd3c6afde1cb8228c52e49cf45f6238d76",
+      "git_blob_sha": "20315f0fa6f800b68732c741ded589dd5189bd6c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_006_meter.stl",
+      "lfs": false,
+      "path": "assets/m3_spacer__length_0_006_meter.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_006_meter.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/m3_spacer__length_0_02_meter.stl",
+      "bytes": 30084,
+      "sha256": "610aef3c9d591e69a98109f5c6ab43d06eeaceb82593565d84d937e246c35b63",
+      "git_blob_sha": "c88930402506e0ea65fb6873a8149bfa62c9385c",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_02_meter.stl",
+      "lfs": false,
+      "path": "assets/m3_spacer__length_0_02_meter.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_02_meter.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/m3_spacer__length_0_03_meter.stl",
+      "bytes": 30084,
+      "sha256": "eb47ae76c492014521c3bab8a9fa3e42bf624d3b78a97e8f4f02f17c70564bc6",
+      "git_blob_sha": "c7b0ad49b773a2851cb7172e9643aa7b831ea906",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_03_meter.stl",
+      "lfs": false,
+      "path": "assets/m3_spacer__length_0_03_meter.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/m3_spacer__length_0_03_meter.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/marker.stl",
+      "bytes": 95884,
+      "sha256": "e4a3390ca0d3c1a35e1a0422eb0f9d3f4ba8f6b1d4a3df45180ef497d18c8099",
+      "git_blob_sha": "98833237d15b075d96c61499f61f830d29991284",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/marker.stl",
+      "lfs": false,
+      "path": "assets/marker.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/marker.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/motorbox_bottom.stl",
+      "bytes": 53284,
+      "sha256": "e3cbfc94ae9d679aee96e2ee43f666f2f3db8ec8206901acefadca41b184d277",
+      "git_blob_sha": "cf237716a4ce3c418ee016564c22a3dcde32af4a",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/motorbox_bottom.stl",
+      "lfs": false,
+      "path": "assets/motorbox_bottom.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/motorbox_bottom.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/motorbox_top.stl",
+      "bytes": 80684,
+      "sha256": "482027897d6d062afba9835cfcd5415b3990811da7c68e7bb520eb85906e3b04",
+      "git_blob_sha": "2106a7277db85bea2d28dfa2dbd8b1af20b17fba",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/motorbox_top.stl",
+      "lfs": false,
+      "path": "assets/motorbox_top.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/motorbox_top.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/n20.stl",
+      "bytes": 15584,
+      "sha256": "df7b61163a71a3ab48e0bab482365c8ae4ff5d722ec61b918f3476000e50c067",
+      "git_blob_sha": "c9402faa90cbcf83f4873b6c9f8f7c8c1833d645",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/n20.stl",
+      "lfs": false,
+      "path": "assets/n20.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/n20.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/oring.stl",
+      "bytes": 518484,
+      "sha256": "9ffd9f4d63d1dafb6781041acc87ba222b7d0853011193fc2099a8a0f34697ee",
+      "git_blob_sha": "c5dfe22ea6e74121119926b6d7b44ad6a4aff525",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/oring.stl",
+      "lfs": false,
+      "path": "assets/oring.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/oring.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/pin.stl",
+      "bytes": 273684,
+      "sha256": "aabc2da250fe03afd4a1c5074906b9377cb16ba1e3fe762d21addd66d62235b2",
+      "git_blob_sha": "7c13be66341099fa7cba33f9d3b89db65b70f5d9",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/pin.stl",
+      "lfs": false,
+      "path": "assets/pin.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/pin.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/plunger.stl",
+      "bytes": 717184,
+      "sha256": "215963ecee63934a425453a417f1c733846c0585bd83167955d10014ad6c82f8",
+      "git_blob_sha": "4e89cd132a4d230ae05a7a3fa527070960b82675",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/plunger.stl",
+      "lfs": false,
+      "path": "assets/plunger.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/plunger.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/square_thin_nut_grade_b_m3x0_5__1f32078b7141c356c1ef5a853a7893b2.stl",
+      "bytes": 29684,
+      "sha256": "4c05fe5678bc6aeb65705cd4a883dc7540e9322474dbabc8dcf35bb021a686b1",
+      "git_blob_sha": "8fe105dbb1326282aff6c486bbfbe0e27651427e",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/square_thin_nut_grade_b_m3x0_5__1f32078b7141c356c1ef5a853a7893b2.stl",
+      "lfs": false,
+      "path": "assets/square_thin_nut_grade_b_m3x0_5__1f32078b7141c356c1ef5a853a7893b2.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/square_thin_nut_grade_b_m3x0_5__1f32078b7141c356c1ef5a853a7893b2.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/wheel1.stl",
+      "bytes": 1048584,
+      "sha256": "3f3ca48c4d2a987983bad0dbddce94b25055d0a91c348d094e524d4b31c8b613",
+      "git_blob_sha": "1e7f329e0880bb8a33e53a1691a00b74ac4904fb",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/wheel1.stl",
+      "lfs": false,
+      "path": "assets/wheel1.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/wheel1.stl"
+    },
+    {
+      "upstream_path": "robot_soccer_kit/assets/wheel2.stl",
+      "bytes": 1048584,
+      "sha256": "8fd16e3739f6ef69286a7c6d44482ef368a6685e3a0e8674605b002936f0a4f6",
+      "git_blob_sha": "7e7214123d4f0079d4c70b2649fc275c8352f642",
+      "raw_url": "https://raw.githubusercontent.com/google-deepmind/mujoco_menagerie/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/wheel2.stl",
+      "lfs": false,
+      "path": "assets/wheel2.stl",
+      "url": "https://github.com/google-deepmind/mujoco_menagerie/blob/62ab00f2bc44f6f20c1c9b7a13f3fb1dd41a4e35/robot_soccer_kit/assets/wheel2.stl"
+    }
+  ],
+  "entrypoint_resource_bytes": {
+    "scene.xml": 6027836
+  }
+}

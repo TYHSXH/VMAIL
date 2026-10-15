@@ -1,0 +1,241 @@
+{
+  "limit_bytes": 134217728,
+  "accounting": "Expanded XML file attributes, counted per occurrence as in backend/simulator.py; XML text and unused files excluded.",
+  "models": [
+    {
+      "id": "fridge_door",
+      "resource_bytes_by_xml": {
+        "fridge_door.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "newton_cradle",
+      "resource_bytes_by_xml": {
+        "newton_cradle.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "slider_crank",
+      "resource_bytes_by_xml": {
+        "slider_crank.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "flex_mechanisms",
+      "resource_bytes_by_xml": {
+        "cantilever.xml": 0,
+        "dipper.xml": 0,
+        "scene.xml": 0,
+        "slidercrank.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "flex_pulley",
+      "resource_bytes_by_xml": {
+        "pulley.xml": 0,
+        "scene.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "soft_gripper",
+      "resource_bytes_by_xml": {
+        "gripper.xml": 25738,
+        "scene.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "tendon_arm",
+      "resource_bytes_by_xml": {
+        "arm26.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "aloha",
+      "resource_bytes_by_xml": {
+        "aloha.xml": 8285808,
+        "filtered_cartesian_actuators.xml": 0,
+        "joint_position_actuators.xml": 0,
+        "keyframe_ctrl.xml": 0,
+        "keyframe_no_act.xml": 0,
+        "scene.xml": 13506325
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "kuka_iiwa_14",
+      "resource_bytes_by_xml": {
+        "iiwa14.xml": 5006619,
+        "scene.xml": 5006619
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "ufactory_xarm7",
+      "resource_bytes_by_xml": {
+        "hand.xml": 2473938,
+        "scene.xml": 4542494,
+        "xarm7.xml": 4542494,
+        "xarm7_nohand.xml": 2068556
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "unitree_z1",
+      "resource_bytes_by_xml": {
+        "scene.xml": 8897388,
+        "z1.xml": 8897388,
+        "z1_gripper.xml": 12255880
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "universal_robots_ur5e",
+      "resource_bytes_by_xml": {
+        "scene.xml": 30983304,
+        "ur5e.xml": 30983304
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "car",
+      "resource_bytes_by_xml": {
+        "car.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "robot_soccer_kit",
+      "resource_bytes_by_xml": {
+        "robot_soccer_kit.xml": 6027836,
+        "scene.xml": 6027836
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "stanford_tidybot",
+      "resource_bytes_by_xml": {
+        "base.xml": 204620,
+        "scene.xml": 6646880,
+        "scene_base.xml": 204620,
+        "tidybot.xml": 6646880
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "bitcraze_crazyflie_2",
+      "resource_bytes_by_xml": {
+        "cf2.xml": 1089464,
+        "scene.xml": 1089464
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "skydio_x2",
+      "resource_bytes_by_xml": {
+        "scene.xml": 839367,
+        "x2.xml": 839367
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "agility_cassie",
+      "resource_bytes_by_xml": {
+        "cassie.xml": 8611530,
+        "scene.xml": 8611530
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "anybotics_anymal_c",
+      "resource_bytes_by_xml": {
+        "anymal_c.xml": 16004008,
+        "scene.xml": 16004008
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "humanoid",
+      "resource_bytes_by_xml": {
+        "humanoid.xml": 0
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "unitree_g1",
+      "resource_bytes_by_xml": {
+        "g1.xml": 19666440,
+        "g1_with_hands.xml": 31471016,
+        "scene.xml": 19666440,
+        "scene_with_hands.xml": 31471016
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "unitree_go2",
+      "resource_bytes_by_xml": {
+        "go2.xml": 28409145,
+        "scene.xml": 28409145
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "unitree_h1",
+      "resource_bytes_by_xml": {
+        "h1.xml": 14322164,
+        "scene.xml": 14322164
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "robotiq_2f85",
+      "resource_bytes_by_xml": {
+        "2f85.xml": 3185972,
+        "scene.xml": 3185972
+      },
+      "over_limit": {},
+      "errors": {}
+    },
+    {
+      "id": "shadow_hand",
+      "resource_bytes_by_xml": {
+        "keyframes.xml": 0,
+        "left_hand.xml": 3382030,
+        "right_hand.xml": 3382030,
+        "scene_left.xml": 3382030,
+        "scene_right.xml": 3382030
+      },
+      "over_limit": {},
+      "errors": {}
+    }
+  ]
+}

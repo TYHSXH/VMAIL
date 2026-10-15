@@ -30,6 +30,7 @@
             <h1 id="taskTitle">选择一个学习任务</h1>
           </div>
           <div class="topbar-actions">
+            <button id="openPreview" class="quiet-button" type="button">模型预览</button>
             <span id="simTime" class="sim-time">t = 0.000 s</span>
             <button id="toggleInspector" class="quiet-button" type="button">参数与数据</button>
           </div>
@@ -76,6 +77,7 @@
         </header>
 
         <section class="tab-panel" data-panel="parameters">
+          <div id="jointControls" class="joint-panel"></div>
           <form id="parameterForm" class="parameter-form"></form>
           <div class="simulation-settings">
             <label title="同时控制三维实时仿真与数据页批量计算的持续时间">仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
@@ -86,8 +88,7 @@
         </section>
 
         <section class="tab-panel" data-panel="controls">
-          <p class="panel-intro">关节用于调整模型姿态；执行器控制量可在仿真运行时连续改变。</p>
-          <div id="jointControls" class="runtime-controls"></div>
+          <p class="panel-intro">执行器控制量可在仿真运行时连续改变。调整关节姿态请打开“参数”。</p>
           <div id="actuatorControls" class="runtime-controls"></div>
         </section>
 
@@ -117,6 +118,33 @@
 
       <div id="message" class="toast hidden" role="status"></div>
     </div>
+    <section id="modelPreview" class="model-preview hidden" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+      <header class="preview-header">
+        <h1 id="previewTitle">模型预览</h1>
+        <div class="preview-actions">
+          <select id="previewLibrary" class="quiet-button" aria-label="从模型库选择"><option value="">从模型库选择…</option></select>
+          <input id="previewFile" class="hidden" type="file" accept=".xml" />
+          <button id="choosePreviewFile" class="quiet-button" type="button">选择 XML</button>
+          <button id="closePreview" class="primary-button" type="button">退出预览</button>
+        </div>
+      </header>
+      <div class="preview-stage">
+        <div id="previewViewport" class="mujoco-viewport"></div>
+        <p id="previewStatus" class="preview-status" role="status">拖入一个 XML，或从模型库选择。库内 XML 会自动加载配套资源；点击“运行仿真”观察运动，不记录数据。</p>
+        <div class="viewer-toolbar" role="toolbar" aria-label="预览控制">
+          <button data-preview-action="play" type="button" disabled>运行仿真</button>
+          <button data-preview-action="reset" type="button" disabled>重置模型</button>
+          <button data-preview-action="camera" type="button" disabled>旋转</button>
+          <button data-preview-action="pan" type="button" disabled>平移</button>
+          <button data-preview-action="drag" type="button" disabled>拖动物体</button>
+          <button data-preview-action="contacts" type="button" disabled>接触点</button>
+          <button data-preview-action="home" type="button" disabled>复位视角</button>
+          <button id="togglePreviewJoints" data-preview-action="joints" type="button" aria-controls="previewJoints" aria-expanded="true" disabled>关节</button>
+        </div>
+        <aside id="previewJoints" class="preview-joints hidden" aria-label="预览关节调整"><div id="previewJointControls" class="joint-panel"></div></aside>
+        <div class="viewer-help"><span>左键旋转 · Shift＋左键平移 · 滚轮缩放 · 切换“拖动物体”调整姿态 · Esc 退出</span></div>
+      </div>
+    </section>
     <script type="module" src="/main.js"></script>
   </body>
 </html>
