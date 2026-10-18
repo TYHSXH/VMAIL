@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL 理论力学实验台</title>
-    <script type="module" crossorigin src="/static/assets/index-CJv7o1yW.js"></script>
-    <link rel="stylesheet" crossorigin href="/static/assets/index-CKH3WlS-.css">
+    <script type="module" crossorigin src="/static/assets/main-B4LCA42P.js"></script>
+    <link rel="modulepreload" crossorigin href="/static/assets/rolldown-runtime-CbXtAM7H.js">
+    <link rel="modulepreload" crossorigin href="/static/assets/task-notes-BM-gozpR.js">
+    <link rel="stylesheet" crossorigin href="/static/assets/task-notes-BKtxnqsP.css">
   </head>
   <body>
     <div id="app">
@@ -17,50 +19,63 @@
             <strong>VMAIL</strong>
             <span>理论力学实验台</span>
           </div>
-          <button id="collapseTasks" class="icon-button" type="button" title="收起任务栏" aria-label="收起任务"></button>
+          <button id="collapseTasks" class="icon-button" data-icon="panel-left" type="button" title="收起任务栏" aria-label="收起任务"></button>
         </header>
-        <button id="refreshTasks" class="quiet-button wide" type="button">刷新学习任务</button>
+        <div class="task-list-heading"><h2>学习任务 <span id="taskCount">0</span></h2><button id="refreshTasks" class="icon-button" data-icon="refresh" type="button" title="刷新任务" aria-label="刷新任务"></button></div>
         <nav id="taskList" class="task-list" aria-label="学习任务"></nav>
+        <footer class="sidebar-footer">
+          <div class="course-credit"><span>BUAA 5系</span><strong>理论力学课程组</strong></div>
+          <span>© 2026 VMAIL</span>
+          <span id="engineBadge" class="engine-badge loading" role="status">MuJoCo 3.13 · 加载中</span>
+        </footer>
         <div id="taskResizeHandle" class="resize-handle resize-handle-right" role="separator" aria-label="调整任务栏宽度" aria-orientation="vertical" tabindex="0"></div>
       </aside>
 
       <main class="stage-shell">
         <header class="topbar">
-          <button id="expandTasks" class="icon-button hidden" type="button" title="展开任务栏" aria-label="展开任务栏"></button>
+          <button id="expandTasks" class="icon-button hidden" data-icon="panel-left" type="button" title="展开任务栏" aria-label="展开任务栏"></button>
           <div class="task-heading">
-            <span id="engineBadge" class="engine-badge loading">正在加载 MuJoCo WASM</span>
             <h1 id="taskTitle">选择一个学习任务</h1>
           </div>
           <div class="topbar-actions">
-            <button id="openPreview" class="quiet-button" type="button">模型预览</button>
-            <span id="simTime" class="sim-time">t = 0.000 s</span>
-            <button id="toggleInspector" class="quiet-button" type="button">参数与数据</button>
+            <a class="quiet-button help-link" href="/help" target="_blank" rel="noopener noreferrer">帮助</a>
+            <button id="openPreview" class="quiet-button" data-icon="cube" type="button">模型预览</button>
+            <button id="toggleInspector" class="quiet-button" data-icon="sliders" type="button">参数与数据</button>
           </div>
         </header>
 
         <section class="viewer-stage" aria-label="MuJoCo 三维仿真">
           <div id="mujocoViewport" class="mujoco-viewport"></div>
           <div id="viewerLoading" class="viewer-loading">
-            <strong>正在启动浏览器端 MuJoCo</strong>
-            <span>首次加载需要初始化 WebAssembly。</span>
+            <strong>正在准备实验台</strong>
+            <span>首次加载需要一点时间</span>
           </div>
           <div class="viewer-toolbar" role="toolbar" aria-label="仿真控制">
-            <button id="resetButton" type="button" disabled>重置</button>
-            <button id="stepButton" type="button" disabled>单步</button>
-            <span class="toolbar-divider"></span>
             <div class="mode-switch" aria-label="鼠标模式">
-              <button id="cameraMode" class="active" type="button">旋转</button>
-              <button id="panMode" type="button">平移</button>
-              <button id="dragMode" type="button">拖动物体</button>
+              <button id="cameraMode" class="active" data-icon="orbit" type="button">旋转</button>
+              <button id="panMode" data-icon="move" type="button">平移</button>
+              <button id="dragMode" data-icon="hand" type="button">拖动</button>
             </div>
+            <span class="toolbar-divider"></span>
             <button id="contactButton" type="button" disabled>接触点</button>
-            <button id="homeCameraButton" type="button" disabled>复位视角</button>
+            <button id="shadowButton" class="active" type="button" aria-pressed="true" disabled>阴影</button>
+            <button id="lightingButton" class="active" type="button" aria-pressed="true" disabled>光照</button>
+            <span class="toolbar-divider"></span>
+            <button data-overlay="loads" class="active" type="button" aria-pressed="true" title="仅显示施加的外载荷；拖拽箭头从作用点连接到鼠标目标，不代表合力" disabled>外载荷</button>
+            <button data-overlay="inertia" type="button" aria-pressed="false" title="显示与主惯量等效的惯量盒" disabled>惯量</button>
+            <button data-overlay="com" type="button" aria-pressed="false" title="黄色标记各刚体质心" disabled>质心</button>
+            <button data-overlay="joints" type="button" aria-pressed="false" title="显示刚体转动／滑动关节的正轴方向" disabled>关节轴</button>
+            <button id="homeCameraButton" data-icon="frame" type="button" disabled>复位视角</button>
           </div>
-          <div class="playback-dock">
+          <div class="simulation-controls">
+            <span id="simTime" class="sim-time">t = 0.000 s</span>
+            <div class="playback-dock">
+            <button id="resetButton" class="dock-secondary" data-icon="reset" type="button" title="重置实验" disabled>重置</button>
             <button id="playButton" class="playback-primary" type="button" disabled>开始仿真</button>
+            <button id="stepButton" class="dock-secondary" data-icon="step" type="button" title="前进一个时间步" disabled>单步</button>
+            </div>
           </div>
           <div class="viewer-help">
-            <span id="mouseHint">左键旋转，Shift＋左键平移，滚轮缩放</span>
             <span id="selectionLabel"></span>
           </div>
         </section>
@@ -69,50 +84,50 @@
       <aside id="inspector" class="inspector">
         <div id="inspectorResizeHandle" class="resize-handle resize-handle-left" role="separator" aria-label="调整参数与数据面板宽度" aria-orientation="vertical" tabindex="0"></div>
         <header class="inspector-header">
-          <nav class="tabs" aria-label="任务面板">
-            <button class="tab active" data-tab="task" type="button">任务</button>
-            <button class="tab" data-tab="parameters" type="button">参数</button>
-            <button class="tab" data-tab="controls" type="button">控制</button>
-            <button class="tab" data-tab="data" type="button">数据</button>
+          <nav class="tabs" role="tablist" aria-label="任务面板">
+            <button id="tab-task" class="tab active" role="tab" aria-controls="panel-task" aria-selected="true" data-tab="task" type="button">任务</button>
+            <button id="tab-parameters" class="tab" role="tab" aria-controls="panel-parameters" aria-selected="false" tabindex="-1" data-tab="parameters" type="button">参数</button>
+            <button id="tab-controls" class="tab" role="tab" aria-controls="panel-controls" aria-selected="false" tabindex="-1" data-tab="controls" type="button">控制</button>
+            <button id="tab-data" class="tab" role="tab" aria-controls="panel-data" aria-selected="false" tabindex="-1" data-tab="data" type="button">数据</button>
           </nav>
-          <button id="closeInspector" class="icon-button" type="button" title="收起面板" aria-label="收起面板"></button>
+          <button id="closeInspector" class="icon-button" data-icon="panel-right" type="button" title="收起面板" aria-label="收起面板"></button>
         </header>
 
-        <section class="tab-panel" data-panel="parameters">
+        <section id="panel-parameters" class="tab-panel" role="tabpanel" aria-labelledby="tab-parameters" data-panel="parameters">
           <div id="jointControls" class="joint-panel"></div>
           <form id="parameterForm" class="parameter-form"></form>
           <div class="simulation-settings">
             <label title="同时控制三维实时仿真与数据页批量计算的持续时间">仿真时长 <span>s</span><input id="durationInput" type="number" min="0.1" step="0.1" value="6" /></label>
             <label>时间步长 <span>s</span><input id="timestepInput" type="number" min="0.00001" step="any" value="0.005" /></label>
           </div>
-          <p class="field-help">点击开始后，三维仿真运行至设定时长并自动暂停；实时数据按仿真时间高频采集（每次最多约 5000 点），曲线按屏幕帧率刷新。</p>
-          <button id="applyParameters" class="primary-button wide" type="button" disabled>应用参数并重载模型</button>
+          <p class="field-help">到达设定时长后自动暂停。修改模型参数后需重新应用。</p>
+          <button id="applyParameters" class="primary-button wide" data-icon="check" type="button" disabled>应用参数</button>
         </section>
 
-        <section class="tab-panel" data-panel="controls">
-          <p class="panel-intro">执行器控制量可在仿真运行时连续改变。调整关节姿态请打开“参数”。</p>
+        <section id="panel-controls" class="tab-panel" role="tabpanel" aria-labelledby="tab-controls" data-panel="controls">
+          <p class="panel-intro">运行中可实时调节控制量，关节姿态在“参数”中调整。</p>
           <div id="actuatorControls" class="runtime-controls"></div>
         </section>
 
-        <section class="tab-panel" data-panel="data">
+        <section id="panel-data" class="tab-panel" role="tabpanel" aria-labelledby="tab-data" data-panel="data">
           <div class="data-actions">
-            <button id="clearData" class="quiet-button" type="button">清空曲线</button>
-            <button id="exportData" class="quiet-button" type="button" disabled>导出当前数据</button>
-            <button id="runButton" class="primary-button" type="button" disabled>批量计算并保存</button>
+            <button id="clearData" class="quiet-button" type="button">清空</button>
+            <button id="exportData" class="quiet-button" data-icon="download" type="button" disabled>导出数据</button>
+            <button id="runButton" class="primary-button" type="button" disabled>批量计算</button>
             <button id="cancelRun" class="quiet-button hidden" type="button">取消计算</button>
           </div>
-          <p class="field-help">导出当前数据保存当前曲线。批量计算会从初始状态重新运行，使用当前固定控制值，不包含拖拽历史。</p>
           <p id="dataSource" class="data-source" role="status"></p>
-          <p class="field-help">悬停联动读取同一时刻；Shift＋滚轮缩放时间轴，双击图表恢复全程。</p>
+          <details class="usage-notes"><summary>图表与导出说明</summary><p>悬停读取数据，Shift＋滚轮缩放时间轴，双击恢复全程。导出数据保存当前曲线；批量计算从初始状态重新运行并保存结果，使用固定控制值，不包含拖拽历史。</p></details>
           <div id="chartStack" class="chart-stack"></div>
           <details class="result-history"><summary>已保存的实验</summary><div id="resultHistory"></div></details>
         </section>
 
-        <section class="tab-panel active" data-panel="task">
+        <section id="panel-task" class="tab-panel active" role="tabpanel" aria-labelledby="tab-task" data-panel="task">
+          <div class="panel-kicker">研究问题</div>
           <p id="taskQuestion" class="question">从左侧选择学习任务。</p>
           <div id="topicTags" class="tags"></div>
           <details class="notes" open>
-            <summary>操作步骤与建模说明</summary>
+            <summary>实验说明</summary>
             <div id="taskNotes" class="task-prose"></div>
           </details>
         </section>
@@ -126,25 +141,31 @@
         <div class="preview-actions">
           <select id="previewLibrary" class="quiet-button" aria-label="从模型库选择"><option value="">从模型库选择…</option></select>
           <input id="previewFile" class="hidden" type="file" accept=".xml" />
-          <button id="choosePreviewFile" class="quiet-button" type="button">选择 XML</button>
-          <button id="closePreview" class="primary-button" type="button">退出预览</button>
+          <button id="choosePreviewFile" class="quiet-button" data-icon="upload" type="button">打开 XML</button>
+          <button id="closePreview" class="quiet-button" data-icon="back" type="button">返回任务</button>
         </div>
       </header>
       <div class="preview-stage">
         <div id="previewViewport" class="mujoco-viewport"></div>
-        <p id="previewStatus" class="preview-status" role="status">拖入一个 XML，或从模型库选择。库内 XML 会自动加载配套资源；点击“运行仿真”观察运动，不记录数据。</p>
+        <p id="previewStatus" class="preview-status" role="status">拖入 XML 开始预览，也可从上方模型库选择。预览仿真不记录数据。</p>
         <div class="viewer-toolbar" role="toolbar" aria-label="预览控制">
           <button data-preview-action="play" type="button" disabled>运行仿真</button>
-          <button data-preview-action="reset" type="button" disabled>重置模型</button>
-          <button data-preview-action="camera" type="button" disabled>旋转</button>
-          <button data-preview-action="pan" type="button" disabled>平移</button>
-          <button data-preview-action="drag" type="button" disabled>拖动物体</button>
+          <button data-preview-action="reset" data-icon="reset" type="button" disabled>重置</button>
+          <span class="toolbar-divider"></span>
+          <button data-preview-action="camera" data-icon="orbit" type="button" disabled>旋转</button>
+          <button data-preview-action="pan" data-icon="move" type="button" disabled>平移</button>
+          <button data-preview-action="drag" data-icon="hand" type="button" disabled>拖动</button>
           <button data-preview-action="contacts" type="button" disabled>接触点</button>
+          <button data-preview-action="shadows" class="active" type="button" aria-pressed="true" disabled>阴影</button>
+          <button data-preview-action="lighting" class="active" type="button" aria-pressed="true" disabled>光照</button>
+          <button data-preview-action="loads" class="active" type="button" aria-pressed="true" title="仅显示施加的外载荷；拖拽箭头从作用点连接到鼠标目标，不代表合力" disabled>外载荷</button>
+          <button data-preview-action="inertia" type="button" aria-pressed="false" disabled>惯量</button>
+          <button data-preview-action="com" type="button" aria-pressed="false" disabled>质心</button>
+          <button data-preview-action="axes" type="button" aria-pressed="false" disabled>关节轴</button>
           <button data-preview-action="home" type="button" disabled>复位视角</button>
           <button id="togglePreviewJoints" data-preview-action="joints" type="button" aria-controls="previewJoints" aria-expanded="true" disabled>关节</button>
         </div>
         <aside id="previewJoints" class="preview-joints hidden" aria-label="预览关节调整"><div id="previewJointControls" class="joint-panel"></div></aside>
-        <div class="viewer-help"><span>左键旋转 · Shift＋左键平移 · 滚轮缩放 · 切换“拖动物体”调整姿态 · Esc 退出</span></div>
       </div>
     </section>
   </body>

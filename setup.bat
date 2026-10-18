@@ -1,42 +1,39 @@
 @echo off
 setlocal
-cd /d "%~dp0"
+set PYTHONUTF8=1
+pushd "%~dp0"
+if errorlevel 1 goto folder_failed
 
-if not exist ".venv\Scripts\python.exe" (
-  echo Creating the project Python environment in .venv...
-  where py >nul 2>nul
-  if not errorlevel 1 py -3 -m venv .venv
-  if not exist ".venv\Scripts\python.exe" (
-    where python >nul 2>nul
-    if not errorlevel 1 python -m venv .venv
+rem Prefer interpreters with broadly available binary wheels; skip old/32-bit ones.
+for %%V in (3.12 3.11 3.13 3) do (
+  py -%%V -m backend.bootstrap --check-python >nul 2>nul
+  if not errorlevel 1 (
+    py -%%V -m backend.bootstrap
+    goto setup_done
   )
 )
+python -m backend.bootstrap --check-python >nul 2>nul
+if errorlevel 1 goto python_failed
+python -m backend.bootstrap
 
-if not exist ".venv\Scripts\python.exe" (
-  echo.
-  echo Python 3 was not found. Install Python 3.11 or newer, then run setup.bat again.
-  pause
-  exit /b 1
-)
-
-echo Installing VMAIL Python dependencies and MuJoCo...
-".venv\Scripts\python.exe" -c "import sys; assert sys.version_info >= (3,11) and sys.maxsize > 2**32"
-if errorlevel 1 (
-  echo VMAIL requires 64-bit Python 3.11 or newer. Recreate .venv using a supported Python.
-  pause
-  exit /b 1
-)
-".venv\Scripts\python.exe" -m pip install --upgrade pip
-if errorlevel 1 goto install_failed
-".venv\Scripts\python.exe" -m pip install -r requirements.txt
-if errorlevel 1 goto install_failed
-
+:setup_done
+if errorlevel 1 goto setup_failed
 echo.
 echo Setup completed. Run start.bat to open VMAIL.
+popd
 exit /b 0
 
-:install_failed
-echo.
-echo Installation failed. Check the network connection and run setup.bat again.
-pause
+:python_failed
+echo No suitable Python found. Install 64-bit x86 Python 3.12 and add it to PATH.
+goto setup_failed
+
+:folder_failed
+echo Cannot open the VMAIL project folder.
+if not defined VMAIL_NO_PAUSE pause
+exit /b 1
+
+:setup_failed
+echo Setup did not complete. Read the error above, then run setup.bat again.
+if not defined VMAIL_NO_PAUSE pause
+popd
 exit /b 1

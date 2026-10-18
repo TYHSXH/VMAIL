@@ -8,5 +8,6 @@ export default defineConfig({
     emptyOutDir: true,
     assetsDir: "assets",
     target: "es2022",
+    rollupOptions: { input: { main: "frontend/index.html", help: "frontend/help.html" } },
   },
 });

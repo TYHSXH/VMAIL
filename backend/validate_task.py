@@ -131,10 +131,11 @@ def validate_task(task_id: str) -> list[str]:
             observed_series.update(f"equality.{name}.force.{axis}" for axis in "xyz")
             observed_series.add(f"equality.{name}.force.magnitude")
 
+    observed_series.update(prepared.get("load_program", {}).get("units", {}))
     ui_series = []
     for chart in task.get("ui", {}).get("layout", {}).get("charts", []):
         ui_series.extend(chart.get("series", []))
-    if not ui_series:
+    if not ui_series and not prepared.get("load_program", {}).get("units"):
         errors.append("ui.yaml should define at least one chart series")
     for series in ui_series:
         if series not in observed_series:

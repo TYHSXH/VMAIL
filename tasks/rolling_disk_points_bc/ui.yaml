@@ -19,6 +19,7 @@ controls:
   joint_note: 曲柄默认以 2 rad/s 顺时针转动；闭环与纯滚约束自动联动。
   actuators:
     crank_speed:
+      show_load: false
       label: 曲柄角速度
       unit: rad/s
       value: -2

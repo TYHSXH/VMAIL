@@ -86,7 +86,7 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     librarySelect.value = "";
     updatePlayback();
     tools.forEach(button => { button.disabled = true; });
-    setStatus("拖入一个 XML，或从模型库选择。库内 XML 会自动加载配套资源；点击“运行仿真”观察运动，不记录数据。");
+    setStatus("拖入 XML 开始预览，也可从上方模型库选择。预览仿真不记录数据。");
     overlay.classList.add("hidden");
     document.getElementById("app").inert = false;
     onExit();
@@ -125,6 +125,16 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
       viewer.setDuration(Infinity);
       title.textContent = payload.name;
       tools.forEach(button => { button.disabled = false; button.classList.toggle("active", button.dataset.previewAction === "camera"); });
+      for (const action of ["shadows", "lighting"]) {
+        const button = tools.find(tool => tool.dataset.previewAction === action);
+        const enabled = action === "shadows" ? viewer.shadowsEnabled : viewer.lightingEnabled;
+        button.classList.toggle("active", enabled); button.setAttribute("aria-pressed", String(enabled));
+      }
+      for(const action of ["loads","inertia","com","axes"]){
+        const button=tools.find(tool=>tool.dataset.previewAction===action),key=action==="axes"?"joints":action;
+        const enabled=viewer.overlays?.options[key] ?? key==="loads";
+        button.classList.toggle("active",enabled);button.setAttribute("aria-pressed",String(enabled));
+      }
       loading = false;
       jointPanel.render(); jointsPanel.classList.remove("hidden");
       jointsButton.classList.add("active"); jointsButton.setAttribute("aria-expanded", "true");
@@ -155,6 +165,14 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     } else if (action === "reset") { viewer.reset(); updatePlayback(); jointPanel.sync(true); }
     else if (action === "home") viewer.homeCamera();
     else if (action === "contacts") button.classList.toggle("active", viewer.toggleContacts());
+    else if (["loads","inertia","com","axes"].includes(action)) {
+      const enabled=viewer.setOverlay(action==="axes"?"joints":action,button.getAttribute("aria-pressed")!=="true");
+      button.classList.toggle("active",enabled);button.setAttribute("aria-pressed",String(enabled));
+    }
+    else if (action === "shadows" || action === "lighting") {
+      const enabled = action === "shadows" ? viewer.setShadows(!viewer.shadowsEnabled) : viewer.setLighting(!viewer.lightingEnabled);
+      button.classList.toggle("active", enabled); button.setAttribute("aria-pressed", String(enabled));
+    }
     else if (action === "joints") { const hidden = jointsPanel.classList.toggle("hidden"); button.classList.toggle("active", !hidden); button.setAttribute("aria-expanded", String(!hidden)); jointPanel.sync(true); }
   });
   window.addEventListener("dragover", event => {

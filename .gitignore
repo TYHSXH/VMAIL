@@ -5,3 +5,6 @@ __pycache__/
 *.pyc
 tasks/*/results/run_*/
 MUJOCO_LOG.TXT
+*.log
+.pytest_cache/
+.venv.backup-*/

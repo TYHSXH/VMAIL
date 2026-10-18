@@ -1,5 +1,7 @@
 # VMAIL Workflow
 
+[文档索引](README.md) · [系统使用手册](user-guide.md) · [任务包规范](task-package-spec.md)
+
 VMAIL 面向可能没有编程基础的学生。学生主要做两件事：和 AI coding 工具对话提出学习任务，在浏览器中运行和观察任务。
 
 ## 角色边界

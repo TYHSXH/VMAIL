@@ -32,6 +32,7 @@ notes.md
 
 ```text
 assets/                 mesh、纹理等模型资源
+loads.yaml              时间函数、反馈规律及指定作用点的外力/力矩
 scripts/                Python 控制或批量研究脚本
 results/                运行结果，不能作为模型输入
 README.md               任务专用操作说明
@@ -62,12 +63,23 @@ README.md               任务专用操作说明
 - `layout.charts` 按研究物理量分组，尽量让一个图中的曲线具有相同单位。网页会把不同单位拆分成独立图。
 - 可通过 `ui.yaml.camera.position`、`target` 的三维坐标配置任务默认视图，确保完整机构可见。每次载入任务都会恢复默认视图。
 - 默认执行器值应与初始状态及实验步骤一致，不能让“恒速运动”示例在默认值下停止或突然制动。
+- 仅用于维持规定速度／位置的系统内部驱动，在 `ui.yaml.controls.actuators.<name>` 设置 `show_load: false`，不将其实现力矩画作外载荷。此设置只影响箭头，不删除执行器或改变物理计算；显式施加的外力／外力矩仍照常显示。
 - `task.yaml.simulation.duration` 同时作为浏览器实时仿真和 Python 批量实验的默认时长；网页到达该时长后自动暂停。
 - `task.yaml.simulation.timestep` 同时作为浏览器模型和批量实验的默认时间步长。
 
 ## 复杂控制脚本
 
-需要随时间施加力、力矩、控制器或批量扫参时，可在 `scripts/` 中添加 Python 文件。脚本应：
+网页任务需要随时间或关节状态变化的力、力矩或执行器输入时，优先使用 `loads.yaml`，完整规范和示例见 `../docs/load-controls.md`（相对 tasks 目录）。可参考 `rotating_load_demo/`。无需修改公共前后端，也不要让学生以为 XML 会自动执行 Python。
+
+- 参数放在 `parameters.yaml`，声明中文 label、unit、合理范围；表达式可直接引用参数键。
+- `type: joint` 的滑动关节使用 N，转动关节使用 N·m；`type: actuator` 必须注明实际输入单位。
+- `type: wrench` 必须指定 body 或 site，明确 frame 为 world 或 body；force 单位 N，torque 单位 N·m，point 是物体局部坐标（m）。未设置 point 时作用于质心，指定 site 时作用于该点。
+- 只使用规范中的数学函数与 q('关节')、v('关节')，不嵌入代码，不使用 eval、Python 导入或网络调用。
+- 如有分段函数，说明切换时刻；表格时间严格递增，端点之外保持边界值。
+- 调节姿态阶段不施加这些载荷；点击开始后以仿真时间更新。载荷曲线自动记录，不必重复添加 observe 条目。
+- 对整段实验运行校验，避免仅在 t=0 合法、随后除零或越界的公式。
+
+超出标准载荷能力的控制算法或批量扫参，可在 `scripts/` 中添加 Python 文件。脚本应：
 
 - 从任务目录定位 `model.xml`，不依赖学生电脑的绝对路径。
 - 使用官方 `mujoco` Python 包。

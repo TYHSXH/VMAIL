@@ -1,22 +1,26 @@
 @echo off
 setlocal
-cd /d "%~dp0"
+set PYTHONUTF8=1
+pushd "%~dp0"
+if errorlevel 1 goto folder_failed
 
-echo Using current Python environment:
-python -c "import sys; print(sys.executable)"
-
-echo.
-echo Checking required packages...
-python -c "import fastapi, yaml, numpy, mujoco, uvicorn; assert mujoco.__version__ == '3.13.0'; print('Dependencies OK')"
+python -m backend.check_environment
 if errorlevel 1 (
-  echo.
-  echo Missing dependency. Install requirements in the current environment with:
-  echo python -m pip install -r requirements.txt
-  exit /b 1
+  echo Install dependencies in the active environment: python -m pip install -r requirements.txt
+  goto failed
 )
-
-echo.
-echo Starting VMAIL at http://127.0.0.1:8000
-echo Press Ctrl+C to stop.
+echo Starting VMAIL...
 python -m backend.launch
-if errorlevel 1 pause
+if errorlevel 1 goto failed
+popd
+exit /b 0
+
+:folder_failed
+echo Cannot open the VMAIL project folder.
+if not defined VMAIL_NO_PAUSE pause
+exit /b 1
+
+:failed
+if not defined VMAIL_NO_PAUSE pause
+popd
+exit /b 1

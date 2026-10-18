@@ -2,6 +2,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import loadMujoco from "@mujoco/mujoco";
 import { projectJointPose } from "./joint-pose.js";
+import { applyLoads } from "./loads.js";
+import { PhysicsOverlays } from "./physics-overlays.js";
 
 class CapsuleGeometry extends THREE.BufferGeometry {
   constructor(radius, length) {
@@ -40,6 +42,8 @@ export class MujocoBrowserViewer {
     this.completionNotified = false;
     this.mode = "camera";
     this.showContacts = false;
+    this.shadowsEnabled = null;
+    this.lightingEnabled = true;
     this.initialState = [];
     this.drag = null;
     this.posePrepared = false;
@@ -51,7 +55,7 @@ export class MujocoBrowserViewer {
     this.frameId = null;
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x10151b);
+    this.scene.background = new THREE.Color(0x191d20);
     this.camera = new THREE.PerspectiveCamera(45, 16 / 9, 0.01, 1000);
     this.camera.up.set(0, 0, 1);
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -101,18 +105,42 @@ export class MujocoBrowserViewer {
   }
 
   addLights() {
-    this.scene.add(new THREE.HemisphereLight(0xddeeff, 0x18202a, 1.35));
+    this.lightingGroup = new THREE.Group();
+    this.lightingGroup.add(new THREE.HemisphereLight(0xddeeff, 0x18202a, 1.35));
     const key = new THREE.DirectionalLight(0xffffff, 2.4);
     key.position.set(-3, -4, 7);
     key.castShadow = true;
     key.shadow.mapSize.set(2048, 2048);
-    this.scene.add(key);
+    this.lightingGroup.add(key);
     const fill = new THREE.DirectionalLight(0x8fc9ff, 0.75);
     fill.position.set(4, 3, 2);
-    this.scene.add(fill);
+    this.lightingGroup.add(fill);
+    this.flatLight = new THREE.AmbientLight(0xffffff, 2);
+    this.flatLight.visible = false;
+    this.scene.add(this.lightingGroup, this.flatLight);
   }
 
-  async loadModel(xml, initialState = [], observe = {}, assets = {}, cameraConfig = null, jointLimits = null) {
+  setShadows(enabled) {
+    this.shadowsEnabled = Boolean(enabled);
+    this.renderer.shadowMap.enabled = this.shadowsEnabled && this.lightingEnabled !== false;
+    this.scene.traverse(object => {
+      if (object.material) {
+        for (const material of Array.isArray(object.material) ? object.material : [object.material]) material.needsUpdate = true;
+      }
+    });
+    this.sceneDirty = true;
+    return this.shadowsEnabled;
+  }
+
+  setLighting(enabled) {
+    this.lightingEnabled = Boolean(enabled);
+    if (this.lightingGroup) this.lightingGroup.visible = this.lightingEnabled;
+    if (this.flatLight) this.flatLight.visible = !this.lightingEnabled;
+    this.setShadows(this.shadowsEnabled ?? this.renderer.shadowMap.enabled);
+    return this.lightingEnabled;
+  }
+
+  async loadModel(xml, initialState = [], observe = {}, assets = {}, cameraConfig = null, jointLimits = null, loadProgram = null) {
     const vfs = new this.mujoco.MjVFS();
     let model;
     try {
@@ -135,6 +163,10 @@ export class MujocoBrowserViewer {
     this.paused = true;
     this.initialState = initialState;
     this.observe = observe;
+    this.loadProgram = loadProgram;
+    this.hiddenLoadActuators = new Set();
+    this.loadValues = {};
+    this.loadFailed = false;
     this.model = model;
     this.jointLimits = Array.isArray(jointLimits) && jointLimits.length === model.njnt ? jointLimits
       : Array.from({ length: model.njnt }, (_, id) => model.jnt_range[2 * id + 1] > model.jnt_range[2 * id]);
@@ -153,12 +185,13 @@ export class MujocoBrowserViewer {
     this.reset();
     this.homeCamera();
     const complex = model.nflex > 0 || model.nskin > 0 || model.nmeshvert > 100000;
-    this.renderer.shadowMap.enabled = !complex;
+    this.setShadows(this.shadowsEnabled ?? !complex);
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, complex ? 1 : 2));
     this.sceneDirty = true;
   }
 
   disposeModel() {
+    this.overlays?.clear();
     this.clearMeshes();
     for (const key of ["mjScene", "data", "model"]) {
       if (this[key]) {
@@ -183,6 +216,7 @@ export class MujocoBrowserViewer {
     const controls = preserveControls ? Array.from(this.data.ctrl) : null;
     this.clearDrag();
     this.posePrepared = false;
+    this.loadFailed = false;
     this.paused = true;
     this.completionNotified = false;
     this.mujoco.mj_resetData(this.model, this.data);
@@ -210,9 +244,11 @@ export class MujocoBrowserViewer {
         this.data.qpos[this.model.jnt_qposadr[jointId]] = item.value;
       }
     }
+    this.experimentStart = {qpos:this.data.qpos.slice(),qvel:this.data.qvel.slice(),act:this.data.act.slice()};
     this.mujoco.mj_forward(this.model, this.data);
     this.updateScene();
     this.emitSample(true);
+    this.updateDiagnostics();
   }
 
   step(count = 1) {
@@ -222,6 +258,7 @@ export class MujocoBrowserViewer {
         this.finishDuration();
         break;
       }
+      if (!this.applyTaskLoads()) break;
       this.applyDragForce();
       this.model.opt.timestep = Math.min(this.configuredTimestep, this.duration - this.getTime());
       this.mujoco.mj_step(this.model, this.data);
@@ -233,9 +270,11 @@ export class MujocoBrowserViewer {
     this.mujoco.mj_forward(this.model, this.data);
     this.updateScene();
     this.emitSample(true);
+    this.updateDiagnostics();
   }
 
   setPaused(paused) {
+    if (!paused) this.loadFailed = false;
     const changed = this.paused !== paused;
     this.paused = paused;
     if (changed) this.callbacks.onPausedChange?.(paused);
@@ -344,6 +383,7 @@ export class MujocoBrowserViewer {
 
   prepareJointPose() {
     this.clearDrag(); this.setPaused(true); this.posePrepared = true;
+    this.clearTaskLoads();
     this.data.time = 0; this.data.qvel.fill(0); this.data.qacc_warmstart.fill(0);
     this.timeAccumulator = 0; this.lastSampleTime = -Infinity; this.nextSampleTime = 0; this.completionNotified = false;
   }
@@ -396,6 +436,17 @@ export class MujocoBrowserViewer {
     if (!this.model || !this.data || actuatorId < 0 || actuatorId >= this.model.nu) return;
     if (this.drag) this.drag.controls[actuatorId] = Number(value);
     else this.data.ctrl[actuatorId] = Number(value);
+    this.sceneDirty = true;
+  }
+
+  setActuatorLoadVisibility(specifications = {}) {
+    this.hiddenLoadActuators = new Set();
+    for(const [name,spec] of Object.entries(specifications)){
+      if(spec.show_load!==false)continue;
+      const id=this.mujoco.mj_name2id(this.model,this.mujoco.mjtObj.mjOBJ_ACTUATOR.value,name);
+      if(id>=0)this.hiddenLoadActuators.add(id);
+    }
+    this.updateDiagnostics();this.sceneDirty=true;
   }
 
   setActuatorControlValues(values = {}) {
@@ -449,6 +500,19 @@ export class MujocoBrowserViewer {
     this.clearMeshes();
     this.updateScene(true);
     return this.showContacts;
+  }
+
+  setOverlay(name, enabled) {
+    if(!["loads","inertia","com","joints"].includes(name))return false;
+    this.overlays ||= new PhysicsOverlays(this.scene);
+    this.overlays.options[name]=Boolean(enabled);this.updateDiagnostics();this.sceneDirty=true;
+    return this.overlays.options[name];
+  }
+
+  updateDiagnostics() {
+    if(!this.model||!this.data)return;
+    this.overlays ||= new PhysicsOverlays(this.scene);
+    this.overlays.update(this);
   }
 
   homeCamera() {
@@ -645,6 +709,7 @@ export class MujocoBrowserViewer {
     }
     for (let i = count; i < this.meshes.length; i += 1) this.meshes[i].visible = false;
     geoms.delete();
+    this.updateDiagnostics();
     this.sceneDirty = true;
   }
 
@@ -681,6 +746,7 @@ export class MujocoBrowserViewer {
             completed = true;
             break;
           }
+          if (!this.applyTaskLoads()) break;
           this.applyDragForce();
           this.model.opt.timestep = Math.min(timestep, this.duration - this.getTime());
           this.mujoco.mj_step(this.model, this.data);
@@ -704,7 +770,7 @@ export class MujocoBrowserViewer {
         this.emitSample(completed, now);
       }
       if (this.controls.update()) this.sceneDirty = true;
-      if (this.sceneDirty) { this.renderer.render(this.scene, this.camera); this.sceneDirty = false; }
+      if (this.sceneDirty) { this.updateDiagnostics(); this.renderer.render(this.scene, this.camera); this.sceneDirty = false; }
       this.callbacks.onTime?.(this.data?.time || 0);
       this.frameId = requestAnimationFrame(frame);
     };
@@ -712,7 +778,7 @@ export class MujocoBrowserViewer {
   }
 
   emitSample(force = false) {
-    if (this.drag || this.posePrepared) return false;
+    if (this.drag || this.posePrepared || this.loadFailed) return false;
     const time = Number(this.data?.time || 0);
     if (time + 1e-9 < this.lastSampleTime) {
       this.setPaused(true);
@@ -729,9 +795,10 @@ export class MujocoBrowserViewer {
     }
     if (!force && time + 1e-12 < this.nextSampleTime) return false;
     if (!force && Math.abs(time - this.lastSampleTime) < 1e-12) return false;
+    if (!this.applyTaskLoads()) return false;
     this.lastSampleTime = time;
     while (this.nextSampleTime <= time + 1e-12) this.nextSampleTime += this.sampleInterval;
-    const values = this.readObservations();
+    const values = { ...this.readObservations(), ...this.loadValues };
     if (Object.values(values).some((value) => !Number.isFinite(value))) {
       this.setPaused(true);
       this.callbacks.onError?.("仿真出现无效数值，已暂停；请检查模型或减小步长。");
@@ -783,7 +850,7 @@ export class MujocoBrowserViewer {
         if (item.magnitude) units[`site.${item.name}.${field}.magnitude`] = unit;
       }
     }
-    return units;
+    return { ...units, ...this.loadProgram?.units };
   }
 
   readObjectVector(methodName, objectType, objectId) {
@@ -923,6 +990,7 @@ export class MujocoBrowserViewer {
     );
     this.setPaused(true);
     this.posePrepared = true;
+    this.clearTaskLoads();
     this.completionNotified = false;
     this.timeAccumulator = 0;
     this.drag = {
@@ -948,6 +1016,7 @@ export class MujocoBrowserViewer {
     this.pointerFromEvent(event);
     this.raycaster.setFromCamera(this.pointer, this.camera);
     this.raycaster.ray.intersectPlane(this.dragPlane, this.dragTarget);
+    this.sceneDirty = true;
   }
 
   handlePointerUp(event) {
@@ -984,6 +1053,7 @@ export class MujocoBrowserViewer {
     this.nextSampleTime = 0;
     this.completionNotified = false;
     this.model.opt.timestep = this.configuredTimestep;
+    this.experimentStart = {qpos:this.data.qpos.slice(),qvel:this.data.qvel.slice(),act:this.data.act.slice()};
     this.mujoco.mj_forward(this.model, this.data);
     this.emitSample(true);
   }
@@ -1020,6 +1090,7 @@ export class MujocoBrowserViewer {
       .addScaledVector(pointVelocity, -18);
     if (force.length() > 300) force.setLength(300);
     const torque = grabPoint.clone().sub(centerOfMass).cross(force);
+    this.drag.force=force.clone();this.drag.point=grabPoint.clone();
     const offset = bodyId * 6;
     this.data.xfrc_applied[offset] = force.x;
     this.data.xfrc_applied[offset + 1] = force.y;
@@ -1027,6 +1098,28 @@ export class MujocoBrowserViewer {
     this.data.xfrc_applied[offset + 3] = torque.x;
     this.data.xfrc_applied[offset + 4] = torque.y;
     this.data.xfrc_applied[offset + 5] = torque.z;
+  }
+
+  clearTaskLoads() {
+    if (!this.loadProgram?.entries?.length || !this.data) return;
+    this.data.qfrc_applied.fill(0); this.data.xfrc_applied.fill(0);
+    this.loadValues = {};
+  }
+
+  applyTaskLoads() {
+    if (!this.loadProgram?.entries?.length || this.drag || this.posePrepared) return true;
+    if (this.loadFailed) return false;
+    try {
+      this.mujoco.mj_forward(this.model, this.data);
+      this.loadValues = applyLoads(this.loadProgram, this.model, this.data);
+      this.sceneDirty = true;
+      this.mujoco.mj_forward(this.model, this.data);
+      return true;
+    } catch (error) {
+      this.clearTaskLoads(); this.loadFailed = true; this.setPaused(true);
+      this.callbacks.onError?.(error.message);
+      return false;
+    }
   }
 
   clearDrag() {
@@ -1055,6 +1148,7 @@ export class MujocoBrowserViewer {
   dispose() {
     if (this.frameId) cancelAnimationFrame(this.frameId);
     this.disposeModel();
+    this.overlays?.dispose();this.overlays=null;
     for (const key of ["mjCamera", "perturb", "option"]) this[key]?.delete();
     this.controls.dispose();
     this.resizeObserver.disconnect();

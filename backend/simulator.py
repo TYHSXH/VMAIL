@@ -9,10 +9,32 @@ from pathlib import Path
 import time
 
 import numpy as np
+from .loads import LoadError, compile_loads, apply_loads
+from .load_math import signal_math
 
 
 class SimulationError(Exception):
     pass
+
+
+def _compile_loads(task, values, model, mujoco):
+    try:
+        program = compile_loads(task.get("loads", {}), values, model, mujoco)
+        labels = {name: spec.get("label", name) for name, spec in _parameter_entries(task).items()}
+        for entry in program["entries"]:
+            raw = entry["source"]
+            entry["math"] = ({field: [signal_math(value, labels) for value in raw.get(field, [0,0,0])] for field in ("force", "torque")}
+                             if entry["type"] == "wrench" else {"value": signal_math(raw["value"], labels)})
+        return program
+    except LoadError as exc:
+        raise SimulationError(str(exc)) from exc
+
+
+def _apply_loads(program, model, data):
+    try:
+        return apply_loads(program, model, data)
+    except LoadError as exc:
+        raise SimulationError(str(exc)) from exc
 
 
 MAX_STEPS = 200_000
@@ -125,6 +147,9 @@ def prepare_browser_model(
         data = mujoco.MjData(model)
         _set_initial_state(model, data, task, values, mujoco)
         _validate_observations(model, task.get("observe", {}).get("observe", {}), mujoco)
+        program = _compile_loads(task, values, model, mujoco)
+        mujoco.mj_forward(model, data)
+        _apply_loads(program, model, data)
     except SimulationError:
         raise
     except Exception as exc:
@@ -147,6 +172,7 @@ def prepare_browser_model(
         "initial_state": initial_state,
         "joint_limits": model.jnt_limited.astype(bool).tolist(),
         "observe": task.get("observe", {}).get("observe", {}),
+        "load_program": program,
         "assets": {name: base64.b64encode(blob).decode("ascii") for name, blob in assets.items()},
     }
 
@@ -434,10 +460,12 @@ def run_mujoco_task(
     defaults = {name: spec.get("value", 0) for name, spec in task.get("ui", {}).get("controls", {}).get("actuators", {}).items()}
     controls = _set_actuator_controls(model, data, {**defaults, **(control_overrides or {})}, mujoco)
     mujoco.mj_forward(model, data)
+    program = _compile_loads(task, values, model, mujoco)
 
     observe = task.get("observe", {}).get("observe", {})
     _validate_observations(model, observe, mujoco)
     units = _observation_units(model, observe, mujoco)
+    units.update(program["units"])
     series: dict[str, list[float]] = {"time": []}
     steps = max(1, math.ceil(duration / timestep))
     if (steps + 1) * (len(units) + 1) > MAX_VALUES:
@@ -452,7 +480,10 @@ def run_mujoco_task(
                 raise SimulationError("计算超过 60 秒，请缩小实验规模。")
             if progress is not None:
                 progress(step / steps)
-        row = _record_observations(model, data, observe, mujoco)
+        load_values = _apply_loads(program, model, data)
+        if program["entries"]:
+            mujoco.mj_forward(model, data)
+        row = {**_record_observations(model, data, observe, mujoco), **load_values}
         if not all(math.isfinite(value) for value in row.values()) or not np.all(np.isfinite(data.qpos)) or not np.all(np.isfinite(data.qvel)):
             raise SimulationError("仿真出现非有限数值，请检查模型或减小步长。")
         if step and data.time + 1e-9 < series["time"][-1]:
@@ -481,6 +512,7 @@ def run_mujoco_task(
         f"- Samples: {len(series['time'])}\n"
         f"- Parameters: {values}\n"
         f"- Actuator controls: {controls}\n"
+        f"- Load definitions: {task.get('loads', {})}\n"
         f"- Units: {units}\n"
     )
 
@@ -488,6 +520,7 @@ def run_mujoco_task(
         "task_id": task["id"],
         "parameters": values,
         "controls": controls,
+        "loads": task.get("loads", {}),
         "duration": duration,
         "timestep": timestep,
         "series": series,

@@ -10,6 +10,11 @@ export function shortName(name) {
 }
 export function seriesName(task, key, unit = "") {
   const [group, name, field, component] = key.split(".");
+  if (group === "load") {
+    const label = task?.loads?.loads?.find(item => item.id === name)?.label || shortName(name);
+    const quantity = {fx:"力 X",fy:"力 Y",fz:"力 Z",tx:"质心力矩 X",ty:"质心力矩 Y",tz:"质心力矩 Z",value:"输入"}[field] || field;
+    return `${label} · ${quantity}`;
+  }
   const plural = {joint:"joints",body:"bodies",site:"sites",equality:"equalities"}[group];
   const spec = task?.observe?.observe?.[plural]?.find((item) => item.name === name);
   const label = spec?.label || shortName(name);

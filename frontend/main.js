@@ -5,6 +5,10 @@ import { shortName } from "./labels.js";
 import { renderTaskNotes } from "./task-notes.js";
 import { setupModelPreview } from "./model-preview.js";
 import { JointPanel } from "./joint-panel.js";
+import { icon, decorateIcons } from "./icons.js";
+import { LoadPreviewPanel, renderLoadFormula } from "./load-controls.js";
+
+decorateIcons();
 
 const state = {
   tasks: [],
@@ -30,19 +34,22 @@ const state = {
   runtimeRows: [],
 };
 
-const colors = ["#38bdf8", "#34d399", "#fb923c", "#f472b6", "#a78bfa", "#facc15"];
 const el = Object.fromEntries(
   [
     "taskSidebar", "collapseTasks", "expandTasks", "refreshTasks", "taskList", "engineBadge",
     "taskTitle", "simTime", "toggleInspector", "mujocoViewport", "viewerLoading", "resetButton",
-    "stepButton", "playButton", "cameraMode", "panMode", "dragMode", "contactButton", "homeCameraButton",
-    "mouseHint", "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
+    "stepButton", "playButton", "cameraMode", "panMode", "dragMode", "contactButton", "homeCameraButton", "shadowButton", "lightingButton",
+    "selectionLabel", "inspector", "closeInspector", "parameterForm", "durationInput",
     "timestepInput", "applyParameters", "runButton", "clearData", "exportData", "chartStack", "dataSource", "resultHistory", "cancelRun", "jointControls", "actuatorControls", "taskQuestion", "topicTags", "taskNotes", "message",
     "taskResizeHandle", "inspectorResizeHandle",
   ].map((id) => [id, document.getElementById(id)]),
 );
 
 const charts = new ChartStack(el.chartStack, state);
+const loadPreview = new LoadPreviewPanel(()=>state.viewer,()=>state.task,()=>{
+  if(state.parametersDirty)throw new Error("请先应用参数，再更新加载曲线。");
+  return simulationSettings().duration;
+});
 const taskJointPanel = new JointPanel(el.jointControls, {
   getViewer: () => state.viewerTaskId === state.task?.id ? state.viewer : null,
   canEdit: () => !state.modelLoading && !state.parametersDirty && !state.batch && !state.viewer?.drag,
@@ -51,11 +58,13 @@ const taskJointPanel = new JointPanel(el.jointControls, {
     state.experimentVersion++;
     if (state.seriesMode !== "preparing") clearSeries("preparing");
     resetPlaybackState();
+    loadPreview.refresh();
     el.dataSource.textContent = "关节姿态已调整，点击开始仿真后计时并采集数据。";
   },
   onReset: () => {
     state.experimentVersion++; clearSeries("preparing"); resetViewerPreservingControls();
     state.viewer.prepareJointPose(); resetPlaybackState();
+    loadPreview.refresh();
     el.dataSource.textContent = "已恢复任务初始姿态，点击开始仿真后采集数据。";
   },
 });
@@ -77,14 +86,26 @@ async function requestJson(url, options) {
   return data;
 }
 function activateTab(name) {
-  document.querySelectorAll(".tab").forEach(button=>button.classList.toggle("active",button.dataset.tab===name));
+  document.querySelectorAll(".tab").forEach(button=>{
+    const active=button.dataset.tab===name;
+    button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));button.tabIndex=active?0:-1;
+  });
   document.querySelectorAll(".tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
   el.inspector.classList.remove("collapsed");
   if(name==="data")charts.draw();
   if(name==="parameters")taskJointPanel.sync(true);
+  if(name==="controls")loadPreview.charts?.draw();
 }
 function setPlaybackEnabled(enabled) {
-  for(const button of [el.resetButton,el.stepButton,el.playButton,el.contactButton,el.homeCameraButton])button.disabled=!enabled;
+  document.querySelectorAll("#app [data-overlay]").forEach(button=>{
+    button.disabled=!enabled;
+    const active=state.viewer?.overlays?.options[button.dataset.overlay] ?? button.dataset.overlay==="loads";
+    button.classList.toggle("active",active);button.setAttribute("aria-pressed",String(active));
+  });
+  for(const button of [el.resetButton,el.stepButton,el.playButton,el.contactButton,el.homeCameraButton,el.shadowButton,el.lightingButton])button.disabled=!enabled;
+  if(enabled)for(const [button,on] of [[el.shadowButton,state.viewer.shadowsEnabled],[el.lightingButton,state.viewer.lightingEnabled]]){
+    button.classList.toggle("active",Boolean(on));button.setAttribute("aria-pressed",String(Boolean(on)));
+  }
   taskJointPanel.sync(true);
 }
 function simulationSettings() {
@@ -105,17 +126,17 @@ async function initViewer() {
         return true;
       },
       onDragStart:()=>{
+        loadPreview.invalidate("松开物体后重新计算加载曲线。");
         state.experimentVersion++;
         clearSeries("preparing");resetPlaybackState();setPlaybackEnabled(false);
         el.dataSource.textContent="正在拖动调整姿态，不计时、不采集数据。";
-        el.mouseHint.textContent="姿态调整中 · 控制量暂时停用 · 松开后点击开始仿真";
       },
       onDragEnd:()=>{
+        loadPreview.refresh();
         resetPlaybackState();
         setPlaybackEnabled(!state.modelLoading && !state.batch);
         syncRuntimeControls();
         el.dataSource.textContent="姿态已调整，点击开始仿真后才计时并采集数据。";
-        el.mouseHint.textContent="按住物体调整姿态，松开后点击开始仿真";
       },
       onPausedChange:paused=>{
         if(!paused){activateTab("data");state.simulationStarted=true;state.simulationCompleted=false;}
@@ -125,18 +146,19 @@ async function initViewer() {
       onError:message=>showMessage(message,true),
     });
     await state.viewer.init();state.viewerReady=true;
-    el.engineBadge.textContent="MuJoCo 3.13 · 浏览器";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
-    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>请选择学习任务</strong><span>从左侧选择任务，或拖入 XML 预览模型。</span>";
+    el.engineBadge.textContent="MuJoCo 3.13";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
+    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>选择任务，开始实验</strong><span>从左侧载入任务，或拖入 XML 预览模型。</span>";
   }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
 async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}
 function renderTaskList() {
   el.taskList.replaceChildren();
-  if(!state.tasks.length){const p=document.createElement("p");p.className="empty-state";p.textContent="暂无任务，让 AI 创建学习任务包。";el.taskList.append(p);return;}
+  document.getElementById("taskCount").textContent=String(state.tasks.length).padStart(2,"0");
+  if(!state.tasks.length){const p=document.createElement("p");p.className="empty-state";p.textContent="暂无学习任务";el.taskList.append(p);return;}
   for(const task of state.tasks){
     const row=document.createElement("div");row.className=`task-entry ${state.task?.id===task.id?"active":""}`;
-    const button=document.createElement("button");button.type="button";button.className="task-item";button.textContent=task.title || task.id;button.addEventListener("click",()=>selectTask(task.id));
-    const edit=document.createElement("button");edit.type="button";edit.className="rename-task";edit.textContent="✎";edit.title="修改任务标题";edit.setAttribute("aria-label",`修改${task.title || task.id}的标题`);
+    const button=document.createElement("button");button.type="button";button.className="task-item";button.textContent=task.title || task.id;if(state.task?.id===task.id)button.setAttribute("aria-current","true");button.addEventListener("click",()=>selectTask(task.id));
+    const edit=document.createElement("button");edit.type="button";edit.className="rename-task";edit.innerHTML=icon("edit");edit.title="修改任务标题";edit.setAttribute("aria-label",`修改${task.title || task.id}的标题`);
     edit.addEventListener("click",()=>{
       const input=document.createElement("input");input.value=task.title || task.id;input.maxLength=80;input.setAttribute("aria-label","任务新标题");
       const save=document.createElement("button");save.type="button";save.textContent="保存";
@@ -158,6 +180,7 @@ function renderTaskList() {
   }
 }
 async function selectTask(taskId) {
+  loadPreview.clear();
   const version=++state.selectionVersion;++state.modelLoadVersion;
   state.viewer?.setPaused(true);setPlaybackEnabled(false);rememberViewerControls();
   if(state.batch)await cancelBatch();
@@ -211,6 +234,7 @@ function restoreViewerControls() {
 }
 async function loadBrowserModel() {
   if(!state.task || !state.viewerReady)return false;
+  loadPreview.invalidate("载入模型后更新加载曲线。");
   const task=state.task,version=++state.modelLoadVersion;
   state.modelLoading=true;state.viewer.setPaused(true);setPlaybackEnabled(false);
   el.viewerLoading.classList.remove("hidden");el.viewerLoading.innerHTML="<strong>正在载入模型</strong><span>请稍候</span>";
@@ -219,8 +243,11 @@ async function loadBrowserModel() {
     const payload=await requestJson(`/api/tasks/${task.id}/browser-model`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters:collectParameters(),timestep,duration})});
     if(version!==state.modelLoadVersion || state.task!==task)return false;
     state.seriesMode="loading";
-    await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera,payload.joint_limits);
-    state.viewerTaskId=task.id;state.seriesUnits=state.viewer.getObservationUnits();restoreViewerControls();charts.rebuild();clearSeries();
+    await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera,payload.joint_limits,payload.load_program);
+    state.viewer.setActuatorLoadVisibility(task.ui.controls?.actuators || {});
+    state.viewerTaskId=task.id;state.seriesUnits=state.viewer.getObservationUnits();restoreViewerControls();clearSeries();
+    for(const key of Object.keys(payload.load_program?.units || {}))state.visibleSeries.add(key);
+    charts.rebuild();
     state.viewer.setDuration(duration);state.viewer.reset(true);renderRuntimeControls();
     state.parametersDirty=false;state.modelLoading=false;resetPlaybackState();setPlaybackEnabled(!state.batch);el.viewerLoading.classList.add("hidden");return true;
   }catch(error){
@@ -257,17 +284,34 @@ function controlRow(item,onChange) {
   state.runtimeRows.push({item,slider,number});return row;
 }
 function renderRuntimeControls() {
+  loadPreview.clear();
   state.runtimeRows=[];const controls=state.viewer.getInteractiveControls();
-  el.actuatorControls.innerHTML="<h2>运动控制</h2>";
+  el.actuatorControls.innerHTML=controls.actuators.length?"<h2>执行器</h2>":"";
   const config=state.task.ui.controls || {};
   // Model joints are authoritative; legacy task allowlists must not hide them.
   taskJointPanel.render(controls.joints,config.joint_note || "");
+  const automatic=new Set((state.viewer.loadProgram?.entries || []).filter(entry=>entry.type==="actuator").map(entry=>entry.index));
   for(const item of controls.actuators){
     const spec=config.actuators?.[item.name] || {};
     Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name),controlType:"actuator"});
-    el.actuatorControls.append(controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);}));
+    const row=controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);loadPreview.refresh();});
+    if(automatic.has(item.id)){row.querySelectorAll("input").forEach(input=>input.disabled=true);row.title="由任务载荷函数自动控制";}
+    el.actuatorControls.append(row);
   }
-  if(!controls.actuators.length){const p=document.createElement("p");p.className="empty-state";p.textContent="本任务没有运动控制量。";el.actuatorControls.append(p);}
+  const loads=state.viewer.loadProgram?.entries || [];
+  if(loads.length){
+    const heading=document.createElement("h2");heading.textContent="自动加载";el.actuatorControls.append(heading);
+    for(const entry of loads){
+      const raw=entry.source,card=document.createElement("section");card.className="load-rule";
+      const title=document.createElement("strong");title.textContent=entry.label;
+      const target=document.createElement("p");target.textContent=entry.type==="wrench"?`${raw.site?"作用点":"刚体"} · ${shortName(raw.site || raw.body)} · ${entry.frame==="body"?"物体坐标系":"世界坐标系"}`:`${entry.type==="joint"?"关节载荷":"执行器输入"} · ${shortName(raw.joint || raw.actuator)} · ${raw.unit}`;
+      const formula=document.createElement("div");formula.className="load-math";renderLoadFormula(formula,entry);
+      card.append(title,target,formula);el.actuatorControls.append(card);
+    }
+    const hint=document.createElement("p");hint.className="field-help";hint.textContent="按仿真时间自动加载，载荷曲线在“数据”中查看。规律由任务 loads.yaml 定义，幅值等参数在“参数”中修改。";el.actuatorControls.append(hint);
+    loadPreview.mount(el.actuatorControls);
+  }
+  if(!controls.actuators.length&&!loads.length){const p=document.createElement("p");p.className="empty-state";p.textContent="本任务没有运动控制量。";el.actuatorControls.append(p);}
 }
 function syncRuntimeControls() {
   taskJointPanel.sync();
@@ -338,12 +382,11 @@ async function runBatchSimulation() {
   }catch(error){showMessage(error.message,true);}
   finally{
     clearInterval(timer);
-    if(batch && state.batch===batch){state.batch=null;el.cancelRun.classList.add("hidden");el.runButton.disabled=!state.task;el.runButton.textContent="批量计算并保存";setPlaybackEnabled(Boolean(state.viewer?.model) && !state.modelLoading && state.viewerTaskId===state.task?.id);}
+    if(batch && state.batch===batch){state.batch=null;el.cancelRun.classList.add("hidden");el.runButton.disabled=!state.task;el.runButton.textContent="批量计算";setPlaybackEnabled(Boolean(state.viewer?.model) && !state.modelLoading && state.viewerTaskId===state.task?.id);}
   }
 }
 function setMode(mode) {
   state.viewer?.setMode(mode);el.cameraMode.classList.toggle("active",mode==="camera");el.panMode.classList.toggle("active",mode==="pan");el.dragMode.classList.toggle("active",mode==="drag");
-  el.mouseHint.textContent=mode==="drag"?"按住物体调整姿态，松开后点击开始仿真":mode==="pan"?"左键平移，滚轮缩放":"左键旋转，Shift＋左键平移，滚轮缩放";
 }
 
 function setupResizableSidebars() {
@@ -355,7 +398,7 @@ function setupResizableSidebars() {
       other: el.inspector,
       property: "--task-sidebar-width",
       storage: "vmail-task-sidebar-width",
-      initial: 238,
+      initial: 244,
       min: 180,
       max: 420,
       direction: 1,
@@ -366,7 +409,7 @@ function setupResizableSidebars() {
       other: el.taskSidebar,
       property: "--inspector-width",
       storage: "vmail-inspector-width",
-      initial: 350,
+      initial: 380,
       min: 300,
       max: 620,
       direction: -1,
@@ -431,12 +474,20 @@ function setupResizableSidebars() {
 
 
 document.querySelectorAll(".tab").forEach((button)=>button.addEventListener("click",()=>activateTab(button.dataset.tab)));
+document.querySelector(".tabs").addEventListener("keydown",event=>{
+  const tabs=[...document.querySelectorAll(".tab")],current=tabs.indexOf(document.activeElement);
+  if(current<0 || !["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+  event.preventDefault();
+  const next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(current+(event.key==="ArrowRight"?1:-1)+tabs.length)%tabs.length;
+  activateTab(tabs[next].dataset.tab);tabs[next].focus();
+});
 el.refreshTasks.addEventListener("click",()=>loadTasks().catch(error=>showMessage(error.message,true)));
 el.applyParameters.addEventListener("click",()=>{if(!state.batch)loadBrowserModel();});
-function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();taskJointPanel.sync(true);}
+function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();taskJointPanel.sync(true);loadPreview.invalidate("应用参数后更新加载曲线。");}
 el.parameterForm.addEventListener("input",markDirty);
 el.timestepInput.addEventListener("input",markDirty);
 el.durationInput.addEventListener("input",()=>{
+  loadPreview.refresh();
   state.experimentVersion++;
   try{const {duration}=simulationSettings();state.viewer?.setDuration(duration);if(state.viewer?.getTime()+1e-9<duration)state.simulationCompleted=false;updatePlaybackButton();}catch{/* Validate on start/apply. */}
 });
@@ -444,7 +495,7 @@ el.runButton.addEventListener("click",runBatchSimulation);
 el.cancelRun.addEventListener("click",cancelBatch);
 el.clearData.addEventListener("click",()=>{state.viewer?.setPaused(true);clearSeries();state.viewer?.emitSample(true);});
 el.exportData.addEventListener("click",exportCurrentData);
-el.resetButton.addEventListener("click",()=>{clearSeries();resetViewerPreservingControls();resetPlaybackState();});
+el.resetButton.addEventListener("click",()=>{clearSeries();resetViewerPreservingControls();resetPlaybackState();loadPreview.refresh();});
 el.stepButton.addEventListener("click",async()=>{
   try{
     simulationSettings();
@@ -472,6 +523,18 @@ el.cameraMode.addEventListener("click",()=>setMode("camera"));
 el.panMode.addEventListener("click",()=>setMode("pan"));
 el.dragMode.addEventListener("click",()=>setMode("drag"));
 el.contactButton.addEventListener("click",()=>el.contactButton.classList.toggle("active",state.viewer.toggleContacts()));
+document.querySelectorAll("#app [data-overlay]").forEach(button=>button.addEventListener("click",()=>{
+  const enabled=state.viewer.setOverlay(button.dataset.overlay,button.getAttribute("aria-pressed")!=="true");
+  button.classList.toggle("active",enabled);button.setAttribute("aria-pressed",String(enabled));
+}));
+el.shadowButton.addEventListener("click",()=>{
+  const enabled=state.viewer.setShadows(!state.viewer.shadowsEnabled);
+  el.shadowButton.classList.toggle("active",enabled);el.shadowButton.setAttribute("aria-pressed",String(enabled));
+});
+el.lightingButton.addEventListener("click",()=>{
+  const enabled=state.viewer.setLighting(!state.viewer.lightingEnabled);
+  el.lightingButton.classList.toggle("active",enabled);el.lightingButton.setAttribute("aria-pressed",String(enabled));
+});
 el.homeCameraButton.addEventListener("click",()=>state.viewer.homeCamera());
 el.collapseTasks.addEventListener("click",()=>{el.taskSidebar.classList.add("collapsed");el.expandTasks.classList.remove("hidden");});
 el.expandTasks.addEventListener("click",()=>{el.taskSidebar.classList.remove("collapsed");el.expandTasks.classList.add("hidden");});

@@ -1,5 +1,5 @@
 import {seriesName, formatValue} from "./labels.js";
-const colors = ["#38bdf8", "#34d399", "#fb923c", "#f472b6", "#a78bfa", "#facc15"];
+const colors = ["#277d83", "#b65332", "#7860a0", "#567e48", "#b35068", "#9f7c2d"];
 
 export class ChartStack {
   constructor(container, state) {
@@ -16,7 +16,15 @@ export class ChartStack {
     this.cards = [];
     this.hoverTime = null;
     this.viewRange = null;
-    for (const config of this.state.task?.ui?.layout?.charts || []) {
+    const configs = [...(this.state.task?.ui?.layout?.charts || [])];
+    const declared = new Set(configs.flatMap(config => config.series || []));
+    for (const load of this.state.task?.loads?.loads || []) {
+      for (const fields of load.type === "wrench" ? [["fx","fy","fz"],["tx","ty","tz"]] : [["value"]]) {
+        const keys = fields.map(field => `load.${load.id}.${field}`).filter(key => this.state.seriesUnits[key] && !declared.has(key));
+        if (keys.length) configs.push({title: `${this.state.preview ? "" : "实际加载 · "}${load.label || load.id}${load.type === "wrench" ? fields[0] === "fx" ? " · 外力" : " · 质心力矩" : " · 输入"}`, series: keys});
+      }
+    }
+    for (const config of configs) {
       const groups = new Map();
       for (const key of config.series || []) {
         const unit = this.state.seriesUnits[key] || "1";
@@ -59,7 +67,7 @@ export class ChartStack {
         stamp.className = "chart-time";
         const field = keys[0]?.split(".")[2];
         const angular = unit.startsWith("rad");
-        const quantity = {position:angular?"转角":"位移",velocity:angular?"角速度":"速度",acceleration:angular?"角加速度":"加速度",force:unit==="N·m"?"力矩":"力"}[field] || "物理量";
+        const quantity = {position:angular?"转角":"位移",velocity:angular?"角速度":"速度",acceleration:angular?"角加速度":"加速度",force:unit==="N·m"?"力矩":"力"}[field] || (keys[0]?.startsWith("load.") ? unit==="N·m"?"力矩":unit==="N"?"力":"输入" : "物理量");
         const item = {card, heading, canvas, keys, unit, values, stamp, quantity, hover:null};
         canvas.addEventListener("pointermove", (event) => {
           const rect = canvas.getBoundingClientRect();
@@ -113,9 +121,9 @@ export class ChartStack {
     }
     const ctx = canvas.getContext("2d");
     ctx.setTransform(dpr,0,0,dpr,0,0);
-    ctx.fillStyle = "#101720"; ctx.fillRect(0,0,width,height);
-    ctx.font = "11px Microsoft YaHei, sans-serif";
-    ctx.fillStyle = "#9ba8b8";
+    ctx.fillStyle = "#fcfcfa"; ctx.fillRect(0,0,width,height);
+    ctx.font = "11px Segoe UI, Microsoft YaHei UI, sans-serif";
+    ctx.fillStyle = "#77816e";
     ctx.fillText(`${item.quantity} / ${unit}`, 12, 17);
     ctx.fillText("时间 / s", Math.max(72,width-80), height-6);
     const time = this.state.series.time;
@@ -126,7 +134,7 @@ export class ChartStack {
       while(lo<hi){ const mid=(lo+hi)>>1; if(time[mid]<target)lo=mid+1;else hi=mid; }
       index=lo>0 && Math.abs(time[lo-1]-target)<Math.abs(time[lo]-target) ? lo-1 : lo;
     }
-    item.stamp.textContent = index >= 0 ? `${this.hoverTime === null ? "当前" : "读取"}时刻：${formatValue(time[index])} s` : "等待仿真数据";
+    item.stamp.textContent = index >= 0 ? `${this.state.preview ? "预览" : this.hoverTime === null ? "当前" : "读取"}时刻：${formatValue(time[index])} s` : "等待仿真数据";
     for (const [key, output] of item.values) output.textContent = `${formatValue(this.state.series[key]?.[index])} ${unit}`;
     if(time.length<2 || !active.length){
       ctx.fillText(!active.length?"勾选下方曲线以显示":"开始仿真后显示曲线",70,105);return;
@@ -145,8 +153,8 @@ export class ChartStack {
     const y=(v)=>bottom-(v-min)/(max-min)*h;
     for(let i=0;i<=4;i++){
       const yy=top+i*h/4;
-      ctx.strokeStyle="#293543";ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(width-16,yy);ctx.stroke();
-      ctx.fillStyle="#9ba8b8";ctx.fillText(formatValue(max-i*(max-min)/4),3,yy+4);
+      ctx.strokeStyle="#e5e8e0";ctx.beginPath();ctx.moveTo(left,yy);ctx.lineTo(width-16,yy);ctx.stroke();
+      ctx.fillStyle="#77816e";ctx.fillText(formatValue(max-i*(max-min)/4),3,yy+4);
       const tt=viewStart+i*(viewEnd-viewStart)/4;
       ctx.fillText(formatValue(tt),Math.min(width-40,Math.max(left-5,x(tt)-10)),202);
     }
@@ -171,7 +179,7 @@ export class ChartStack {
       ctx.stroke();
     }
     if(this.hoverTime!==null && index>=0){
-      ctx.strokeStyle="#cbd5e1";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x(time[index]),top);ctx.lineTo(x(time[index]),bottom);ctx.stroke();ctx.setLineDash([]);
+      ctx.strokeStyle="#929b88";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x(time[index]),top);ctx.lineTo(x(time[index]),bottom);ctx.stroke();ctx.setLineDash([]);
     }
   }
 }

@@ -16,6 +16,7 @@ controls:
   joint_note: 曲柄默认以 1 rad/s 逆时针转动，可调整曲柄角速度。
   actuators:
     constant_speed_drive:
+      show_load: false
       label: 曲柄角速度
       unit: rad/s
       value: 1

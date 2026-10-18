@@ -2,112 +2,23 @@
 
 [简体中文](README.md) | [English](README_EN.md)
 
-VMAIL is an interactive local MuJoCo workbench for students studying theoretical mechanics. Students can use an AI coding assistant to create learning tasks under `tasks/`, then load a model in the browser, change parameters, drag bodies, control joints and actuators, inspect motion data, and run saved batch simulations.
+VMAIL is a local MuJoCo workbench for interactive mechanics experiments, parameter and joint adjustments, load controls, charts, and Python batch simulations.
 
-The browser runs physics through the official `@mujoco/mujoco` WebAssembly package and renders the 3D scene with Three.js/WebGL. The Python backend loads and validates task packages and runs batch experiments that save complete datasets.
+## Quick start
 
-## XML Model Preview
+1. Install 64-bit Python 3.11 or newer and add it to PATH.
+2. Double-click `start.bat` with an internet connection for the first setup.
+3. Select a learning task and click the simulation start button.
 
-The task Parameters tab includes joint pose sliders and numeric inputs alongside mass, stiffness and other model parameters. Angular joints support degrees/radians; slide joints use meters. Joint edits pause playback and are excluded from experiment recording. The preview has the same collapsible joint panel, with a restore-pose action. Compiled joint limits are respected, while task-specific mechanism controls preserve linked motion.
+The server runs at <http://127.0.0.1:8000>. Students do not need Node.js. Click **帮助** (Help) in the top bar to open the Markdown user manual in a separate tab.
 
-Click **模型预览** (Model preview), or drop one `.xml` file onto the page. The separate preview provides orbit, pan, zoom, body dragging, reset and physics playback/pause, without task parameters or data collection. Exit with **退出预览** or Esc to return to the paused task with its existing parameters and data. No tasks or result files are created.
+## Documentation
 
-Select a model and entry XML from the library dropdown to load includes and binary meshes (including STL), along with referenced textures. Dropping an unchanged library XML also resolves its companions by filename and content; use the dropdown for ambiguous matches. Keep the complete model_library folder. Other self-contained MuJoCo XML files (up to 16 MiB) still work. Uploaded XML is sent only to the local backend for matching and parsing, without disk writes. External files of unknown or modified XML cannot be accessed through a single-file browser import; load these as complete task packages. Referenced resources are limited to 128 MiB. Preview physics uses the model's constraints and forces, without a trained robot controller or data recorder.
+The detailed documentation is maintained in Chinese:
 
-Preview reset prefers the model's home keyframe, then another named initial keyframe or the first keyframe; task initial-state settings are preserved. Dynamic rendering includes 1D flex tubes, 2D/3D flex surfaces and skins. Binary resource transfers avoid Base64 overhead. Static views and background task views do not redraw unnecessarily. Complex scenes reduce shadows/pixel density and bound physics work per frame; heavy models can run slower than real time without increasing their configured timestep.
-
-## First-Time Setup
-
-### Option 1: One-click setup and launch (recommended)
-
-1. Install 64-bit Python 3.11 or newer. Select "Add Python to PATH" during installation.
-2. Extract the complete VMAIL folder without changing its internal structure.
-3. Stay connected to the internet and double-click `start.bat`.
-4. On the first run, the script creates a project-specific `.venv` and installs FastAPI, Python MuJoCo, and the other packages in `requirements.txt`.
-5. After setup, VMAIL starts at `http://127.0.0.1:8000`. Later launches reuse the existing environment unless a dependency is missing.
-
-You may also double-click `setup.bat` to configure the environment first, and then use `start.bat` to launch VMAIL.
-
-The compiled frontend and MuJoCo WASM runtime are included in `app/`. Students do not need Node.js or a separate browser-version MuJoCo installation.
-
-### Option 2: Use an existing Conda environment
-
-Open Anaconda Prompt, enter the project directory, activate the desired environment, and run:
-
-```powershell
-python -m pip install -r requirements.txt
-.\start-current-python.bat
-```
-
-This option does not use the project's `.venv`. The active Conda environment must be able to import `fastapi`, `uvicorn`, `yaml`, `numpy`, and `mujoco`.
-
-## Troubleshooting
-
-- First-time installation fails: check the network connection, close the script window, and run `setup.bat` again.
-- Python cannot be found: reinstall Python with "Add Python to PATH" enabled, or use a configured Conda environment.
-- The page does not open: check the startup window for errors and visit `http://127.0.0.1:8000`.
-- A new task is missing: make sure it is registered in `tasks/manifest.yaml`, then click "Refresh learning tasks" in the left sidebar.
-- Frontend source was changed: teachers or developers must run `npm install` and `npm run build`; regular students do not need to do this.
-
-## Learning Task Workflow
-
-1. The student describes the real object, variables to investigate, and desired observations to an AI coding assistant.
-2. The AI reads `tasks/AGENTS.md` and `docs/task-package-spec.md`.
-3. The AI creates or updates `tasks/<task_id>/` and registers it in `tasks/manifest.yaml`.
-4. The AI runs the task validator.
-5. The student refreshes the task list in the browser, changes parameters, and performs the experiment.
-6. When requirements change, the student asks the AI to update the same task folder and reloads it in the workbench.
-
-`tasks/manifest.yaml` is the shared index for all tasks, so it belongs at the root of `tasks/`, not inside an individual task folder. The example task itself is stored in `tasks/example_mass_spring/`.
-
-## Workbench Controls
-
-- 3D viewport: orbit, pan, zoom, select bodies, and apply drag forces.
-- Simulation: a loaded task remains still until Start is pressed; pause, resume, step, reset, contact display, and camera reset are supported.
-- Parameters: edit mass, stiffness, damping, initial state, and other MJCF values exposed by the task; applying changes recompiles the model.
-- Controls: directly position one-dimensional slide/hinge joints and write runtime inputs to MuJoCo actuator `ctrl` values. Values are remembered by task and actuator name across parameter reloads, resets, and restarts.
-- Data: inspect live curves; **Export current data** downloads the current browser curve buffer as CSV; **Compute and save** reruns a Python batch experiment from the initial state using the current actuator control values.
-- Point observations: a task can use a named MuJoCo `site` to record the position, velocity, and acceleration of a body-fixed point with matching browser/Python fields and SI units.
-- Layout: on desktop, drag either sidebar edge to resize it; widths are saved in the current browser.
-
-"Simulation duration" controls both the browser simulation and the Python batch experiment. The browser pauses automatically when it reaches that duration. "Timestep" applies to both calculations after the model is reloaded. Live values, chart legends, and exported CSV headers include units.
-
-## Project Structure
-
-```text
-app/                    Built web interface and MuJoCo WASM
-frontend/               Web interface source
-backend/                Local API and Python batch simulation
-docs/                   Workflow and task package documentation
-prompts/                Prompts for AI coding assistants
-tasks/
-  AGENTS.md              Rules AI must follow when creating tasks
-  manifest.yaml          Shared index of all learning tasks
-  <task_id>/             One independent folder per task
-setup.bat                First-time environment setup
-start.bat                Automatic environment check and launch
-start-current-python.bat Launch with the active Python/Conda environment
-```
-
-## Teacher and Developer Commands
-
-Validate all tasks:
-
-```powershell
-.\.venv\Scripts\python.exe -m backend.validate_task
-```
-
-Validate one task:
-
-```powershell
-.\.venv\Scripts\python.exe -m backend.validate_task example_mass_spring
-```
-
-Rebuild the frontend after changing `frontend/`:
-
-```powershell
-npm install
-npm run build
-```
-
-See [docs/task-package-spec.md](docs/task-package-spec.md) for the complete task format and [prompts/student-task-builder.md](prompts/student-task-builder.md) for a recommended starting prompt.
+- [User guide](docs/user-guide.md): setup, Conda, controls, model preview, data export, troubleshooting.
+- [Documentation index](docs/README.md): reading paths for users, AI assistants, and developers.
+- [Task workflow](docs/workflow.md) and [AI task prompt](prompts/student-task-builder.md).
+- [Task authoring rules](tasks/AGENTS.md), [task package specification](docs/task-package-spec.md), and [load controls](docs/load-controls.md).
+- [Development and maintenance](docs/development.md): structure, builds, validation, and regression tests.
+- [Model library](model_library/README.md): source models, assets, and license information.

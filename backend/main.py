@@ -209,6 +209,27 @@ def api_browser_model(task_id: str, request: SimulationRequest) -> dict[str, Any
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
+app.mount("/docs", StaticFiles(directory=ROOT / "docs"), name="docs")
+
+
+@app.get("/model_library/README.md")
+def model_library_readme() -> FileResponse:
+    return FileResponse(ROOT / "model_library" / "README.md", media_type="text/plain; charset=utf-8")
+
+
+@app.get("/api/help-documents")
+def help_documents() -> dict[str, Any]:
+    documents = []
+    for path, title in [("docs/user-guide.md", "学生使用手册"), ("prompts/student-task-builder.md", "AI 使用与提示词")]:
+        documents.append({"path": path, "title": title, "source": (ROOT / path).read_text(encoding="utf-8-sig")})
+    return {"documents": documents}
+
+
+@app.get("/help")
+def help_page() -> FileResponse:
+    return FileResponse(APP_DIR / "help.html", headers={"Cache-Control": "no-store"})
+
+
 app.mount("/static", StaticFiles(directory=APP_DIR), name="static")
 
 

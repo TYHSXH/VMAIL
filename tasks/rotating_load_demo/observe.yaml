@@ -1,0 +1,7 @@
+observe:
+  joints:
+    - {name: move_x, label: 水平位移, fields: [position, velocity]}
+    - {name: move_y, label: 竖向位移, fields: [position, velocity]}
+    - {name: turn, label: 杆转角, fields: [position, velocity]}
+  sites:
+    - {name: point_b, label: 杆端B, fields: [position, velocity], components: [x, y], frame: world}

@@ -1,4 +1,9 @@
 tasks:
+  - id: rotating_load_demo
+    title: 变方向外力与偏心力矩
+    path: rotating_load_demo
+    status: ready
+    description: 杆端大小与方向随时间变化的外力及力偶，展示标准载荷配置。
   - id: example_mass_spring
     title: 弹簧阻尼滑块示例
     path: example_mass_spring

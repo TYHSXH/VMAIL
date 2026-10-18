@@ -14,6 +14,7 @@ tasks/
     observe.yaml
     ui.yaml
     notes.md
+    loads.yaml          # 可选：时变载荷、执行器输入、关节反馈
     assets/
     results/
 ```
@@ -214,10 +215,11 @@ layout:
 
 浏览器使用官方 MuJoCo WebAssembly 运行时执行物理计算，并通过 WebGL 显示 `model.xml`。相机旋转、平移、缩放、动态刚体选择和三维外力拖拽是工作台的通用能力，不需要每个任务额外声明。`ui.yaml` 只负责参数分组和数据曲线；模型能否被拖动取决于刚体是否具有可运动自由度。
 
-实验台的“控制”页会自动列出：
+实验台的“参数”页列出：
 
 - 类型为 `slide` 或 `hinge` 的一维关节，用于暂停后直接调整关节位置。
-- 模型中的 actuator，用于在运行时写入 `data.ctrl`。
+
+“控制”页列出模型中的 actuator（运行时输入 `data.ctrl`），以及 loads.yaml 定义的自动加载规律。
 
 actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `kp`、`kv` 等模型参数可以通过 `parameters.yaml` 指向 actuator 的 MJCF 属性，应用参数后重新编译生效。
 
@@ -249,7 +251,9 @@ MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能
 
 ## 可选 Python 脚本
 
-复杂任务可增加 `scripts/`，用于随时间施加外力/力矩、控制器、扫参或更复杂的数据处理。脚本不是任务加载的必需文件，网页也不会自动执行它。推荐：
+网页中需要时变外力／力矩、分段输入、表格插值或关节反馈时，优先使用可选的 **loads.yaml**，详见 [载荷与控制规范](load-controls.md)。网页实时、单步和后台批量计算使用相同定义；载荷输出自动记录并生成曲线。参考完整任务 `tasks/rotating_load_demo/`。
+
+超出标准载荷配置能力的算法、扫参或数据处理可增加 `scripts/`。脚本不是任务加载的必需文件，网页不会自动执行它。推荐：
 
 ```text
 task_id/

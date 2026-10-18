@@ -1,0 +1,7 @@
+id: rotating_load_demo
+title: 变方向外力与偏心力矩
+question: 杆端外力的大小与方向随时间变化时，为什么杆会同时平移和转动？
+theory_topics: [刚体平面运动, 力矩, 随时间变化的载荷]
+simulation:
+  duration: 6
+  timestep: 0.002

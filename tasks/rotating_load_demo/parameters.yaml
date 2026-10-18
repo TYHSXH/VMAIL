@@ -1,0 +1,32 @@
+parameters:
+  mass:
+    label: 杆质量
+    value: 2
+    min: 0.2
+    max: 10
+    unit: kg
+    mjcf: {tag: geom, name: bar_geom, attribute: mass}
+  amplitude:
+    label: 基准力
+    value: 2
+    min: 0
+    max: 10
+    unit: N
+  frequency:
+    label: 波动频率
+    value: 0.5
+    min: 0
+    max: 3
+    unit: Hz
+  direction_speed:
+    label: 方向转速
+    value: 0.8
+    min: -3
+    max: 3
+    unit: rad/s
+  moment:
+    label: 力偶幅值
+    value: 0.4
+    min: 0
+    max: 3
+    unit: N·m

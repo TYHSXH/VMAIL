@@ -1,16 +1,34 @@
 @echo off
 setlocal
-cd /d "%~dp0"
+set PYTHONUTF8=1
+pushd "%~dp0"
+if errorlevel 1 goto folder_failed
 
-if not exist ".venv\Scripts\python.exe" call setup.bat
-if errorlevel 1 exit /b 1
+if not exist ".venv\Scripts\python.exe" goto configure
+".venv\Scripts\python.exe" -m backend.check_environment --quiet
+if not errorlevel 1 goto launch
 
-".venv\Scripts\python.exe" -c "import fastapi, yaml, numpy, mujoco, uvicorn; assert mujoco.__version__ == '3.13.0'" >nul 2>nul
-if errorlevel 1 call setup.bat
-if errorlevel 1 exit /b 1
+:configure
+call setup.bat
+if errorlevel 1 goto failed
+".venv\Scripts\python.exe" -m backend.check_environment
+if errorlevel 1 goto failed
 
+:launch
 echo.
-echo Starting VMAIL at http://127.0.0.1:8000
-echo Press Ctrl+C to stop.
+echo Starting VMAIL...
+echo Keep this window open. Press Ctrl+C to stop.
 ".venv\Scripts\python.exe" -m backend.launch
-if errorlevel 1 pause
+if errorlevel 1 goto failed
+popd
+exit /b 0
+
+:folder_failed
+echo Cannot open the VMAIL project folder.
+if not defined VMAIL_NO_PAUSE pause
+exit /b 1
+
+:failed
+if not defined VMAIL_NO_PAUSE pause
+popd
+exit /b 1

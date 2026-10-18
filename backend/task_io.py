@@ -112,6 +112,7 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
         "ui": _read_yaml(task_dir / "ui.yaml"),
         "model_xml": (task_dir / "model.xml").read_text(encoding="utf-8"),
         "notes": (task_dir / "notes.md").read_text(encoding="utf-8"),
+        "loads": _read_yaml(task_dir / "loads.yaml") if (task_dir / "loads.yaml").exists() else {},
     }
     for document, field in (("task", "simulation"), ("parameters", "parameters"), ("observe", "observe"), ("ui", "layout"), ("ui", "controls")):
         value = task[document].get(field, {})
@@ -139,6 +140,9 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
     actuators = controls.get("actuators", {})
     if not isinstance(actuators, dict) or any(not isinstance(spec, dict) for spec in actuators.values()):
         raise TaskValidationError("ui.yaml 的 controls.actuators 必须按执行器名称配置对象。")
+    for name, spec in actuators.items():
+        if "show_load" in spec and not isinstance(spec["show_load"], bool):
+            raise TaskValidationError(f"执行器 {name} 的 show_load 必须是 true 或 false。")
     for field in ("charts", "parameter_groups"):
         entries = task["ui"].get("layout", {}).get(field, [])
         if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
