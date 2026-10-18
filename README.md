@@ -6,8 +6,17 @@ VMAIL 是本地运行的 MuJoCo 理论力学实验台，支持三维交互、参
 
 ## 启动
 
+项目仓库：[TYHSXH/VMAIL](https://github.com/TYHSXH/VMAIL)。已安装 Git 时，在准备存放项目的目录打开终端，执行：
+
+```powershell
+git clone https://github.com/TYHSXH/VMAIL.git
+cd VMAIL
+```
+
+未安装 Git 时，可从仓库下载 ZIP 压缩包并完整解压。后续操作在克隆或解压得到的项目文件夹中进行。
+
 1. 安装 64 位 Python（建议 3.12），并加入 PATH。
-2. 首次保持联网，双击 `start.bat`，自动配置项目环境并打开浏览器。
+2. 首次保持联网，双击 `start.bat`（或在终端执行 `.\start.bat`），自动配置项目环境并打开浏览器。
 3. 在左侧选择学习任务，设置参数后点击“开始仿真”。
 
 服务地址：<http://127.0.0.1:8000>。学生无需安装 Node.js。完整安装、Conda 启动与操作步骤见[系统使用手册](docs/user-guide.md)，运行后也可点击顶部“帮助”。
