@@ -4,10 +4,18 @@
 
 ## 安装与启动
 
+项目仓库：[TYHSXH/VMAIL](https://github.com/TYHSXH/VMAIL)。已安装 Git 的同学，在自己有读写权限的项目存放目录打开终端，执行：
+
+```powershell
+git clone https://github.com/TYHSXH/VMAIL.git
+cd VMAIL
+```
+
+未安装 Git 时，也可从该仓库下载 ZIP 压缩包并完整解压。后续操作均在克隆或解压得到的项目文件夹中进行，保持内部目录结构不变。
+
 1. Windows 电脑安装 **64 位 Python** ，建议使用 Python 3.12；安装时勾选加入 PATH。系统要求 Python 3.11 或更新版本，实际安装还取决于所用版本是否有匹配的依赖包。
-2. 将 VMAIL 解压到自己有读写权限的文件夹，保留内部目录结构。
-3. 首次保持联网，双击 `start.bat`。程序会创建本机专用的 `.venv`，安装依赖并检查原生 MuJoCo 能否计算。
-4. 浏览器会自动打开 <http://127.0.0.1:8000>。保留启动窗口；使用结束后在窗口按 Ctrl+C 停止服务。
+2. 首次保持联网，在项目文件夹双击 `start.bat`；也可在上述终端执行 `.\start.bat`。程序会创建本机专用的 `.venv`，安装依赖并检查原生 MuJoCo 能否计算。
+3. 浏览器会自动打开 <http://127.0.0.1:8000>。保留启动窗口；使用结束后在窗口按 Ctrl+C 停止服务。
 
 以后仍双击 `start.bat`，环境正常时不会重新安装。学生无需安装 Node.js，也无需单独下载 MuJoCo：实时仿真在浏览器运行，批量计算使用同时安装的 Python 原生 MuJoCo。
 
