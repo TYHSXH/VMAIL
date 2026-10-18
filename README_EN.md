@@ -21,6 +21,10 @@ Alternatively, download the repository as a ZIP archive and extract it completel
 
 The server runs at <http://127.0.0.1:8000>. Students do not need Node.js. Click **帮助** (Help) in the top bar to open the Markdown user manual in a separate tab.
 
+## Uninstall
+
+Stop VMAIL with Ctrl+C in the server window, then double-click `uninstall.bat` to remove the project's `.venv` and its installed Python dependencies. Tasks, saved results, project files, old environment backups, system Python, and Conda environments are preserved. Run `start.bat` to reinstall.
+
 ## Documentation
 
 The detailed documentation is maintained in Chinese:

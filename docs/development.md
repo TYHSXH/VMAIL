@@ -64,6 +64,8 @@ npm run build
 
 ## 迁移安装
 
+`uninstall.bat` 调用 Windows 自带的 PowerShell 执行 `backend/uninstall.ps1`，无需依赖将要删除的项目 Python。它仅删除校验过的项目根目录 `.venv`，拒绝符号链接、目录联接和非虚拟环境目录；发现锁定的原生模块时先报错，避免在程序运行时开始清理。旧环境备份与用户数据保留；不向系统 Python 或 Conda 运行 pip uninstall。
+
 检查步骤见[迁移测试说明](migration-check.md)。`setup.bat` 优先探测 64 位 Python 3.12 / 3.11 / 3.13，然后尝试默认 Python；版本、架构不匹配或无法创建虚拟环境的解释器会跳过。`backend.bootstrap` 使用标准库创建 `.venv`，通过该解释器的 `python -m pip` 安装二进制依赖，不依赖原电脑的 pip.exe 路径，不要求本机编译工具。
 
 迁移或失效的环境会先改名为 `.venv.backup-*`，再创建本机环境；不删除旧环境。安装完成记录项目位置。`backend.check_environment` 检查 Python 架构、构建页面与资源、必要文档、写入权限、依赖和一次原生 MuJoCo 计算。只有检查通过才报告安装成功。

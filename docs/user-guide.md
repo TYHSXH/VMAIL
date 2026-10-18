@@ -23,6 +23,14 @@ cd VMAIL
 
 如果已经使用 Conda，在目标环境安装 `requirements.txt` 后运行 `start-current-python.bat`；这种方式使用当前环境，不使用项目 `.venv`。
 
+## 卸载与重新安装
+
+先在启动窗口按 Ctrl+C 停止 VMAIL，再双击项目根目录的 `uninstall.bat`。脚本会删除一键安装创建的 `.venv`，一次清除其中的 Python 依赖，包括原生 MuJoCo；卸载不需要联网。
+
+任务、实验结果、项目文件及 `.venv.backup-*` 旧环境备份会保留，系统 Python 和 Conda 环境不受影响。通过 `start-current-python.bat` 使用的外部环境不由此脚本卸载。若提示环境正在使用，请关闭相关程序后重试。
+
+需要重新使用时，保持联网双击 `start.bat` 即可重建环境。若连项目文件也不再需要，可在备份实验结果后自行删除项目文件夹。
+
 ## 开始实验与视角操作
 
 1. 点击左侧任务名称，先阅读右侧“任务”页。

@@ -4,7 +4,7 @@
 
 ## 拷贝内容
 
-复制项目文件，排除 `.venv`、`.venv.backup-*`、`node_modules`、`.npm-cache`、`.git` 和 Python 缓存。保留 `app`（含 WASM、JS、CSS、字体）、`backend`、`docs`、`prompts`、`tasks`、`model_library`、`requirements.txt` 和三个 BAT 脚本。源码和开发文件可一起保留；已有 `tasks/*/results/` 按需保留。
+复制项目文件，排除 `.venv`、`.venv.backup-*`、`node_modules`、`.npm-cache`、`.git` 和 Python 缓存。保留 `app`（含 WASM、JS、CSS、字体）、`backend`、`docs`、`prompts`、`tasks`、`model_library`、`requirements.txt` 和安装、启动、卸载 BAT 脚本。源码和开发文件可一起保留；已有 `tasks/*/results/` 按需保留。
 
 新电脑需要自行安装 64 位 x86 Python，建议 3.12。安装脚本不会安装 Python 本身，也不会自动配置浏览器、显卡驱动或网络代理。首次安装需要能访问 pip 使用的软件包源；安装完成后运行已打包的程序不需要 Node.js。
 
