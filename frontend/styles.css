@@ -429,3 +429,6 @@ body.help-page { height: auto; min-height: 100vh; overflow: auto; background: va
 .preview-header h1 { flex: 1; min-width: 120px; }
 .preview-actions { flex-wrap: wrap; }
 @media (max-width: 760px) { .preview-brand { width: 100%; } .preview-actions { width: 100%; } .preview-actions select { max-width: 200px; } }
+
+.export-experiment-dialog p { color: var(--muted); font-size: 12px; line-height: 1.8; }
+.export-experiment-dialog .primary-button { width: 100%; margin-top: 8px; }

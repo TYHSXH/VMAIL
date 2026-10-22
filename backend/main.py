@@ -24,12 +24,26 @@ APP_DIR = ROOT / "app"
 TASKS_DIR = ROOT / "tasks"
 
 
+class ControlEvent(BaseModel):
+    step: int = Field(ge=0, le=200000)
+    controls: list[float] = Field(max_length=200000)
+
+
+class ExperimentReplay(BaseModel):
+    version: int = 1
+    model_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
+    initial_state: list[float] = Field(max_length=1000000)
+    control_events: list[ControlEvent] = Field(default_factory=list, max_length=10000)
+    sample_steps: list[int] = Field(min_length=2, max_length=200001)
+
+
 class SimulationRequest(BaseModel):
     parameters: dict[str, Any] = Field(default_factory=dict)
     controls: dict[str, float] = Field(default_factory=dict)
     duration: float | None = None
     timestep: float | None = None
     run_token: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,80}$")
+    replay: ExperimentReplay | None = None
 
 
 class TitleRequest(BaseModel):
@@ -208,6 +222,7 @@ def api_simulate(task_id: str, request: SimulationRequest) -> dict[str, Any]:
             request.controls,
             run["cancel"],
             lambda value: run.update(progress=value),
+            replay=request.replay.model_dump() if request.replay is not None else None,
         )
         if run["cancel"].is_set():
             raise SimulationError("计算已取消，未保存结果。")

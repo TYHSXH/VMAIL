@@ -11,6 +11,7 @@ import time
 import numpy as np
 from .loads import LoadError, compile_loads, apply_loads
 from .load_math import signal_math
+from .experiment import model_revision, restore_experiment
 
 
 class SimulationError(Exception):
@@ -169,6 +170,7 @@ def prepare_browser_model(
 
     return {
         "xml": ET.tostring(root, encoding="unicode"),
+        "model_revision": model_revision(task, values, xml, assets),
         "initial_state": initial_state,
         "joint_limits": model.jnt_limited.astype(bool).tolist(),
         "observe": task.get("observe", {}).get("observe", {}),
@@ -436,6 +438,7 @@ def run_mujoco_task(
     control_overrides: dict[str, Any] | None = None,
     cancel_event: Any = None,
     progress: Any = None,
+    replay: dict | None = None,
 ) -> dict[str, Any]:
     try:
         import mujoco
@@ -461,6 +464,10 @@ def run_mujoco_task(
     controls = _set_actuator_controls(model, data, {**defaults, **(control_overrides or {})}, mujoco)
     mujoco.mj_forward(model, data)
     program = _compile_loads(task, values, model, mujoco)
+    sample_steps, control_events = None, {}
+    if replay is not None:
+        sample_steps, control_events = restore_experiment(replay, model_revision(task, values, xml, assets), model, data, duration, timestep, mujoco)
+        controls = {mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_ACTUATOR, i): float(value) for i, value in enumerate(data.ctrl)}
 
     observe = task.get("observe", {}).get("observe", {})
     _validate_observations(model, observe, mujoco)
@@ -468,7 +475,7 @@ def run_mujoco_task(
     units.update(program["units"])
     series: dict[str, list[float]] = {"time": []}
     steps = max(1, math.ceil(duration / timestep))
-    if (steps + 1) * (len(units) + 1) > MAX_VALUES:
+    if (len(sample_steps) if sample_steps is not None else steps + 1) * (len(units) + 1) > MAX_VALUES:
         raise SimulationError("观测数据过多，请减少观测量、缩短时长或增大步长。")
     started = time.monotonic()
 
@@ -480,6 +487,9 @@ def run_mujoco_task(
                 raise SimulationError("计算超过 60 秒，请缩小实验规模。")
             if progress is not None:
                 progress(step / steps)
+        if step in control_events:
+            data.ctrl[:] = control_events[step]
+        mujoco.mj_forward(model, data)
         load_values = _apply_loads(program, model, data)
         if program["entries"]:
             mujoco.mj_forward(model, data)
@@ -488,12 +498,13 @@ def run_mujoco_task(
             raise SimulationError("仿真出现非有限数值，请检查模型或减小步长。")
         if step and data.time + 1e-9 < series["time"][-1]:
             raise SimulationError("MuJoCo 自动重置了不稳定的仿真，请检查模型或减小步长。")
-        series["time"].append(float(data.time))
-        for key, value in row.items():
-            series.setdefault(key, []).append(value)
-        for key in list(series.keys()):
-            if key != "time" and key not in row:
-                series[key].append(float("nan"))
+        if sample_steps is None or step in sample_steps:
+            series["time"].append(float(data.time))
+            for key, value in row.items():
+                series.setdefault(key, []).append(value)
+            for key in list(series.keys()):
+                if key != "time" and key not in row:
+                    series[key].append(float("nan"))
 
         if step < steps:
             model.opt.timestep = min(timestep, max(0, duration - data.time))
@@ -512,6 +523,7 @@ def run_mujoco_task(
         f"- Samples: {len(series['time'])}\n"
         f"- Parameters: {values}\n"
         f"- Actuator controls: {controls}\n"
+        f"- Browser experiment replay: {'yes' if replay is not None else 'no'}\n"
         f"- Load definitions: {task.get('loads', {})}\n"
         f"- Units: {units}\n"
     )
@@ -526,4 +538,5 @@ def run_mujoco_task(
         "series": series,
         "units": units,
         "summary": summary,
+        "experiment": {"parameters": values, "duration": duration, "timestep": timestep, "replay": replay} if replay is not None else None,
     }

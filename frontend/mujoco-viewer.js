@@ -224,6 +224,7 @@ export class MujocoBrowserViewer {
     this.mujoco.mj_resetData(this.model, this.data);
     if (this.resetKeyframe >= 0) this.mujoco.mj_resetDataKeyframe(this.model, this.data, this.resetKeyframe);
     this.data.time = 0;
+    this.physicsStep = 0;
     this.model.opt.timestep = this.configuredTimestep;
     if (controls) {
       controls.forEach((value, index) => {
@@ -264,6 +265,8 @@ export class MujocoBrowserViewer {
       this.applyDragForce();
       this.model.opt.timestep = Math.min(this.configuredTimestep, this.duration - this.getTime());
       this.mujoco.mj_step(this.model, this.data);
+      this.physicsStep = (this.physicsStep || 0) + 1;
+      this.mujoco.mj_forward(this.model, this.data);
       if (this.hasReachedDuration()) {
         this.finishDuration();
         break;
@@ -387,6 +390,7 @@ export class MujocoBrowserViewer {
     this.clearDrag(); this.setPaused(true); this.posePrepared = true;
     this.clearTaskLoads();
     this.data.time = 0; this.data.qvel.fill(0); this.data.qacc_warmstart.fill(0);
+    this.physicsStep = 0;
     this.timeAccumulator = 0; this.lastSampleTime = -Infinity; this.nextSampleTime = 0; this.completionNotified = false;
   }
 
@@ -753,6 +757,8 @@ export class MujocoBrowserViewer {
           this.applyDragForce();
           this.model.opt.timestep = Math.min(timestep, this.duration - this.getTime());
           this.mujoco.mj_step(this.model, this.data);
+          this.physicsStep = (this.physicsStep || 0) + 1;
+          this.mujoco.mj_forward(this.model, this.data);
           this.timeAccumulator -= timestep;
           stepped = true;
           stateFresh = false;
@@ -1049,6 +1055,7 @@ export class MujocoBrowserViewer {
     if (!this.model || !this.data || !this.posePrepared || this.drag) return;
     this.posePrepared = false;
     this.data.time = 0;
+    this.physicsStep = 0;
     this.data.qvel.fill(0);
     this.data.qacc_warmstart.fill(0);
     this.timeAccumulator = 0;

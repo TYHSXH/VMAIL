@@ -40,9 +40,22 @@ The interface currently uses Chinese labels; the labels below help you locate ea
 2. In **参数与控制** (Parameters and controls), adjust the mass, stiffness, damping, or initial conditions, then click **应用参数** (Apply parameters).
 3. Click **开始仿真** (Start simulation) and inspect the curves in **数据** (Data). The simulation pauses automatically at the specified duration. Use **重置** (Reset) to restore the task's initial state.
 4. Rotate with the left mouse button, pan with Shift + left mouse button, and zoom with the scroll wheel. **复位视角** restores the task's default view. **拖动** (Drag) adjusts the starting pose; time and data recording stop while dragging.
-5. **导出数据** (Export data) downloads the curves already recorded in the browser. **批量计算** (Batch calculation) runs a new calculation locally from the task's initial conditions and saves results under `tasks/<task_id>/results/run_*/`. Download the CSV from **已保存的实验** (Saved experiments).
+5. After the browser simulation finishes, click **导出本次实验** (Export this experiment) and choose **导出网页数据 CSV** (Export browser data CSV) or **后台重算并下载 CSV** (Recompute locally and download CSV). **后台重算** (Native replay) is also a shortcut. Native results are saved under `tasks/<task_id>/results/run_*/` and can be downloaded again from **已保存的实验** (Saved experiments).
 
-Batch calculations do not reproduce mouse dragging or changes to controls made during a real-time run. The current batch function runs one parameter set at a time; automated parameter sweeps require a separate experiment script. The edit button beside a task name renames it; the trash button deletes the task and its results. Back up anything you need before deleting it.
+Native replay inherits the parameters, duration, timestep, joint positions, actual pose after dragging, velocities, and internal state **at the start of that browser experiment**, and replays actuator changes at their recorded physics steps. It does not start from the final pose or replace the recorded settings with edits made just before export. Dragging prepares the initial pose; mouse movement during preparation is outside experiment time. Dragging again, or changing model parameters, duration, timestep, or joint pose, requires another complete browser run before export.
+
+### How do browser and native calculations differ?
+
+| Comparison | Browser calculation / export | Native replay (previously “batch calculation”) |
+| --- | --- | --- |
+| Engine | MuJoCo WebAssembly in the browser, with animation and charts | Native MuJoCo called through Python, without depending on animation refresh |
+| Purpose | Interactive observation; export saves the recorded data without recalculation | Recompute under the same experimental conditions and save results and conditions |
+| Conditions and samples | Records the actual starting state and control changes | Inherits the same record and outputs at browser sample times for comparison |
+| Accuracy | Depends on the model, timestep, and solver settings | **Not inherently more accurate because it runs in the backend**; the same version and conditions should agree within numerical tolerance |
+
+Both engines currently use MuJoCo 3.13.0. Browser frame rate affects visual smoothness and elapsed wall-clock time, not the configured physics timestep. Native replay checks the model and load revision and compares both datasets. Contacts, impacts, and sensitive systems can amplify floating-point differences between platforms; bitwise equality is not guaranteed. To improve numerical accuracy, choose a suitable smaller timestep or revise the model/solver settings, complete a new browser experiment, then replay those new conditions. See the [browser calculation, native replay, and export guide](docs/simulation-export.md).
+
+One replay uses one completed experiment; automated parameter sweeps still require a separate script. The edit button beside a task name renames it; the trash button deletes the task and its results. Back up anything you need before deleting it.
 
 Use **模型预览** (Model preview) in the top bar to browse the included model library or preview a single XML file. A complete task package is needed for task instructions, parameter settings, and chart configuration. **帮助** (Help) opens the user manual and AI prompts.
 

@@ -10,6 +10,7 @@ import { decodePreviewBundle } from "../frontend/preview-bundle.js";
 import { applyLoads } from "../frontend/loads.js";
 import { forecastLoads } from "../frontend/load-preview.js";
 import katex from "katex";
+import {ExperimentRecorder, compareExperiments} from "../frontend/experiment.js";
 
 const mj = await loadMujoco();
 globalThis.window = { devicePixelRatio: 1 };
@@ -308,4 +309,59 @@ test("inertia, COM, world joint axes and point-force/couple overlays follow phys
     viewer.drag=null;viewer.posePrepared=false;viewer.setOverlay("loads",false);
     assert.equal(items.get("drag:target").visible,false);assert.equal(force.visible,false);
   }finally{viewer.drag=null;destroy(viewer);}
+});
+function nativeReplay(input) {
+  return JSON.parse(execFileSync(process.env.VMAIL_TEST_PYTHON || projectPython,
+    [fileURLToPath(new URL("replay_native.py", import.meta.url))], {input:JSON.stringify(input),encoding:"utf8"}));
+}
+for (const scenario of ["dragged slider", "adjusted closed linkage with changing controls", "feedback loads"]) test(`completed ${scenario}: native replay inherits the WASM start and matches every sample`, async()=>{
+  const task_id=scenario==="dragged slider"?"example_mass_spring":scenario==="feedback loads"?"rotating_load_demo":"slider_crank_block_force";
+  const parameters=scenario==="dragged slider"?{mass:2}:{};
+  const duration=.051,timestep=.002;
+  const payload=nativeReplay({mode:"prepare",task_id,parameters,duration,timestep});
+  const rows=[];
+  const viewer=await createViewer(payload.xml,{onSample:sample=>{
+    if(rows.at(-1)?.time===sample.time)rows[rows.length-1]=sample;
+    else rows.push(sample);
+  }},payload.assets,payload.joint_limits,payload.load_program);
+  try {
+    viewer.initialState=payload.initial_state;viewer.observe=payload.observe;viewer.reset();viewer.setDuration(duration);
+    if(scenario==="dragged slider") {
+      viewer.posePrepared=true;
+      viewer.data.qpos[0]=.31;viewer.data.qvel[0]=.8;
+      viewer.drag={bodyId:1,pointerId:0,controls:Array.from(viewer.data.ctrl),activation:Array.from(viewer.data.act),disableflags:viewer.model.opt.disableflags};
+      viewer.renderer.domElement.hasPointerCapture=()=>false;
+      viewer.clearDrag();
+      assert.equal(viewer.data.qpos[0],.31);assert.equal(viewer.data.qvel[0],0);
+    } else if(scenario!=="feedback loads") {
+      assert.equal(viewer.setJointPosition(0,Math.PI/3),true);
+      viewer.setActuatorControl(0,1);
+    }
+    if(viewer.posePrepared)viewer.beginPreparedExperiment();
+    rows.length=0;
+    const recorder=new ExperimentRecorder(viewer,{parameters,duration,timestep,model_revision:payload.model_revision});
+    viewer.emitSample(true);
+    const steps=Math.ceil(duration/timestep);
+    for(let step=0;step<steps;step++) {
+      if(scenario.includes("changing controls") && [5,12].includes(step)) {
+        viewer.setActuatorControl(0,.7);recorder.controlChanged(viewer);
+        if(step===5){viewer.setActuatorControl(0,1.2);recorder.controlChanged(viewer);}
+        viewer.mujoco.mj_forward(viewer.model,viewer.data);viewer.emitSample(true);
+      }
+      viewer.step();
+    }
+    const series={time:rows.map(row=>row.time)};
+    for(const key of Object.keys(rows[0].values))series[key]=rows.map(row=>row.values[key]);
+    const completed=recorder.finish(series,viewer.getObservationUnits());
+    assert.ok(completed);
+    assert.equal(completed.request.replay.sample_steps.at(-1),steps);
+    if(scenario.includes("changing controls"))assert.equal(completed.request.replay.control_events.length,2);
+    const native=nativeReplay({task_id,...completed.request});
+    const comparison=compareExperiments(completed,native);
+    assert.ok(comparison.consistent,`maximum absolute difference ${comparison.maxAbsolute}`);
+    const first=completed.series[Object.keys(completed.series).find(key=>key!=="time")][0];
+    series[Object.keys(series).find(key=>key!=="time")][0]=999;
+    assert.equal(completed.series[Object.keys(completed.series).find(key=>key!=="time")][0],first);
+    if(scenario==="dragged slider")assert.equal(native.series[`joint.${payload.observe.joints[0].name}.position`][0],.31);
+  } finally {viewer.drag=null;destroy(viewer);}
 });

@@ -93,3 +93,11 @@ npm run build
 学生安装读取 `requirements.txt` 与 `constraints.txt`，版本来自 Windows x64／Python 3.12 的验证环境。升级依赖后应更新约束并完整回归。启动前读取 `app/.vite/manifest.json` 检查 Vite 登记的静态资源，不再只检查 HTML 和任意一个 WASM。默认只允许本机、同源请求，所有 API 禁止缓存；自定义端口无需修改跨域白名单。
 
 [发布验收说明](release-check.md)记录检查范围与尚需人工验证的项目。
+
+## 网页实验记录与原生重算
+
+`frontend/experiment.js` 在第一次开始／单步前以 `mjSTATE_INTEGRATION` 抓取完整 t=0 积分状态，按物理步记录手动 ctrl 变化；实验结束时冻结当次参数、时长、步长、采样步和网页数据。完成前不可导出。网页 CSV 使用冻结记录；后台请求也来自该快照，不再临时读取表单或最终姿态。关节调节、拖动和模型参数修改使旧记录失效。
+
+`backend/experiment.py` 校验模型／资源／观测／载荷标识、状态向量长度与有限值、四元数、采样和控制步顺序，通过 `mj_setState` 恢复起点，按步重放手动 ctrl，载荷规律仍正常计算。结果按网页采样步输出，连同 `experiment.json` 保存；无 replay 的原 API 保留，供脚本和独立任务验证使用。前端保持网页曲线，逐点比较容差后下载后台 CSV。两端同为 MuJoCo 3.13.0，不以运行平台宣称精度高低。
+
+`tests/replay_native.py` 由 renderer 回归调用，使用真实 WASM 和原生 MuJoCo 覆盖拖动后姿态、质量参数、闭环关节转角、中途控制、反馈载荷与非整数末步。`tests/test_experiment.py` 检查版本不符、损坏记录与保存条件重放。

@@ -10,6 +10,7 @@ import { LoadPreviewPanel, renderLoadFormula } from "./load-controls.js";
 import { setupAssistant } from "./assistant.js";
 import { setupFileDrop } from "./file-drop.js";
 import { confirmTaskDeletion } from "./task-delete.js";
+import { ExperimentRecorder, compareExperiments } from "./experiment.js";
 
 decorateIcons();
 
@@ -35,6 +36,8 @@ const state = {
   seriesMode: "realtime",
   modelLoading: false,
   runtimeRows: [],
+  experiment: null,
+  appliedInputs: null,
 };
 
 const el = Object.fromEntries(
@@ -144,7 +147,7 @@ async function initViewer() {
         if(!paused){activateTab("data");state.simulationStarted=true;state.simulationCompleted=false;}
         updatePlaybackButton();
       },
-      onComplete:(time,duration)=>{state.simulationStarted=true;state.simulationCompleted=true;updatePlaybackButton();showMessage(`仿真完成：${duration.toFixed(3)} s`);},
+      onComplete:(time,duration)=>{state.simulationStarted=true;state.simulationCompleted=true;updatePlaybackButton();showMessage(`仿真完成：${duration.toFixed(3)} s，可选择导出网页数据或后台重算。`);},
       onError:message=>showMessage(message,true),
     });
     await state.viewer.init();state.viewerReady=true;
@@ -230,7 +233,7 @@ function renderTask() {
   renderTaskNotes(el.taskNotes,task.notes);el.durationInput.value=task.task.simulation?.duration ?? 5;el.timestepInput.value=task.task.simulation?.timestep ?? .01;
   el.topicTags.replaceChildren();
   for(const topic of task.task.theory_topics || []){const tag=document.createElement("span");tag.textContent=topic;el.topicTags.append(tag);}
-  renderParameters();el.applyParameters.disabled=false;el.runButton.disabled=Boolean(state.batch);
+  renderParameters();el.applyParameters.disabled=false;el.runButton.disabled=true;
 }
 function renderParameters() {
   const params=state.task.parameters.parameters || {};
@@ -270,10 +273,11 @@ async function loadBrowserModel() {
   state.modelLoading=true;state.viewer.setPaused(true);setPlaybackEnabled(false);
   el.viewerLoading.classList.remove("hidden");el.viewerLoading.innerHTML="<strong>正在载入模型</strong><span>请稍候</span>";
   try{
-    rememberViewerControls();const {duration,timestep}=simulationSettings();
-    const payload=await requestJson(`/api/tasks/${task.id}/browser-model`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters:collectParameters(),timestep,duration})});
+    rememberViewerControls();const {duration,timestep}=simulationSettings(),parameters=collectParameters();
+    const payload=await requestJson(`/api/tasks/${task.id}/browser-model`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters,timestep,duration})});
     if(version!==state.modelLoadVersion || state.task!==task)return false;
     state.seriesMode="loading";
+    state.appliedInputs={parameters,duration,timestep,model_revision:payload.model_revision};
     await state.viewer.loadModel(payload.xml,payload.initial_state,payload.observe,payload.assets,task.ui.camera,payload.joint_limits,payload.load_program);
     state.viewer.setActuatorLoadVisibility(task.ui.controls?.actuators || {});
     state.viewerTaskId=task.id;state.seriesUnits=state.viewer.getObservationUnits();restoreViewerControls();clearSeries();
@@ -290,6 +294,21 @@ async function loadBrowserModel() {
 function updatePlaybackButton(){const running=state.viewer && !state.viewer.paused;el.playButton.textContent=running?"暂停仿真":state.simulationCompleted?"重新开始":state.simulationStarted?"继续仿真":"开始仿真";el.playButton.classList.toggle("active",Boolean(running));el.playButton.setAttribute("aria-pressed",String(Boolean(running)));}
 function resetPlaybackState(){state.simulationStarted=false;state.simulationCompleted=false;state.viewer?.setPaused(true);updatePlaybackButton();}
 function resetViewerPreservingControls(){rememberViewerControls();state.viewer.reset(true);restoreViewerControls();state.viewer.emitSample(true);syncRuntimeControls();}
+function restartRecordedExperiment() {
+  const recorded=state.experiment?.completed || state.experiment;
+  if(!recorded){clearSeries();resetViewerPreservingControls();resetPlaybackState();return;}
+  const viewer=state.viewer,controls=viewer.getActuatorControlValues();
+  clearSeries();viewer.clearDrag();viewer.posePrepared=false;viewer.loadFailed=false;
+  viewer.mujoco.mj_setState(viewer.model,viewer.data,recorded.request.replay.initial_state,viewer.mujoco.mjtState.mjSTATE_INTEGRATION.value);
+  viewer.physicsStep=0;viewer.timeAccumulator=0;viewer.lastSampleTime=-Infinity;viewer.nextSampleTime=0;viewer.completionNotified=false;
+  viewer.model.opt.timestep=viewer.configuredTimestep;viewer.setActuatorControlValues(controls);
+  viewer.mujoco.mj_forward(viewer.model,viewer.data);viewer.updateScene();viewer.emitSample(true);resetPlaybackState();
+}
+function beginRecording() {
+  if(state.experiment)return;
+  state.experiment=new ExperimentRecorder(state.viewer,state.appliedInputs);
+  state.viewer.emitSample(true);
+}
 function actuatorUnit(name) {
   const xml=new DOMParser().parseFromString(state.task.model_xml,"application/xml");
   const actuator=[...xml.querySelectorAll("actuator > *")].find(node=>node.getAttribute("name")===name);
@@ -325,7 +344,7 @@ function renderRuntimeControls() {
   for(const item of controls.actuators){
     const spec=config.actuators?.[item.name] || {};
     Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name),controlType:"actuator"});
-    const row=controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);loadPreview.refresh();});
+    const row=controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);state.experiment?.controlChanged(state.viewer);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);loadPreview.refresh();});
     if(automatic.has(item.id)){row.querySelectorAll("input").forEach(input=>input.disabled=true);row.title="由任务载荷函数自动控制";}
     el.actuatorControls.append(row);
   }
@@ -355,6 +374,7 @@ function syncRuntimeControls() {
 function resetSeriesSelection(){state.visibleSeries=new Set((state.task?.ui.layout?.charts || []).flatMap(chart=>chart.series || []));}
 function appendSample(sample) {
   if(!state.task || state.seriesMode!=="realtime" || state.batch)return;
+  if(state.experiment?.completed)return;
   if(state.series.time.length && sample.time<state.series.time.at(-1)-1e-9)clearSeries();
   const replace=state.series.time.length && Math.abs(sample.time-state.series.time.at(-1))<1e-12;
   if(!replace)state.series.time.push(sample.time);
@@ -364,23 +384,31 @@ function appendSample(sample) {
     const value=sample.values[key];
     if(replace)state.series[key][length-1]=Number.isFinite(value)?value:null;else state.series[key].push(Number.isFinite(value)?value:null);
   }
-  if(length>10000)for(const values of Object.values(state.series))values.shift();
   if(state.chartFrameId===null)state.chartFrameId=requestAnimationFrame(()=>{state.chartFrameId=null;charts.draw();syncRuntimeControls();});
-  el.exportData.disabled=false;el.dataSource.textContent=`实时实验 · t = ${sample.time.toFixed(3)} s`;
+  if(state.simulationCompleted)state.experiment?.finish(state.series,state.seriesUnits);
+  el.exportData.disabled=!state.experiment?.completed;el.runButton.disabled=!state.experiment?.completed;
+  el.dataSource.textContent=`网页实验 · t = ${sample.time.toFixed(3)} s${state.experiment?.completed?" · 已完成，可导出或后台重算":" · 完成后可导出"}`;
 }
 function clearSeries(mode="realtime") {
   if(state.chartFrameId!==null)cancelAnimationFrame(state.chartFrameId);
-  state.chartFrameId=null;state.series={time:[]};state.seriesMode=mode;charts.viewRange=null;charts.hoverTime=null;charts.draw();el.exportData.disabled=true;el.dataSource.textContent="暂无数据";
+  state.chartFrameId=null;state.series={time:[]};state.seriesMode=mode;state.experiment=null;charts.viewRange=null;charts.hoverTime=null;charts.draw();el.exportData.disabled=true;el.runButton.disabled=true;el.dataSource.textContent="请先完成一次网页仿真，再选择导出方式。";
 }
 function exportCurrentData() {
-  const time=state.series.time;if(!time.length)return;
-  const columns=Object.keys(state.series).filter(key=>key!=="time");
+  const completed=state.experiment?.completed;if(!completed)return;
+  const series=completed.series,time=series.time;
+  const columns=Object.keys(series).filter(key=>key!=="time");
   const escape=value=>value==null?"":`"${String(value).replaceAll('"','""')}"`;
-  const heading=key=>`${key} [${state.seriesUnits[key] || "1"}]`;
+  const heading=key=>`${key} [${completed.units[key] || "1"}]`;
   const lines=[[heading("time"),...columns.map(heading)].map(escape).join(",")];
-  time.forEach((t,i)=>lines.push([t,...columns.map(key=>state.series[key][i])].map(escape).join(",")));
+  time.forEach((t,i)=>lines.push([t,...columns.map(key=>series[key][i])].map(escape).join(",")));
   const url=URL.createObjectURL(new Blob(["\ufeff",lines.join("\r\n")],{type:"text/csv;charset=utf-8"}));
-  const a=document.createElement("a");a.href=url;a.download=`${state.task.id}_${state.seriesMode}_${new Date().toISOString().replaceAll(":","-")}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const a=document.createElement("a");a.href=url;a.download=`${state.task.id}_web_${new Date().toISOString().replaceAll(":","-")}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function chooseExport() {
+  if(!state.experiment?.completed || state.batch){showMessage("请先完成一次网页仿真。",true);return;}
+  const dialog=document.getElementById("exportExperimentDialog");dialog.returnValue="cancel";
+  dialog.addEventListener("close",()=>{if(dialog.returnValue==="web")exportCurrentData();else if(dialog.returnValue==="native")void runBatchSimulation();},{once:true});
+  dialog.showModal();
 }
 async function loadResultHistory() {
   const task=state.task;if(!task)return;
@@ -396,24 +424,29 @@ async function cancelBatch() {
 }
 async function runBatchSimulation() {
   if(state.batch || !state.task || state.modelLoading)return;
+  const completed=state.experiment?.completed;
+  if(!completed){showMessage("请先完成一次网页仿真，再按本次实验条件后台重算。",true);return;}
   let batch,timer;
   try{
-    const parameters=collectParameters(),settings=simulationSettings();
-    const id=state.task.id,version=state.selectionVersion,experiment=state.experimentVersion;
+    const id=state.task.id,version=state.selectionVersion;
     state.viewer?.setPaused(true);batch={token:crypto.randomUUID(),cancelled:false};state.batch=batch;
-    el.runButton.disabled=true;el.runButton.textContent="计算中…";el.cancelRun.classList.remove("hidden");setPlaybackEnabled(false);
-    el.dataSource.textContent="批量计算中：从初始状态重新运行…";
+    el.runButton.disabled=true;el.exportData.disabled=true;el.runButton.textContent="计算中…";el.cancelRun.classList.remove("hidden");setPlaybackEnabled(false);
+    el.dataSource.textContent="后台重算中：继承本次实验参数、调整后的起始姿态与控制记录…";
     timer=setInterval(async()=>{if(state.batch!==batch)return;try{const progress=await requestJson(`/api/runs/${batch.token}`);if(state.batch===batch)el.runButton.textContent=`计算中 ${Math.round(progress.progress*100)}%`;}catch{}},700);
-    const result=await requestJson(`/api/tasks/${id}/simulate`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({parameters,controls:state.viewerTaskId===id?state.viewer.getActuatorControlValues():{},...settings,run_token:batch.token})});
+    const result=await requestJson(`/api/tasks/${id}/simulate`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...completed.request,run_token:batch.token})});
     if(batch.cancelled || version!==state.selectionVersion || state.task?.id!==id)return;
-    if(experiment!==state.experimentVersion){showMessage("计算期间输入发生变化，结果已保存，可在已保存的实验中下载。");loadResultHistory();return;}
-    clearSeries("batch");state.series=result.series;state.seriesUnits=result.units;charts.rebuild();el.exportData.disabled=!state.series.time.length;
-    el.dataSource.textContent=`批量实验 · 初始状态 · 时长 ${result.duration} s · 步长 ${result.timestep} s`;
-    showMessage(`计算完成，已保存 ${result.saved.run_id}`);loadResultHistory();
-  }catch(error){showMessage(error.message,true);}
+    if(completed!==state.experiment?.completed){showMessage("实验准备条件已改变；刚才的重算结果已保存，可在已保存的实验中下载。");loadResultHistory();return;}
+    const comparison=compareExperiments(completed,result);
+    el.dataSource.textContent=`本次后台重算已保存 · ${comparison.consistent?"与网页采样在容差内一致":"与网页存在超出容差的差异，请检查接触、步长和求解设置"} · 网页曲线保留`;
+    const download=document.createElement("a");download.href=`/api/tasks/${id}/results/${result.saved.run_id}/data.csv`;download.download="";download.click();
+    showMessage("后台重算完成，CSV 已下载，结果及实验条件已保存。",!comparison.consistent);loadResultHistory();
+  }catch(error){
+    if(completed===state.experiment?.completed)el.dataSource.textContent="后台重算未完成，网页记录保留，可重试或导出网页数据。";
+    showMessage(error.message,true);
+  }
   finally{
     clearInterval(timer);
-    if(batch && state.batch===batch){state.batch=null;el.cancelRun.classList.add("hidden");el.runButton.disabled=!state.task;el.runButton.textContent="批量计算";setPlaybackEnabled(Boolean(state.viewer?.model) && !state.modelLoading && state.viewerTaskId===state.task?.id);}
+    if(batch && state.batch===batch){state.batch=null;el.cancelRun.classList.add("hidden");el.runButton.disabled=!state.experiment?.completed;el.exportData.disabled=!state.experiment?.completed;el.runButton.textContent="后台重算";setPlaybackEnabled(Boolean(state.viewer?.model) && !state.modelLoading && state.viewerTaskId===state.task?.id);}
   }
 }
 function setMode(mode) {
@@ -514,18 +547,14 @@ document.querySelector(".tabs").addEventListener("keydown",event=>{
 });
 el.refreshTasks.addEventListener("click",()=>loadTasks().catch(error=>showMessage(error.message,true)));
 el.applyParameters.addEventListener("click",()=>{if(!state.batch)loadBrowserModel();});
-function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);updatePlaybackButton();taskJointPanel.sync(true);loadPreview.invalidate("应用参数后更新加载曲线。");}
+function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);clearSeries("preparing");resetPlaybackState();taskJointPanel.sync(true);loadPreview.invalidate("应用参数后更新加载曲线。");}
 el.parameterForm.addEventListener("input",markDirty);
 el.timestepInput.addEventListener("input",markDirty);
-el.durationInput.addEventListener("input",()=>{
-  loadPreview.refresh();
-  state.experimentVersion++;
-  try{const {duration}=simulationSettings();state.viewer?.setDuration(duration);if(state.viewer?.getTime()+1e-9<duration)state.simulationCompleted=false;updatePlaybackButton();}catch{/* Validate on start/apply. */}
-});
+el.durationInput.addEventListener("input",markDirty);
 el.runButton.addEventListener("click",runBatchSimulation);
 el.cancelRun.addEventListener("click",cancelBatch);
-el.clearData.addEventListener("click",()=>{state.viewer?.setPaused(true);clearSeries();state.viewer?.emitSample(true);});
-el.exportData.addEventListener("click",exportCurrentData);
+el.clearData.addEventListener("click",()=>{if(!state.batch && state.viewer?.model && state.viewerTaskId===state.task?.id){restartRecordedExperiment();loadPreview.refresh();}});
+el.exportData.addEventListener("click",chooseExport);
 el.resetButton.addEventListener("click",()=>{clearSeries();resetViewerPreservingControls();resetPlaybackState();loadPreview.refresh();});
 el.stepButton.addEventListener("click",async()=>{
   try{
@@ -533,6 +562,8 @@ el.stepButton.addEventListener("click",async()=>{
     if(state.parametersDirty && !await loadBrowserModel())return;
     if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
     if(state.seriesMode==="batch"){clearSeries();resetViewerPreservingControls();resetPlaybackState();}
+    if(state.simulationCompleted)restartRecordedExperiment();
+    beginRecording();
     state.viewer.setPaused(true);state.viewer.step();state.simulationStarted=true;updatePlaybackButton();activateTab("data");
   }catch(error){showMessage(error.message,true);}
 });
@@ -545,9 +576,9 @@ el.playButton.addEventListener("click",async()=>{
     if(state.parametersDirty && !await loadBrowserModel())return;
     if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
     else if(state.simulationCompleted || state.seriesMode==="batch"){
-      clearSeries();resetViewerPreservingControls();resetPlaybackState();
+      restartRecordedExperiment();
     }
-    state.viewer.setDuration(duration);state.simulationStarted=true;state.simulationCompleted=false;state.viewer.setPaused(false);activateTab("data");
+    beginRecording();state.viewer.setDuration(duration);state.simulationStarted=true;state.simulationCompleted=false;state.viewer.setPaused(false);activateTab("data");
   }catch(error){showMessage(error.message,true);}
 });
 el.cameraMode.addEventListener("click",()=>setMode("camera"));

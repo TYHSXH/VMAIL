@@ -114,12 +114,12 @@
         <section id="panel-data" class="tab-panel" role="tabpanel" aria-labelledby="tab-data" data-panel="data">
           <div class="data-actions">
             <button id="clearData" class="quiet-button" type="button">清空</button>
-            <button id="exportData" class="quiet-button" data-icon="download" type="button" disabled>导出数据</button>
-            <button id="runButton" class="primary-button" type="button" disabled>批量计算</button>
+            <button id="exportData" class="quiet-button" data-icon="download" type="button" disabled>导出本次实验</button>
+            <button id="runButton" class="primary-button" type="button" disabled>后台重算</button>
             <button id="cancelRun" class="quiet-button hidden" type="button">取消计算</button>
           </div>
           <p id="dataSource" class="data-source" role="status"></p>
-          <details class="usage-notes"><summary>图表与导出说明</summary><p>悬停读取数据，Shift＋滚轮缩放时间轴，双击恢复全程。导出数据保存当前曲线；批量计算从初始状态重新运行并保存结果，使用固定控制值，不包含拖拽历史。</p></details>
+          <details class="usage-notes"><summary>图表与导出说明</summary><p>悬停读取数据，Shift＋滚轮缩放时间轴，双击恢复全程。先完成一次网页仿真，再选择导出网页数据或后台重算并下载 CSV。后台继承本次实验参数、关节／拖动后的起始状态及中途控制记录，不从结束姿态起跑。两端使用同版本 MuJoCo，后台不天然更准确；重算后保留网页曲线并检查数值差异。</p></details>
           <div id="chartStack" class="chart-stack"></div>
           <details class="result-history"><summary>已保存的实验</summary><div id="resultHistory"></div></details>
         </section>
@@ -138,6 +138,15 @@
       <div id="message" class="toast hidden" role="status"></div>
       <div id="fileDropHint" class="file-drop-hint hidden" aria-hidden="true"><strong>松开以导入文件</strong><span>图片 → AI 助手 · XML → 模型预览</span></div>
     </div>
+    <dialog id="exportExperimentDialog" class="delete-task-dialog export-experiment-dialog" aria-labelledby="exportExperimentTitle">
+      <form method="dialog">
+        <h2 id="exportExperimentTitle">导出本次完成的实验</h2>
+        <p>直接导出网页数据，或按相同条件在后台重新计算。</p>
+        <button class="primary-button" value="web">导出网页数据 CSV</button>
+        <button class="primary-button" value="native">后台重算并下载 CSV</button>
+        <div class="delete-task-actions"><button class="quiet-button" value="cancel" autofocus>取消</button></div>
+      </form>
+    </dialog>
     <dialog id="deleteTaskDialog" class="delete-task-dialog" aria-labelledby="deleteTaskTitle" aria-describedby="deleteTaskWarning">
       <form method="dialog">
         <h2 id="deleteTaskTitle">删除这个学习任务？</h2>

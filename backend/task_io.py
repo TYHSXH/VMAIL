@@ -228,6 +228,8 @@ def save_run_result(tasks_dir: Path, task_id: str, result: dict[str, Any]) -> di
 
     summary_path = run_dir / "summary.md"
     summary_path.write_text(result.get("summary", ""), encoding="utf-8")
+    if result.get("experiment") is not None:
+        (run_dir / "experiment.json").write_text(json.dumps(result["experiment"], ensure_ascii=False, indent=2, allow_nan=False), encoding="utf-8")
 
     return {
         "run_id": run_dir.name,
