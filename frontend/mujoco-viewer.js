@@ -4,6 +4,7 @@ import loadMujoco from "@mujoco/mujoco";
 import { projectJointPose } from "./joint-pose.js";
 import { applyLoads } from "./loads.js";
 import { PhysicsOverlays } from "./physics-overlays.js";
+import { FloorBranding } from "./floor-branding.js";
 
 class CapsuleGeometry extends THREE.BufferGeometry {
   constructor(radius, length) {
@@ -33,6 +34,7 @@ export class MujocoBrowserViewer {
     this.meshes = [];
     this.geometryCache = new Map();
     this.sceneDirty = true;
+    this.floorBranding = new FloorBranding({ onLoad: () => { this.sceneDirty = true; } });
     this.suspended = false;
     this.resetKeyframe = -1;
     this.paused = true;
@@ -692,6 +694,7 @@ export class MujocoBrowserViewer {
       mesh.material.color.setRGB(mjGeom.rgba[0], mjGeom.rgba[1], mjGeom.rgba[2]);
       mesh.material.opacity = mjGeom.rgba[3];
       mesh.material.transparent = mjGeom.rgba[3] < 0.999;
+      this.floorBranding?.update(mesh, mjGeom, this.model, this.mujoco);
       mesh.matrixAutoUpdate = false;
       mesh.matrix.set(
         mjGeom.mat[0], mjGeom.mat[1], mjGeom.mat[2], mjGeom.pos[0],
@@ -1146,6 +1149,7 @@ export class MujocoBrowserViewer {
   }
 
   dispose() {
+    this.floorBranding?.dispose();
     if (this.frameId) cancelAnimationFrame(this.frameId);
     this.disposeModel();
     this.overlays?.dispose();this.overlays=null;

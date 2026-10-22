@@ -175,14 +175,6 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     }
     else if (action === "joints") { const hidden = jointsPanel.classList.toggle("hidden"); button.classList.toggle("active", !hidden); button.setAttribute("aria-expanded", String(!hidden)); jointPanel.sync(true); }
   });
-  window.addEventListener("dragover", event => {
-    if (event.dataTransfer?.types.includes("Files")) { event.preventDefault(); event.dataTransfer.dropEffect = "copy"; }
-  });
-  window.addEventListener("drop", event => {
-    if (!event.dataTransfer?.types.includes("Files")) return;
-    event.preventDefault();
-    void load([...event.dataTransfer.files]);
-  });
   window.addEventListener("keydown", event => {
     if (!active) return;
     if (event.key === "Escape") { event.preventDefault(); close(); }
@@ -197,5 +189,5 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     }
   }, { capture: true });
   window.addEventListener("beforeunload", () => viewer?.dispose());
-  return { isActive: () => active };
+  return { isActive: () => active, loadFiles: files => load(files), close };
 }

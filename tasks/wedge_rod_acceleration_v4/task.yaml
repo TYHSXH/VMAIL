@@ -1,0 +1,12 @@
+id: wedge_rod_acceleration_v4
+title: 铅垂杆推动楔块（题 6-14）
+question: 杆 AB 与楔块 C 的质量比如何影响杆的竖直加速度与楔块的水平加速度？两者加速度是否满足 a_B = a_C·tanθ？
+simulation:
+  engine: mujoco
+  duration: 6.0
+  timestep: 0.005
+theory_topics:
+  - 牛顿第二定律
+  - 约束运动学
+  - 斜面接触
+  - 加速度关系

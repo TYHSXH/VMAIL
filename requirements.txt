@@ -1,5 +1,6 @@
-fastapi>=0.115
-uvicorn[standard]>=0.30
-pyyaml>=6.0
-numpy>=1.26
+-c constraints.txt
+fastapi==0.141.1
+uvicorn[standard]==0.52.4
+pyyaml==6.0.3
+numpy==2.5.3
 mujoco==3.13.0

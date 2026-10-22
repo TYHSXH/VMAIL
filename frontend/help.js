@@ -47,7 +47,10 @@ try {
     for (const link of targets.get(doc.path).section.querySelectorAll("a[href]")) {
       const resolved = resolveHelpLink(link.getAttribute("href"), doc.path, location.origin);
       const target = resolved && targets.get(resolved.path);
-      if (!target) continue;
+      if (!target) {
+        if (resolved) link.href = `/${resolved.path}${resolved.anchor ? "#" + encodeURIComponent(resolved.anchor) : ""}`;
+        continue;
+      }
       link.href = `#${target.headings.get(resolved.anchor) || target.section.id}`;
       link.removeAttribute("target");
       link.removeAttribute("rel");

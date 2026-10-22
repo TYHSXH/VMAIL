@@ -23,7 +23,7 @@ def reusable_environment(environment: Path, root: Path) -> bool:
                 return False
         except (OSError, ValueError, KeyError, TypeError):
             return False
-    probe = "import sys,sysconfig,pathlib; assert sys.version_info >= (3,11); assert sysconfig.get_platform() == 'win-amd64'; assert pathlib.Path(sys.base_prefix).is_dir(); import pip"
+    probe = "import sys,sysconfig,pathlib; assert sys.version_info >= (3,12); assert sysconfig.get_platform() == 'win-amd64'; assert pathlib.Path(sys.base_prefix).is_dir(); import pip"
     try:
         result = subprocess.run([str(python), "-c", probe], cwd=root, capture_output=True, timeout=20)
         return result.returncode == 0
@@ -56,7 +56,9 @@ def main() -> int:
             # Some installed interpreters have inaccessible activation templates.
             import ensurepip
             with tempfile.TemporaryDirectory(prefix="vmail-python-check-") as folder:
-                venv.EnvBuilder(with_pip=False).create(folder)
+                # Verify ensurepip as well: a Python installation can create a
+                # bare venv yet fail when setup tries to install pip into it.
+                venv.EnvBuilder(with_pip=True).create(folder)
             return 0
         check_project()
         python = prepare_environment()

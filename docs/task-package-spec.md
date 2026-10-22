@@ -1,5 +1,7 @@
 # VMAIL Task Package Specification
 
+从零创建或重写模型时，使用本文“默认 XML 模板”中的代码，并将项目根目录的 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`，再替换示例物体。保留地面中央的大号灰色 logo、纹理和材质；不要跨任务目录引用模板资源。平台与标志版权归 BUAA 5系 理论力学课程组，第三方模型保留自身来源与许可证。
+
 VMAIL 的核心不是预置很多模型，而是定义一种稳定的“学习任务包”。只要 AI coding 工具生成的任务包符合这个规范，网页实验台就能读取、展示参数、运行 MuJoCo 仿真并保存结果。
 
 ## 目录结构
@@ -28,6 +30,39 @@ robot_arm_endpoint_force
 ```
 
 AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的工作约定，规定了命名、验证、脚本安全和结果保存方式。
+
+## 默认 XML 模板
+
+从零创建或重写 XML 时，将下面代码保存为 `tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-gray.png` 复制为该任务的 `assets/logo-gray.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使灰色标志居中且显眼，保持 `texrepeat="1 1"`，不平铺为小图标。
+
+该模板与本规范整合维护，不另设模板文件夹。它只是模型起点，还需按 `tasks/AGENTS.md` 补齐任务配置、参数、观测、界面和学习说明，再登记任务索引并验证。帮助中的下载入口使用本段代码和现有 logo 自动打包。
+
+<!-- VMAIL_BUAA_DEFAULT_XML_BEGIN -->
+```xml
+<mujoco model="vmail_buaa_default">
+  <!-- VMAIL-BUAA | BUAA 5系 理论力学课程组 | https://github.com/TYHSXH/VMAIL -->
+  <compiler angle="radian"/>
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <asset>
+    <!-- Keep this relative asset path when copying the template into a task. -->
+    <texture name="buaa_logo" type="2d" file="assets/logo-gray.png"/>
+    <material name="buaa_floor" texture="buaa_logo" texuniform="false"
+              texrepeat="1 1" rgba="1 1 1 1" specular="0" reflectance="0"/>
+  </asset>
+  <worldbody>
+    <light pos="0 -3 5" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <!-- A single large logo centered on the floor; do not tile the logo. -->
+    <geom name="floor" type="plane" size="4 4 0.1" material="buaa_floor"/>
+    <!-- Replace this demonstration body with the mechanism being studied. -->
+    <body name="specimen" pos="0 0 0.8">
+      <freejoint name="specimen_free"/>
+      <geom name="specimen_geom" type="sphere" size="0.12" mass="1" rgba="0.8 0.3 0.12 1"/>
+      <site name="specimen_center" size="0.01"/>
+    </body>
+  </worldbody>
+</mujoco>
+```
+<!-- VMAIL_BUAA_DEFAULT_XML_END -->
 
 ## tasks/manifest.yaml
 
@@ -215,11 +250,11 @@ layout:
 
 浏览器使用官方 MuJoCo WebAssembly 运行时执行物理计算，并通过 WebGL 显示 `model.xml`。相机旋转、平移、缩放、动态刚体选择和三维外力拖拽是工作台的通用能力，不需要每个任务额外声明。`ui.yaml` 只负责参数分组和数据曲线；模型能否被拖动取决于刚体是否具有可运动自由度。
 
-实验台的“参数”页列出：
+实验台的“参数与控制”页上方列出：
 
 - 类型为 `slide` 或 `hinge` 的一维关节，用于暂停后直接调整关节位置。
 
-“控制”页列出模型中的 actuator（运行时输入 `data.ctrl`），以及 loads.yaml 定义的自动加载规律。
+同一页下方列出模型中的 actuator（运行时输入 `data.ctrl`），以及 loads.yaml 定义的自动加载规律。
 
 actuator 建议显式命名并设置合理的 `ctrlrange`。位置执行器的 `kp`、`kv` 等模型参数可以通过 `parameters.yaml` 指向 actuator 的 MJCF 属性，应用参数后重新编译生效。
 
@@ -290,6 +325,6 @@ task_id/
 
 observe.yaml 还可以通过 equalities 列表读取 MJCF 闭环 equality 约束的反力。条目使用 equality 名称，并在 fields 中声明 force。系统会产生 equality.名称.force.x、y、z 和 magnitude 四列；connect 约束的三个分量采用世界坐标系。
 
-“参数”页自动显示编译模型中的全部刚体转动、滑动关节，柔性顶点和节点的内部关节除外。`controls.joints` 旧名单不再用于隐藏关节。有限位关节遵守模型范围，无限位转动关节提供 0–360°（0–2π rad）设置。`controls.joint_note` 可以补充任务说明。
+“参数与控制”页自动显示编译模型中的全部刚体转动、滑动关节，柔性顶点和节点的内部关节除外。`controls.joints` 旧名单不再用于隐藏关节。有限位关节遵守模型范围，无限位转动关节提供 0–360°（0–2π rad）设置。`controls.joint_note` 可以补充任务说明。
 
 闭环机构调节关节时，网页固定学生选择的关节值，并根据 MuJoCo 的 equality 约束同步调整其他刚体转动、滑动关节，不推进仿真时间、不记录数据；无法满足约束的值会提示并恢复原姿态。旧 `controls.kinematic` 配置不再替换模型关节。恢复姿态返回任务的初始状态。

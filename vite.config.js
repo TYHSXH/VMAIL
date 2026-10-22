@@ -4,6 +4,7 @@ export default defineConfig({
   root: "frontend",
   base: "/static/",
   build: {
+    manifest: true,
     outDir: "../app",
     emptyOutDir: true,
     assetsDir: "assets",

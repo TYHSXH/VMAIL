@@ -42,6 +42,9 @@ README.md               任务专用操作说明
 
 ## 模型与参数
 
+- 从零创建或重写 XML 时，以 `docs/task-package-spec.md` 中“默认 XML 模板”的代码为起点，将项目 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`；保留 floor、logo 纹理和材质。地面使用居中、单个、大尺寸的灰色标志，不平铺为小图标。模型尺度变化时相应调整地面与 logo 尺寸。
+- 模板中的示例球体可替换为目标机构。不要让任务引用任务目录外的模板资源；保留第三方模型原本的来源与许可证。
+
 - `model.xml` 必须是可由 MuJoCo 编译的 MJCF。
 - 被参数、观测量、执行器或脚本引用的 body、joint、geom、site、sensor 和 actuator 必须显式命名，并保持名称稳定。
 - 学生需要比较的变量应写入 `parameters.yaml`，不要把关键变量只硬编码在 Python 脚本中。
@@ -108,3 +111,7 @@ README.md               任务专用操作说明
 - 有 actuator 时，“控制”页能改变运动；没有 actuator 时不要虚构控制器。
 
 不要通过删减验证规则、改动公共后端或伪造结果来使任务通过。
+
+## 基础几何体无法准确表达时
+
+孔洞、凹槽、非规则外形或接触面决定结论时，不要反复强行拼基础几何体或改变实际约束。先阅读[复杂几何体与 STL／MJCF 建模指南](../docs/mesh-modeling.md)。学生按尺寸建立 CAD 并导出二进制 STL，在任务自己的 assets 中保存；AI 辅助编写 MJCF、凸碰撞体、惯量与配置。STL 只有外形，普通 mesh 碰撞使用凸包，有孔的视觉外形未必可穿过。网页不能上传 STL，使用本地编辑器完成资源整合和任务校验，并在 notes.md 写清简化、单位、来源与验证方式。

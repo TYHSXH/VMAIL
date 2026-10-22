@@ -7,6 +7,8 @@ import csv
 import json
 import math
 import re
+import shutil
+import stat
 import threading
 from uuid import uuid4
 
@@ -19,6 +21,8 @@ class TaskValidationError(Exception):
 
 REQUIRED_FILES = ["task.yaml", "model.xml", "parameters.yaml", "observe.yaml", "ui.yaml", "notes.md"]
 TITLE_LOCK = threading.RLock()
+TASK_STATE_LOCK = threading.RLock()
+ACTIVE_SIMULATIONS: dict[str, int] = {}
 
 
 def _read_yaml(path: Path) -> dict[str, Any]:
@@ -91,6 +95,53 @@ def rename_task(tasks_dir: Path, task_id: str, title: str) -> dict[str, str]:
                 path.write_bytes(originals[path])
             raise TaskValidationError(f"标题保存失败：{exc}") from exc
     return {"id": task_id, "title": title}
+
+
+def delete_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
+    task_id = _safe_task_id(task_id)
+    root = tasks_dir.resolve()
+    folder = root / task_id
+    with TITLE_LOCK:
+        entries = list_tasks(root)
+        if not any(entry["id"] == task_id for entry in entries):
+            raise TaskValidationError("任务不存在或已经删除，请刷新列表。")
+        if folder.resolve().parent != root or folder.is_symlink() or not folder.is_dir():
+            raise TaskValidationError("任务目录不存在或指向项目外部，拒绝删除。")
+
+        def check_tree(path):
+            metadata = path.lstat()
+            if path.is_symlink() or getattr(metadata, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0):
+                raise TaskValidationError("任务包含链接或目录联接，请先移除链接后再删除。")
+            if path.is_dir():
+                for child in path.iterdir():
+                    check_tree(child)
+
+        check_tree(folder)
+        manifest_path = root / "manifest.yaml"
+        manifest = _read_yaml(manifest_path)
+        manifest["tasks"] = [entry for entry in manifest["tasks"] if entry["id"] != task_id]
+        staging = root / f".delete-{task_id}-{uuid4().hex}"
+        temporary = root / f".manifest-{uuid4().hex}.tmp"
+        moved = False
+        try:
+            temporary.write_text(yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False), encoding="utf-8")
+            folder.rename(staging)
+            moved = True
+            temporary.replace(manifest_path)
+        except OSError:
+            if moved:
+                staging.rename(folder)
+            raise
+        finally:
+            temporary.unlink(missing_ok=True)
+        # The checked directory has only been renamed within the same root.
+        if staging.resolve().parent != root or staging.is_symlink():
+            raise TaskValidationError("删除目录校验失败。")
+        try:
+            shutil.rmtree(staging)
+        except OSError:
+            return {"id": task_id, "files_deleted": False, "cleanup_path": str(staging)}
+    return {"id": task_id, "files_deleted": True}
 
 
 def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:

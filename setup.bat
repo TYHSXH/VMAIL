@@ -5,7 +5,7 @@ pushd "%~dp0"
 if errorlevel 1 goto folder_failed
 
 rem Prefer interpreters with broadly available binary wheels; skip old/32-bit ones.
-for %%V in (3.12 3.11 3.13 3) do (
+for %%V in (3.12 3.13 3) do (
   py -%%V -m backend.bootstrap --check-python >nul 2>nul
   if not errorlevel 1 (
     py -%%V -m backend.bootstrap

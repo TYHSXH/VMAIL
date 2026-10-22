@@ -8,3 +8,4 @@ MUJOCO_LOG.TXT
 *.log
 .pytest_cache/
 .venv.backup-*/
+.local/

@@ -1,0 +1,59 @@
+<mujoco model="wedge_rod">
+  <!-- VMAIL-BUAA | BUAA 5系 理论力学课程组 | https://github.com/TYHSXH/VMAIL -->
+  <compiler angle="degree"/>
+  <option timestep="0.005" gravity="0 0 -9.81" integrator="implicitfast"/>
+  <asset>
+    <texture name="buaa_logo" type="2d" file="assets/logo-gray.png"/>
+    <material name="buaa_floor" texture="buaa_logo" texuniform="false"
+              texrepeat="1 1" rgba="1 1 1 1" specular="0" reflectance="0"/>
+  </asset>
+
+  <default>
+    <geom friction="0 0 0" condim="1" solref="0.004 1" solimp="0.98 0.999 0.001"/>
+  </default>
+
+  <worldbody>
+    <light pos="0 -3 5" dir="0 0 -1" diffuse="0.8 0.8 0.8"/>
+    <!-- 地板平面位于 z = -1.2 -->
+    <geom name="floor" type="plane" size="4 4 0.1" material="buaa_floor" pos="0 0 -1.2"/>
+
+    <!-- 楔块 C：只保留斜面，只能水平滑动。
+         斜面 box 尺寸 0.60 x 0.12 x 0.02，绕 y 轴转 30 度。
+         整个 box 最低点相对 body 原点的 z 偏移量 = -(0.02*cos30 + 0.60*sin30)
+                                                 = -(0.01732 + 0.30000) = -0.31732
+         body 原点取 z = -0.85，则最低点 z = -1.16732，距地板 0.0327 m，不会嵌入地板。
+         本地斜面方程：z_local = -tan30 * x_local，即 z = -0.85 - 0.57735 * x
+         x = -0.30 处斜面高度：-0.85 + 0.17321 = -0.67679 -->
+    <body name="wedge" pos="0 0 -0.85">
+      <joint name="slide_x" type="slide" axis="1 0 0" range="-1.5 1.5" damping="0"
+             armature="0.001"/>
+      <geom name="incline_face" type="box" size="0.60 0.12 0.02" euler="0 30 0"
+            pos="0 0 0" rgba="0.75 0.72 0.68 1" mass="4"/>
+      <site name="wedge_ref" pos="0 0 0" size="0.01"/>
+    </body>
+
+    <!-- 杆 AB：只能竖直滑动。
+         斜面在 x = -0.30 处高度 h = -0.67679；球半径 0.02。
+         球心沿法向抬高：球面与斜面在球心正下方相切时，球心需在接触点上方 0.02/cos30 = 0.0231；
+         保守取球心 z = h + 0.02 + 0.010 = -0.64679，球面与斜面间有小净间隙，初始无穿透、无接触冲量。
+         杆身为 capsule，半长 0.45、半径 0.02，中心放在 z = 0.47，使胶囊圆柱下端球心在 z = 0.02，
+         与杆端球（球心在 body 原点、半径 0.02）外表面相切，球与杆身连续衔接、不再分离。 -->
+    <body name="rod" pos="-0.30 0 -0.64679">
+      <joint name="slide_z" type="slide" axis="0 0 1" range="-0.30 0.15" damping="0"
+             armature="0.001"/>
+      <geom name="rod_tip_ball" type="sphere" size="0.02" pos="0 0 0"
+            rgba="0.95 0.55 0.15 1" mass="0.2"/>
+      <geom name="rod_shaft" type="capsule" size="0.02 0.45" pos="0 0 0.47"
+            rgba="0.20 0.40 0.75 1" mass="1.8"/>
+      <site name="rod_point" pos="0 0 0" size="0.01"/>
+    </body>
+
+    <!-- 竖直导轨（仅视觉示意，不参与接触）。杆端初始 z = -0.64679，杆身中心 z = -0.17679 -->
+    <body name="guide" pos="-0.30 0 0.05">
+      <geom name="guide_l" type="box" size="0.012 0.02 0.35" pos="-0.045 0 0"
+            rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0" mass="0"/>
+      <geom name="guide_r" type="box" size="0.012 0.02 0.35" pos="0.045 0 0"
+            rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0" mass="0"/>
+    </body>
+  </worldbody>
+</mujoco>

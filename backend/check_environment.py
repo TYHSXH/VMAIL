@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import importlib
+from importlib.metadata import version, PackageNotFoundError
 import json
 from pathlib import Path
 import re
@@ -14,13 +15,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def check_python() -> None:
-    if sys.version_info < (3, 11) or sysconfig.get_platform() != "win-amd64":
-        raise RuntimeError("Use 64-bit x86 Windows Python 3.11 or newer; Python 3.12 is recommended.")
+    if sys.version_info < (3, 12) or sysconfig.get_platform() != "win-amd64":
+        raise RuntimeError("Use 64-bit x86 Windows Python 3.12 or newer; Python 3.12 is recommended.")
 
 
 def check_project(root: Path = ROOT) -> None:
     required = ["app/index.html", "app/help.html", "requirements.txt", "tasks/manifest.yaml",
-                "docs/user-guide.md", "prompts/student-task-builder.md", "model_library/catalog.json"]
+                "docs/user-guide.md", "prompts/student-task-builder.md", "model_library/catalog.json",
+                "docs/task-package-spec.md", "docs/mesh-modeling.md", "assets/logos/logo-gray.png", "constraints.txt",
+                "app/.vite/manifest.json", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md"]
+    required.extend("licenses/" + name for name in ["mujoco-LICENSE.txt", "mujoco-THIRD_PARTY.md", "three-LICENSE.txt",
+                    "katex-LICENSE.txt", "marked-LICENSE.txt", "dompurify-LICENSE.txt", "emscripten-LICENSE.txt"])
     for name in required:
         if not (root / name).is_file():
             raise RuntimeError(f"Missing project file: {name}. Copy the complete VMAIL release, including app/.")
@@ -32,12 +37,28 @@ def check_project(root: Path = ROOT) -> None:
                 raise RuntimeError(f"Missing built asset: {path.name}. Copy the complete app/ folder.")
     if not any((root / "app" / "assets").glob("*.wasm")):
         raise RuntimeError("Missing browser MuJoCo WASM. Copy the complete app/ folder.")
+    manifest = json.loads((root / "app/.vite/manifest.json").read_text(encoding="utf-8"))
+    for entry in manifest.values():
+        for asset in [entry["file"], *entry.get("css", []), *entry.get("assets", [])]:
+            path = (root / "app" / asset).resolve()
+            if not path.is_relative_to((root / "app").resolve()) or not path.is_file():
+                raise RuntimeError(f"Missing built asset: {asset}. Copy the complete app/ folder.")
     # Batch results are written here. Verify permissions before starting the server.
     with tempfile.TemporaryFile(dir=root / "tasks"):
+        pass
+    (root / ".local").mkdir(exist_ok=True)
+    with tempfile.TemporaryFile(dir=root / ".local"):
         pass
 
 
 def check_runtime() -> None:
+    for name, expected in re.findall(r"^([\w.-]+)==([^\s]+)$", (ROOT / "constraints.txt").read_text(encoding="utf-8"), re.MULTILINE):
+        try:
+            installed = version(name)
+        except PackageNotFoundError:
+            raise RuntimeError(f"Missing dependency {name}. Run setup.bat to install the verified environment.") from None
+        if installed != expected:
+            raise RuntimeError(f"Dependency {name}: expected {expected}, found {installed}. Run setup.bat.")
     for name in ["fastapi", "uvicorn", "yaml", "numpy"]:
         importlib.import_module(name)
     import mujoco

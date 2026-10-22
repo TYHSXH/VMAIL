@@ -29,9 +29,10 @@ def _xml_names(model_xml: str) -> dict[str, set[str]]:
     return names
 
 
-def validate_task(task_id: str) -> list[str]:
+def validate_task(task_id: str, tasks_dir: Path | None = None) -> list[str]:
     errors: list[str] = []
-    task_dir = TASKS_DIR / task_id
+    tasks_dir = TASKS_DIR if tasks_dir is None else tasks_dir
+    task_dir = tasks_dir / task_id
 
     for filename in REQUIRED_FILES:
         if not (task_dir / filename).exists():
@@ -41,7 +42,7 @@ def validate_task(task_id: str) -> list[str]:
         return errors
 
     try:
-        task = load_task(TASKS_DIR, task_id)
+        task = load_task(tasks_dir, task_id)
         prepared = prepare_browser_model(task, {})
         names = _xml_names(prepared["xml"])
         if task["task"].get("id") != task_id:

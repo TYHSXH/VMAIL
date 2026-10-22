@@ -1,0 +1,22 @@
+layout:
+  parameter_groups:
+    - title: 物理参数
+      parameters:
+        - rod_mass
+        - wedge_mass
+  charts:
+    - title: 加速度对比
+      series:
+        - joint.slide_x.acceleration
+        - joint.slide_z.acceleration
+    - title: 速度对比
+      series:
+        - joint.slide_x.velocity
+        - joint.slide_z.velocity
+    - title: 位移
+      series:
+        - joint.slide_x.position
+        - joint.slide_z.position
+camera:
+  position: [0.9, -2.0, 0.1]
+  target: [-0.1, 0, -0.7]

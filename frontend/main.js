@@ -7,6 +7,9 @@ import { setupModelPreview } from "./model-preview.js";
 import { JointPanel } from "./joint-panel.js";
 import { icon, decorateIcons } from "./icons.js";
 import { LoadPreviewPanel, renderLoadFormula } from "./load-controls.js";
+import { setupAssistant } from "./assistant.js";
+import { setupFileDrop } from "./file-drop.js";
+import { confirmTaskDeletion } from "./task-delete.js";
 
 decorateIcons();
 
@@ -93,8 +96,7 @@ function activateTab(name) {
   document.querySelectorAll(".tab-panel").forEach(panel=>panel.classList.toggle("active",panel.dataset.panel===name));
   el.inspector.classList.remove("collapsed");
   if(name==="data")charts.draw();
-  if(name==="parameters")taskJointPanel.sync(true);
-  if(name==="controls")loadPreview.charts?.draw();
+  if(name==="parameters"){taskJointPanel.sync(true);loadPreview.charts?.draw();}
 }
 function setPlaybackEnabled(enabled) {
   document.querySelectorAll("#app [data-overlay]").forEach(button=>{
@@ -151,6 +153,7 @@ async function initViewer() {
   }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
 async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}
+let deletingTaskId = null;
 function renderTaskList() {
   el.taskList.replaceChildren();
   document.getElementById("taskCount").textContent=String(state.tasks.length).padStart(2,"0");
@@ -176,10 +179,38 @@ function renderTaskList() {
       save.addEventListener("click",submit);input.addEventListener("keydown",event=>{if(event.key==="Enter"){event.preventDefault();submit();}if(event.key==="Escape")renderTaskList();});
       row.classList.add("editing");row.replaceChildren(input,save,cancel);input.focus();input.select();
     });
-    row.append(button,edit);el.taskList.append(row);
+    const remove=document.createElement("button");remove.type="button";remove.className="delete-task";remove.innerHTML=icon("trash");remove.title="删除整个任务";remove.setAttribute("aria-label",`删除${task.title || task.id}`);remove.disabled=Boolean(deletingTaskId);
+    remove.addEventListener("click",()=>removeTask(task));
+    row.append(button,edit,remove);el.taskList.append(row);
   }
 }
+async function removeTask(task) {
+  if(deletingTaskId)return;
+  deletingTaskId=task.id;renderTaskList();
+  try {
+    if(!await confirmTaskDeletion(task))return;
+    const result=await requestJson(`/api/tasks/${encodeURIComponent(task.id)}`,{method:"DELETE",headers:{"Content-Type":"application/json","X-VMAIL-Assistant":"1"},body:JSON.stringify({confirm_task_id:task.id})});
+    const selected=state.task?.id===task.id;
+    if(selected){++state.selectionVersion;++state.modelLoadVersion;}
+    await loadTasks();
+    if(selected && state.task?.id===task.id){
+      if(state.tasks.length)await selectTask(state.tasks[0].id);
+      else{
+        loadPreview.clear();state.viewer?.clearDrag();state.viewer?.setPaused(true);state.viewer?.setSuspended(true);
+        state.task=null;state.viewerTaskId=null;state.modelLoading=false;state.parametersDirty=false;state.runtimeRows=[];
+        charts.rebuild();clearSeries();setPlaybackEnabled(false);
+        el.mujocoViewport.classList.add("hidden");el.viewerLoading.innerHTML="<strong>暂无学习任务</strong><span>可以在 AI 助手中创建新任务。</span>";el.viewerLoading.classList.remove("hidden");
+        el.taskTitle.textContent="选择一个学习任务";el.taskQuestion.textContent="从左侧选择任务，或与 AI 助手对话创建。";
+        for(const target of [el.taskNotes,el.topicTags,el.parameterForm,el.actuatorControls,el.resultHistory])target.replaceChildren();
+        taskJointPanel.render([]);el.applyParameters.disabled=true;el.runButton.disabled=true;
+      }
+    }
+    showMessage(result.files_deleted ? "任务及全部文件已删除。" : `任务已移出列表，部分文件被占用，需手动清理：${result.cleanup_path}`,!result.files_deleted);
+  }catch(error){showMessage(error.message,true);}
+  finally{deletingTaskId=null;renderTaskList();}
+}
 async function selectTask(taskId) {
+  el.mujocoViewport.classList.remove("hidden");state.viewer?.setSuspended(false);
   loadPreview.clear();
   const version=++state.selectionVersion;++state.modelLoadVersion;
   state.viewer?.setPaused(true);setPlaybackEnabled(false);rememberViewerControls();
@@ -546,8 +577,14 @@ window.addEventListener("keydown",(event)=>{
 });
 window.addEventListener("beforeunload",()=>state.viewer?.dispose());
 setupResizableSidebars();
+const assistant = setupAssistant({
+  getTask: () => state.task?.id || null,
+  onOpen: () => { state.viewer?.setPaused(true); activateTab("assistant"); },
+  onCreated: async task => { await loadTasks(); if(!state.batch){await selectTask(task.id);activateTab("assistant");} showMessage(`已${task.updated ? "更新" : "创建"}任务：${task.title}`); },
+  onError: message => showMessage(message, true),
+});
 const viewerInitialization = initViewer();
-setupModelPreview({
+const modelPreview = setupModelPreview({
   openButton: document.getElementById("openPreview"),
   getEngine: async () => {
     await viewerInitialization;
@@ -556,6 +593,11 @@ setupModelPreview({
   },
   onEnter: () => { state.viewer?.clearDrag(); state.viewer?.setPaused(true); state.viewer?.setSuspended(true); },
   onExit: () => { state.viewer?.setSuspended(false); state.viewer?.resize(); },
+  onError: message => showMessage(message, true),
+});
+setupFileDrop({
+  onXml: files => modelPreview.loadFiles(files),
+  onImages: files => { modelPreview.close(); assistant.open(); void assistant.addImages(files); },
   onError: message => showMessage(message, true),
 });
 Promise.all([viewerInitialization,loadTasks()]).catch(error=>showMessage(error.message,true));

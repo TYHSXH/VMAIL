@@ -1,0 +1,25 @@
+parameters:
+  rod_mass:
+    label: 杆 AB 质量 m
+    value: 2
+    unit: kg
+    min: 0.2
+    max: 20
+    step: 0.1
+    description: 铅垂杆 AB 的总质量（杆端球与杆身按固定比例分配）。
+    mjcf:
+      tag: geom
+      name: rod_shaft
+      attribute: mass
+  wedge_mass:
+    label: 楔块 C 质量 m_c
+    value: 4
+    unit: kg
+    min: 0.2
+    max: 40
+    step: 0.1
+    description: 楔块 C 的质量（整个斜面刚体）。
+    mjcf:
+      tag: geom
+      name: incline_face
+      attribute: mass
