@@ -54,7 +54,6 @@ def main() -> int:
         if "--check-python" in sys.argv[1:]:
             # A version number alone does not prove venv templates are usable.
             # Some installed interpreters have inaccessible activation templates.
-            import ensurepip
             with tempfile.TemporaryDirectory(prefix="vmail-python-check-") as folder:
                 # Verify ensurepip as well: a Python installation can create a
                 # bare venv yet fail when setup tries to install pip into it.

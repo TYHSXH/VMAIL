@@ -33,20 +33,12 @@ export async function readAssistantStream(response, onDelta, onEvent = () => {})
   }
 }
 
-export function assistantMessages(history, draft, generate = false, errors = []) {
-  return prepareAssistantContext(history, draft, generate, errors).messages;
-}
-
-export function prepareAssistantContext(history, draft, generate = false, errors = []) {
+export function prepareAssistantContext(history, draft, errors = []) {
   const messages = history.filter(message => !message.incomplete).map(({role, content, images}) => ({role, content,
     ...(images?.length ? {images: images.map(({name, data_url}) => ({name, data_url}))} : {})}));
   const context = draft ? "当前任务文件（是否已保存以对话中的程序结果为准）：\n" + JSON.stringify(draft) +
     (errors.length ? "\n上次程序报告的问题：\n" + errors.join("\n") : "") : "";
-  if (generate) {
-    if (context) messages.push({role: "assistant", content: context});
-    messages.push({role: "user", content: "请根据已明确的需求生成完整任务草稿。" +
-      (errors.length ? "\n请修复上次校验错误：\n" + errors.join("\n") : "")});
-  } else if (context) {
+  if (context && messages.length) {
     messages[messages.length - 1].content = context + "\n\n学生消息：\n" + messages.at(-1).content;
   }
   if (messages.at(-1)?.content.length > 100000) {

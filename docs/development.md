@@ -60,6 +60,8 @@ npm run build
 
 ## 本地 DeepSeek 助手
 
+当前统一通过 `/api/assistant/chat` 流式对话及 `create_task`、`read_task`、`update_task` 工具处理任务。旧的 `/api/assistant/generate` 独立生成接口已移除；维护或接入时使用现有聊天流程。
+
 `frontend/assistant.js` 在现有右栏提供连接、流式自由对话和任务文件查看；普通聊天无需创建任务。模型可调用 `create_task` 新建、`read_task` 读取、`update_task` 修改原任务。每轮请求携带网页选中任务编号，后端提供最新文件与内容版本号；读取工具结果会继续交给模型，允许在同一次请求内读取后修改。后端在临时目录中校验并流式回传结果；浏览器收到完整成功消息后分别请求 POST 新建或 PATCH 修改，再刷新列表。工具输出不完整或校验失败时将错误和当前文件保留给下一轮修正，不强制新开对话。修改只提交变动文件，合并当前配置后校验；保留原任务编号、资源及 results。提交时再次核对版本号，使用共享任务状态锁阻止在批量计算期间修改；修改前在 `.local/task-history/<task_id>/` 备份原文件，写入失败时回滚已替换文件。模型没有删除工具。`assistant-client.js` 处理流式协议与近期上下文选择，不以 40 条消息终止聊天；每次最多发送 200 条和受控体积，超过时提示省略早期上下文，页面历史不删。`backend/assistant.py` 仅代理固定 DeepSeek 官方地址，端点要求本机来源与专用请求头。此模块面向单用户 loopback 运行，不能直接作为公网多人服务使用。
 
 密钥默认只存 Python 进程内存；选用记住功能时由 `assistant_credentials.py` 使用 Windows DPAPI 当前用户加密到 `.local/deepseek.key`。接口不会返回原始密钥。`.local/` 不进入版本控制，也不要随项目分发。

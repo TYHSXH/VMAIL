@@ -87,24 +87,23 @@ class AssistantTests(unittest.TestCase):
             assistant.open_upstream("/models", self.key)
         self.assertIn("网络", raised.exception.detail)
 
-    def test_images_are_converted_for_both_chat_and_task_generation(self):
+    def test_images_are_converted_for_chat_tools(self):
         self.store.save(self.key, "deepseek-flash", False)
         image = {"name": "diagram.png", "data_url": "data:image/png;base64," + base64.b64encode((ROOT / "assets/logos/logo-gray.png").read_bytes()).decode()}
         request = assistant.ConversationRequest(messages=[{"role": "user", "content": "根据图建立模型", "images": [image]}, {"role": "assistant", "content": "请确认约束"}, {"role": "user", "content": "使用铰接"}])
         with patch.object(assistant, "STORE", self.store):
-            for generate in (False, True):
-                _, payload = assistant.payload_for(request, generate)
-                content = payload["messages"][1]["content"]
-                self.assertEqual(content[0], {"type": "text", "text": "根据图建立模型"})
-                self.assertEqual(content[1]["image_url"]["url"], image["data_url"])
-                self.assertEqual(content[1]["type"], "image_url")
-                self.assertNotIn("images", payload["messages"][1])
+            _, payload = assistant.payload_for(request)
+            content = payload["messages"][1]["content"]
+            self.assertEqual(content[0], {"type": "text", "text": "根据图建立模型"})
+            self.assertEqual(content[1]["image_url"]["url"], image["data_url"])
+            self.assertEqual(content[1]["type"], "image_url")
+            self.assertNotIn("images", payload["messages"][1])
 
     def test_pro_rejects_images_before_contacting_upstream(self):
         self.store.save(self.key, "deepseek-v4-pro", False)
         request = assistant.ConversationRequest(messages=[{"role": "user", "content": "读图", "images": [{"name": "x.png", "data_url": "data:image/png;base64,iVBORw0KGgo="}]}])
         with patch.object(assistant, "STORE", self.store), patch.object(assistant, "open_upstream") as upstream, self.assertRaises(HTTPException) as raised:
-            assistant.payload_for(request, False)
+            assistant.payload_for(request)
         upstream.assert_not_called()
         self.assertIn("Flash", raised.exception.detail)
 
@@ -135,15 +134,6 @@ class AssistantTests(unittest.TestCase):
         payload = upstream.call_args.args[2]
         self.assertIn("默认 XML", payload["messages"][0]["content"])
         self.assertEqual(payload["messages"][0]["role"], "system")
-
-    def test_model_generation_returns_draft_but_does_not_publish(self):
-        self.store.save(self.key, "deepseek-flash", False)
-        draft = {"reply": "草稿", "task_id": "ai_test_spring", "files": example_bundle()}
-        response = {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(draft)}}], "usage": {"total_tokens": 12}}
-        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", return_value=io.BytesIO(json.dumps(response).encode())):
-            result = assistant.generate(assistant.ConversationRequest(messages=[{"role": "user", "content": "生成弹簧实验"}]))
-        self.assertTrue(result["validation"]["valid"], result)
-        self.assertFalse((self.folder / "ai_test_spring").exists())
 
     def test_free_chat_tool_stream_produces_valid_files_without_writing_until_complete(self):
         self.store.save(self.key, "deepseek-flash", False)
@@ -200,15 +190,14 @@ class AssistantTests(unittest.TestCase):
         with self.assertRaises(TaskValidationError): publish_bundle(self.folder, "ai_test_spring", files)
         self.assertEqual(before, (self.folder / "manifest.yaml").read_bytes())
 
-    def test_generated_duplicate_id_is_returned_for_repair(self):
-        self.store.save(self.key, "deepseek-flash", False)
+    def test_create_tool_duplicate_id_is_returned_for_repair(self):
         (self.folder / "ai_test_spring").mkdir()
-        draft = {"reply": "草稿", "task_id": "ai_test_spring", "files": example_bundle()}
-        response = {"choices": [{"finish_reason": "stop", "message": {"content": json.dumps(draft)}}]}
-        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", return_value=io.BytesIO(json.dumps(response).encode())):
-            result = assistant.generate(assistant.ConversationRequest(messages=[{"role": "user", "content": "生成实验"}]))
+        arguments = json.dumps({"task_id": "ai_test_spring", "files": example_bundle()})
+        with patch.object(assistant, "TASKS_DIR", self.folder):
+            result = assistant.task_tool_result("create_task", arguments)
         self.assertFalse(result["validation"]["valid"])
-        self.assertIn("编号已存在", result["validation"]["errors"][0])
+        self.assertIn("任务已存在", result["validation"]["errors"][0])
+        self.assertEqual(result["draft"]["files"], example_bundle())
         self.assertEqual(list((self.folder / "ai_test_spring").iterdir()), [])
 
     def test_manifest_write_failure_rolls_back_new_directory(self):

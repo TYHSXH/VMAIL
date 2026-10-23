@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from typing import Any
 import math
 import xml.etree.ElementTree as ET
@@ -77,7 +76,6 @@ def _model_source(task: dict[str, Any]) -> tuple[str, dict[str, bytes]]:
         return path
 
     def expand(xml: str, seen: set[Path]) -> ET.Element:
-        nonlocal total
         try:
             root = ET.fromstring(xml)
         except ET.ParseError as exc:
@@ -136,7 +134,6 @@ def prepare_browser_model(
     source, assets = _model_source(task)
     xml = _apply_mjcf_overrides(source, task, values)
     root = ET.fromstring(xml)
-    simulation = task.get("task", {}).get("simulation", {})
     _, timestep = simulation_settings(task, duration_override, timestep_override)
     option = root.find("option")
     if option is None:
@@ -445,7 +442,6 @@ def run_mujoco_task(
     except Exception as exc:
         raise SimulationError("MuJoCo is not installed. Run start.bat to install project dependencies.") from exc
 
-    config = deepcopy(task.get("task", {}).get("simulation", {}))
     duration, timestep = simulation_settings(task, duration_override, timestep_override)
 
     values = _merged_parameter_values(task, parameter_overrides)

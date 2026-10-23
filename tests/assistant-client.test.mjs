@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {assistantMessages, prepareAssistantContext, readAssistantStream} from "../frontend/assistant-client.js";
+import {prepareAssistantContext, readAssistantStream} from "../frontend/assistant-client.js";
 import {classifyDroppedFiles, setupFileDrop} from "../frontend/file-drop.js";
 import {validateImageFiles, imageMime} from "../frontend/assistant-images.js";
 
@@ -25,16 +25,16 @@ test("truncated and failed streams cannot count as complete answers", async () =
 });
 
 test("repair receives complete previous files and validation errors without mutating history", () => {
-  const history = [{role: "user", content: "创建单摆"}, {role: "assistant", content: "长度一米"}];
+  const history = [{role: "user", content: "创建单摆"}, {role: "assistant", content: "长度一米"}, {role: "user", content: "修复草稿"}];
   const draft = {task_id: "pendulum", files: {"model.xml": "<mujoco/>"}};
-  const messages = assistantMessages(history, draft, true, ["missing joint"]);
-  assert.match(messages.at(-2).content, /model.xml/);
+  const {messages} = prepareAssistantContext(history, draft, ["missing joint"]);
+  assert.match(messages.at(-1).content, /model.xml/);
   assert.match(messages.at(-1).content, /missing joint/);
-  assert.equal(messages.at(-1).role, "user"); assert.equal(history.length, 2);
+  assert.equal(messages.at(-1).role, "user"); assert.equal(history.length, 3); assert.equal(history.at(-1).content, "修复草稿");
 });
 
 test("new user question carries the current files and long histories keep recent context", () => {
-  const messages = assistantMessages([{role: "user", content: "将质量改成2kg"}], {task_id: "pendulum", files: {}});
+  const {messages} = prepareAssistantContext([{role: "user", content: "将质量改成2kg"}], {task_id: "pendulum", files: {}});
   assert.match(messages[0].content, /pendulum/); assert.match(messages[0].content, /2kg/);
   const history = Array.from({length: 401}, (_, i) => ({role: "user", content: `消息${i}`}));
   const prepared = prepareAssistantContext(history, null);
@@ -47,8 +47,8 @@ test("new user question carries the current files and long histories keep recent
 test("image context is retained in chat, task generation, and repair without mutating history", () => {
   const image = {name: "diagram.png", data_url: "data:image/png;base64," + "A".repeat(200000)};
   const history = [{role: "user", content: "按图建模", images: [image]}];
-  for (const generate of [false, true]) {
-    const messages = assistantMessages(history, {task_id: "p", files: {}}, generate, ["bad joint"]);
+  for (const errors of [[], ["bad joint"]]) {
+    const {messages} = prepareAssistantContext(history, {task_id: "p", files: {}}, errors);
     assert.deepEqual(messages[0].images, [image]);
     assert.notEqual(messages[0].images[0], image);
     assert.equal(history[0].content, "按图建模");

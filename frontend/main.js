@@ -29,9 +29,7 @@ const state = {
   viewerTaskId: null,
   modelLoadVersion: 0,
   chartFrameId: null,
-  latestSampleValues: null,
   selectionVersion: 0,
-  experimentVersion: 0,
   batch: null,
   seriesMode: "realtime",
   modelLoading: false,
@@ -61,14 +59,13 @@ const taskJointPanel = new JointPanel(el.jointControls, {
   canEdit: () => !state.modelLoading && !state.parametersDirty && !state.batch && !state.viewer?.drag,
   onBlocked: () => showMessage("请先应用模型参数或等待计算完成，再调整关节。", true),
   onChange: () => {
-    state.experimentVersion++;
     if (state.seriesMode !== "preparing") clearSeries("preparing");
     resetPlaybackState();
     loadPreview.refresh();
     el.dataSource.textContent = "关节姿态已调整，点击开始仿真后计时并采集数据。";
   },
   onReset: () => {
-    state.experimentVersion++; clearSeries("preparing"); resetViewerPreservingControls();
+    clearSeries("preparing"); resetViewerPreservingControls();
     state.viewer.prepareJointPose(); resetPlaybackState();
     loadPreview.refresh();
     el.dataSource.textContent = "已恢复任务初始姿态，点击开始仿真后采集数据。";
@@ -132,7 +129,6 @@ async function initViewer() {
       },
       onDragStart:()=>{
         loadPreview.invalidate("松开物体后重新计算加载曲线。");
-        state.experimentVersion++;
         clearSeries("preparing");resetPlaybackState();setPlaybackEnabled(false);
         el.dataSource.textContent="正在拖动调整姿态，不计时、不采集数据。";
       },
@@ -221,7 +217,7 @@ async function selectTask(taskId) {
   try{
     const task=await requestJson(`/api/tasks/${encodeURIComponent(taskId)}`);
     if(version!==state.selectionVersion)return;
-    state.task=task;state.parametersDirty=false;state.seriesUnits={time:"s"};state.experimentVersion++;
+    state.task=task;state.parametersDirty=false;state.seriesUnits={time:"s"};
     renderTaskList();renderTask();resetSeriesSelection();charts.rebuild();clearSeries();activateTab("task");
     if(state.viewerReady)await loadBrowserModel();loadResultHistory();
   }catch(error){if(version===state.selectionVersion)showMessage(error.message,true);}
@@ -343,8 +339,8 @@ function renderRuntimeControls() {
   const automatic=new Set((state.viewer.loadProgram?.entries || []).filter(entry=>entry.type==="actuator").map(entry=>entry.index));
   for(const item of controls.actuators){
     const spec=config.actuators?.[item.name] || {};
-    Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name),controlType:"actuator"});
-    const row=controlRow(item,value=>{state.experimentVersion++;state.viewer.setActuatorControl(item.id,value);state.experiment?.controlChanged(state.viewer);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);loadPreview.refresh();});
+    Object.assign(item,{label:spec.label || shortName(item.name),unit:spec.unit || actuatorUnit(item.name)});
+    const row=controlRow(item,value=>{state.viewer.setActuatorControl(item.id,value);state.experiment?.controlChanged(state.viewer);rememberViewerControls();state.viewer.mujoco.mj_forward(state.viewer.model,state.viewer.data);state.viewer.emitSample(true);loadPreview.refresh();});
     if(automatic.has(item.id)){row.querySelectorAll("input").forEach(input=>input.disabled=true);row.title="由任务载荷函数自动控制";}
     el.actuatorControls.append(row);
   }
@@ -367,7 +363,7 @@ function syncRuntimeControls() {
   taskJointPanel.sync();
   for(const {item,slider,number} of state.runtimeRows){
     if(document.activeElement===slider || document.activeElement===number)continue;
-    const value=item.controlType==="actuator"?state.viewer.data?.ctrl[item.id]:state.viewer.getJointPosition(item.name);
+    const value=state.viewer.data?.ctrl[item.id];
     slider.value=value;number.value=Number(Number(value).toFixed(5));
   }
 }
@@ -547,7 +543,7 @@ document.querySelector(".tabs").addEventListener("keydown",event=>{
 });
 el.refreshTasks.addEventListener("click",()=>loadTasks().catch(error=>showMessage(error.message,true)));
 el.applyParameters.addEventListener("click",()=>{if(!state.batch)loadBrowserModel();});
-function markDirty(){state.parametersDirty=true;state.experimentVersion++;state.viewer?.setPaused(true);clearSeries("preparing");resetPlaybackState();taskJointPanel.sync(true);loadPreview.invalidate("应用参数后更新加载曲线。");}
+function markDirty(){state.parametersDirty=true;state.viewer?.setPaused(true);clearSeries("preparing");resetPlaybackState();taskJointPanel.sync(true);loadPreview.invalidate("应用参数后更新加载曲线。");}
 el.parameterForm.addEventListener("input",markDirty);
 el.timestepInput.addEventListener("input",markDirty);
 el.durationInput.addEventListener("input",markDirty);
@@ -561,7 +557,6 @@ el.stepButton.addEventListener("click",async()=>{
     simulationSettings();
     if(state.parametersDirty && !await loadBrowserModel())return;
     if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
-    if(state.seriesMode==="batch"){clearSeries();resetViewerPreservingControls();resetPlaybackState();}
     if(state.simulationCompleted)restartRecordedExperiment();
     beginRecording();
     state.viewer.setPaused(true);state.viewer.step();state.simulationStarted=true;updatePlaybackButton();activateTab("data");
@@ -575,7 +570,7 @@ el.playButton.addEventListener("click",async()=>{
     const {duration}=simulationSettings();
     if(state.parametersDirty && !await loadBrowserModel())return;
     if(state.viewer.posePrepared){clearSeries();state.viewer.beginPreparedExperiment();}
-    else if(state.simulationCompleted || state.seriesMode==="batch"){
+    else if(state.simulationCompleted){
       restartRecordedExperiment();
     }
     beginRecording();state.viewer.setDuration(duration);state.simulationStarted=true;state.simulationCompleted=false;state.viewer.setPaused(false);activateTab("data");

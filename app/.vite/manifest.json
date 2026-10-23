@@ -260,15 +260,11 @@
     "file": "assets/rolldown-runtime-CbXtAM7H.js",
     "name": "rolldown-runtime"
   },
-  "_task-notes-Ck_EeXXs.css": {
-    "file": "assets/task-notes-Ck_EeXXs.css",
-    "src": "_task-notes-Ck_EeXXs.css"
-  },
-  "_task-notes-ZOZAzQeD.js": {
-    "file": "assets/task-notes-ZOZAzQeD.js",
+  "_task-notes-Awec8EyU.js": {
+    "file": "assets/task-notes-Awec8EyU.js",
     "name": "task-notes",
     "css": [
-      "assets/task-notes-Ck_EeXXs.css"
+      "assets/task-notes-BoKezOPT.css"
     ],
     "assets": [
       "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2",
@@ -332,23 +328,27 @@
       "assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf"
     ]
   },
+  "_task-notes-BoKezOPT.css": {
+    "file": "assets/task-notes-BoKezOPT.css",
+    "src": "_task-notes-BoKezOPT.css"
+  },
   "help.html": {
-    "file": "assets/help-Bu44cqeq.js",
+    "file": "assets/help-C1bDHhJj.js",
     "name": "help",
     "src": "help.html",
     "isEntry": true,
     "imports": [
-      "_task-notes-ZOZAzQeD.js"
+      "_task-notes-Awec8EyU.js"
     ]
   },
   "index.html": {
-    "file": "assets/main-CN20J6TK.js",
+    "file": "assets/main-ByEWm6sv.js",
     "name": "main",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-CbXtAM7H.js",
-      "_task-notes-ZOZAzQeD.js"
+      "_task-notes-Awec8EyU.js"
     ],
     "dynamicImports": [
       "../__vite-browser-external"

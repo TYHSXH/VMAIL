@@ -9,3 +9,5 @@ MUJOCO_LOG.TXT
 .pytest_cache/
 .venv.backup-*/
 .local/
+dist/
+/待删除_20261023/

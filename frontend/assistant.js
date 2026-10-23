@@ -202,7 +202,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     let answer = "", taskEvent = null;
     try {
       const context = history.map(item => item === turn ? {...item, incomplete: false} : item);
-      const {messages, omitted} = prepareAssistantContext(context, savedTask && getTask() ? null : draft, false, savedTask ? [] : validation?.errors || []);
+      const {messages, omitted} = prepareAssistantContext(context, savedTask && getTask() ? null : draft, savedTask ? [] : validation?.errors || []);
       const response = await api("/chat", {method: "POST", body: {messages, current_task_id: getTask()}, signal: controller.signal});
       const usage = await readAssistantStream(response, delta => {
         const nearBottom = el.Conversation.scrollHeight - el.Conversation.scrollTop - el.Conversation.clientHeight < 100;
