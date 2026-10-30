@@ -5,7 +5,7 @@ export async function forecastLoads(viewer, duration, { cancelled = () => false 
   const { mujoco: mj, model, loadProgram: program } = viewer;
   if (!model || !program?.entries?.length) return { time: [] };
   const timestep = viewer.configuredTimestep;
-  if (!Number.isFinite(duration) || duration <= 0 || Math.ceil(duration/timestep) > 200000) throw new Error("请设置有效的仿真时长（最多 200000 步）。");
+  if (!Number.isFinite(duration) || duration <= 0 || Math.ceil(duration/timestep) > 1000000) throw new Error("请设置有效的仿真时长（最多 1000000 步）。");
   const scratch = new mj.MjData(model);
   const series = Object.fromEntries(["time", ...Object.keys(program.units)].map(key => [key, []]));
   const start = viewer.posePrepared ? viewer.data : viewer.experimentStart;

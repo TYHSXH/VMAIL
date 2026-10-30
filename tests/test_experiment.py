@@ -7,7 +7,10 @@ import unittest
 import mujoco
 import numpy as np
 
-from backend.simulator import prepare_browser_model, run_mujoco_task, SimulationError
+from backend.simulator import prepare_browser_model, run_mujoco_task, simulation_settings, SimulationError
+from backend.main import SimulationRequest, ControlEvent
+from backend.experiment import restore_experiment
+from pydantic import ValidationError
 from backend.task_io import load_task, save_run_result
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,3 +75,24 @@ class ExperimentReplayTests(unittest.TestCase):
             self.assertEqual(record["replay"], self.replay)
             repeated = run_mujoco_task(self.task, record["parameters"], record["duration"], record["timestep"], replay=record["replay"])
             self.assertEqual(repeated["series"], result["series"])
+
+    def test_one_million_steps_are_allowed_and_the_next_step_is_rejected(self):
+        self.assertEqual(simulation_settings(self.task, 100, .0001), (100, .0001))
+        with self.assertRaisesRegex(SimulationError, "1000000"):
+            simulation_settings(self.task, 100.0001, .0001)
+        with self.assertRaises(ValidationError):
+            ControlEvent(step=1_000_001, controls=[])
+
+    def test_large_replay_passes_request_and_state_restoration_validation(self):
+        payload = prepare_browser_model(self.task, self.parameters, .0001, 100)
+        replay = {**self.replay, "model_revision": payload["model_revision"],
+                  "sample_steps": [*range(200_002), 1_000_000],
+                  "control_events": [{"step": 900_000, "controls": []}]}
+        request = SimulationRequest(duration=100, timestep=.0001, replay=replay)
+        model = mujoco.MjModel.from_xml_string(payload["xml"])
+        data = mujoco.MjData(model)
+        samples, events = restore_experiment(request.replay.model_dump(), payload["model_revision"], model, data, 100, .0001, mujoco)
+        self.assertIn(1_000_000, samples)
+        self.assertEqual(len(samples), 200_003)
+        self.assertEqual(events[900_000], [])
+        self.assertAlmostEqual(data.qpos[0], .37)

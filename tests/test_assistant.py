@@ -18,7 +18,7 @@ import yaml
 
 from backend import assistant
 from backend.assistant_credentials import CredentialStore
-from backend.assistant_tasks import publish_bundle, validate_bundle
+from backend.assistant_tasks import publish_bundle, validate_bundle, check_bundle
 from backend.task_io import REQUIRED_FILES, TaskValidationError, list_tasks, load_task
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -236,6 +236,17 @@ class AssistantTests(unittest.TestCase):
             assistant.create_task(assistant.BundleRequest(task_id="ai_test_spring", files=files))
         self.assertEqual(raised.exception.status_code, 422)
         self.assertEqual(list(self.folder.iterdir()), [])
+
+    def test_ai_task_accepts_one_million_steps_and_rejects_the_next_step(self):
+        files = example_bundle()
+        metadata = yaml.safe_load(files["task.yaml"])
+        metadata["simulation"].update(duration=10, timestep=.00001)
+        files["task.yaml"] = yaml.safe_dump(metadata, allow_unicode=True)
+        check_bundle("ai_test_spring", files)
+        metadata["simulation"]["duration"] = 10.00001
+        files["task.yaml"] = yaml.safe_dump(metadata, allow_unicode=True)
+        with self.assertRaisesRegex(TaskValidationError, "1000000"):
+            check_bundle("ai_test_spring", files)
 
 
 if __name__ == "__main__":

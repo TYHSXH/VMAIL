@@ -7,6 +7,7 @@ import math
 
 from .task_io import REQUIRED_FILES, TaskValidationError, load_task, list_tasks
 from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
+from .parameter_mapping import mjcf_targets
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,8 +55,7 @@ def validate_task(task_id: str, tasks_dir: Path | None = None) -> list[str]:
     for param_name, spec in parameters.items():
         if isinstance(spec, dict) and not str(spec.get("unit", "")).strip():
             errors.append(f"parameter {param_name} must define unit; use '1' for dimensionless values")
-        mjcf = spec.get("mjcf") if isinstance(spec, dict) else None
-        if mjcf:
+        for mjcf in mjcf_targets(spec, param_name):
             tag = mjcf.get("tag")
             name = mjcf.get("name")
             if tag and name and name not in names.get(tag, set()):

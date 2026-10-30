@@ -1,11 +1,11 @@
 {
   "../__vite-browser-external": {
-    "file": "assets/__vite-browser-external-Cn0MOYvd.js",
+    "file": "assets/__vite-browser-external-CB9T68pL.js",
     "name": "__vite-browser-external",
     "src": "../__vite-browser-external",
     "isDynamicEntry": true,
     "imports": [
-      "_rolldown-runtime-CbXtAM7H.js"
+      "_rolldown-runtime-WkwZ5CU-.js"
     ]
   },
   "../assets/logos/logo-black.png": {
@@ -256,15 +256,15 @@
     "file": "assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2",
     "src": "../node_modules/katex/dist/fonts/KaTeX_Typewriter-Regular.woff2"
   },
-  "_rolldown-runtime-CbXtAM7H.js": {
-    "file": "assets/rolldown-runtime-CbXtAM7H.js",
+  "_rolldown-runtime-WkwZ5CU-.js": {
+    "file": "assets/rolldown-runtime-WkwZ5CU-.js",
     "name": "rolldown-runtime"
   },
-  "_task-notes-Awec8EyU.js": {
-    "file": "assets/task-notes-Awec8EyU.js",
+  "_task-notes-CubpfVvb.js": {
+    "file": "assets/task-notes-CubpfVvb.js",
     "name": "task-notes",
     "css": [
-      "assets/task-notes-BoKezOPT.css"
+      "assets/task-notes-rEHfeLe0.css"
     ],
     "assets": [
       "assets/KaTeX_AMS-Regular-BQhdFMY1.woff2",
@@ -328,27 +328,27 @@
       "assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf"
     ]
   },
-  "_task-notes-BoKezOPT.css": {
-    "file": "assets/task-notes-BoKezOPT.css",
-    "src": "_task-notes-BoKezOPT.css"
+  "_task-notes-rEHfeLe0.css": {
+    "file": "assets/task-notes-rEHfeLe0.css",
+    "src": "_task-notes-rEHfeLe0.css"
   },
   "help.html": {
-    "file": "assets/help-C1bDHhJj.js",
+    "file": "assets/help-Dp6axYrV.js",
     "name": "help",
     "src": "help.html",
     "isEntry": true,
     "imports": [
-      "_task-notes-Awec8EyU.js"
+      "_task-notes-CubpfVvb.js"
     ]
   },
   "index.html": {
-    "file": "assets/main-ByEWm6sv.js",
+    "file": "assets/main-DMB1QJYm.js",
     "name": "main",
     "src": "index.html",
     "isEntry": true,
     "imports": [
-      "_rolldown-runtime-CbXtAM7H.js",
-      "_task-notes-Awec8EyU.js"
+      "_rolldown-runtime-WkwZ5CU-.js",
+      "_task-notes-CubpfVvb.js"
     ],
     "dynamicImports": [
       "../__vite-browser-external"

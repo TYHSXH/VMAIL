@@ -1,0 +1,49 @@
+observe:
+  joints:
+    - name: crank_hinge
+      label: 杆 OA 转动
+      fields:
+        - position
+        - velocity
+        - acceleration
+        - force
+    - name: gear_hinge
+      label: 动齿轮Ⅱ自转
+      fields:
+        - position
+        - velocity
+        - acceleration
+        - force
+  sites:
+    - name: point_m
+      label: 动齿轮固连点 M
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      magnitude: true
+      frame: world
+    - name: point_a
+      label: 动齿轮圆心 A
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      magnitude: true
+      frame: world
+    - name: point_p
+      label: 啮合点 P（Ⅱ 的速度瞬心）
+      fields:
+        - velocity
+        - acceleration
+      components:
+        - x
+        - y
+      magnitude: true
+      frame: world

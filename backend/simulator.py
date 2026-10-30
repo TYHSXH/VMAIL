@@ -11,6 +11,7 @@ import numpy as np
 from .loads import LoadError, compile_loads, apply_loads
 from .load_math import signal_math
 from .experiment import model_revision, restore_experiment
+from .parameter_mapping import ParameterMappingError, mjcf_targets, target_value
 
 
 class SimulationError(Exception):
@@ -37,7 +38,7 @@ def _apply_loads(program, model, data):
         raise SimulationError(str(exc)) from exc
 
 
-MAX_STEPS = 200_000
+MAX_STEPS = 1_000_000
 MAX_VALUES = 2_000_000
 MAX_MODEL_RESOURCE_BYTES = 128 * 1024 * 1024
 
@@ -57,7 +58,7 @@ def simulation_settings(task: dict[str, Any], duration: Any = None, timestep: An
     duration = _positive_number(config.get("duration", 5) if duration is None else duration, "仿真时长")
     timestep = _positive_number(config.get("timestep", 0.01) if timestep is None else timestep, "时间步长")
     if timestep < 0.00001 or duration > 3600 or math.ceil(duration / timestep) > MAX_STEPS:
-        raise SimulationError("单次实验最多 200000 步，时长最多 3600 秒，步长至少 0.00001 秒；请缩短时长或增大步长。")
+        raise SimulationError(f"单次实验最多 {MAX_STEPS} 步，时长最多 3600 秒，步长至少 0.00001 秒；请缩短时长或增大步长。")
     return duration, timestep
 
 
@@ -208,17 +209,16 @@ def _apply_mjcf_overrides(model_xml: str, task: dict[str, Any], values: dict[str
     root = ET.fromstring(model_xml)
     params = _parameter_entries(task)
     for param_name, spec in params.items():
-        target = spec.get("mjcf") if isinstance(spec, dict) else None
-        if not target:
-            continue
-        tag = target.get("tag")
-        name = target.get("name")
-        attribute = target.get("attribute")
-        if not tag or not attribute:
-            continue
-        for node in root.iter(tag):
-            if name is None or node.attrib.get("name") == name:
-                node.set(attribute, str(values[param_name]))
+        try:
+            for target in mjcf_targets(spec, param_name):
+                nodes = [node for node in root.iter(target["tag"]) if "name" not in target or node.get("name") == target["name"]]
+                if not nodes:
+                    raise ParameterMappingError(f"参数 {param_name} 的 MJCF 目标不存在：{target['tag']} {target.get('name', '')}。")
+                value = target_value(target, param_name, values)
+                for node in nodes:
+                    node.set(target["attribute"], value)
+        except ParameterMappingError as exc:
+            raise SimulationError(str(exc)) from exc
     return ET.tostring(root, encoding="unicode")
 
 

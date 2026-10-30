@@ -21,6 +21,7 @@ class ReleaseHTTPTests(unittest.TestCase):
     def setUpClass(cls):
         cls.temporary = tempfile.TemporaryDirectory(prefix="vmail-http-")
         folder = Path(cls.temporary.name)
+        cls.tasks_dir = folder / "tasks"
         shutil.copytree(ROOT / "tasks", folder / "tasks", ignore=shutil.ignore_patterns("results", "__pycache__"))
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", 0))
@@ -30,8 +31,11 @@ class ReleaseHTTPTests(unittest.TestCase):
 import sys, uvicorn
 from backend import main, assistant
 from backend.assistant_history import ConversationStore
+from backend.assistant_credentials import CredentialStore
 main.TASKS_DIR = Path(sys.argv[1]) / 'tasks'
+assistant.TASKS_DIR = main.TASKS_DIR
 assistant.HISTORY = ConversationStore(Path(sys.argv[1]) / 'history.sqlite3')
+assistant.STORE = CredentialStore(Path(sys.argv[1]) / 'deepseek.key')
 uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error')
 """
         cls.process = subprocess.Popen([sys.executable, "-c", script, str(folder), str(port)], cwd=ROOT,
@@ -72,7 +76,13 @@ uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error'
                 if resource.endswith(".wasm"):
                     self.assertEqual(headers.get_content_type(), "application/wasm")
         archive = zipfile.ZipFile(io.BytesIO(self.request("/api/task-template")[0]))
-        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png"})
+        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png", "LICENSE", "NOTICE", "COPYRIGHT.md", "assets/LOGO_RIGHTS.txt"})
+        for document in ("LICENSE", "NOTICE", "COPYRIGHT.md", "CONTRIBUTING.md"):
+            self.assertEqual(self.request("/" + document)[0], (ROOT / document).read_bytes())
+        self.assertEqual(archive.read("LICENSE"), self.request("/LICENSE")[0])
+        self.assertEqual(archive.read("NOTICE"), self.request("/NOTICE")[0])
+        self.assertEqual(archive.read("COPYRIGHT.md"), self.request("/COPYRIGHT.md")[0])
+        self.assertEqual(archive.read("assets/LOGO_RIGHTS.txt"), (ROOT / "assets/logos/LICENSE.txt").read_bytes())
         self.assertEqual(archive.read("assets/logo-gray.png"), (ROOT / "assets/logos/logo-gray.png").read_bytes())
         self.assertEqual(len(self.request("/api/help-documents")[0]["documents"]), 3)
 
@@ -86,6 +96,21 @@ uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error'
                 raw, headers = self.request(f"/api/tasks/{identifier}/results/{run_id}/data.csv")
                 self.assertIn("time", raw.decode("utf-8-sig").splitlines()[0])
                 self.assertEqual(headers.get_content_type(), "text/csv")
+
+    def test_bad_task_configuration_returns_a_readable_error_and_service_recovers(self):
+        path = self.tasks_dir / "example_mass_spring" / "ui.yaml"
+        original = path.read_bytes()
+        try:
+            path.write_text("layout:\n  charts:\n  - title: invalid\n    series: null\n", encoding="utf-8")
+            for suffix, body in (("", None), ("/browser-model", {}), ("/simulate", {})):
+                with self.subTest(suffix=suffix), self.assertRaises(HTTPError) as raised:
+                    self.request("/api/tasks/example_mass_spring" + suffix, body)
+                self.assertEqual(raised.exception.code, 400)
+                self.assertIn("series", json.loads(raised.exception.read())["detail"])
+        finally:
+            path.write_bytes(original)
+        self.assertEqual(self.request("/api/health")[0]["status"], "ok")
+        self.request("/api/tasks/example_mass_spring/browser-model", {})
 
     def test_history_roundtrip_delete_isolated_and_no_cache(self):
         headers = {"X-VMAIL-Assistant": "1"}

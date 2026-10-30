@@ -1,0 +1,18 @@
+VMAIL-BUAA Logo artwork
+Copyright 2026 BUAA Department 5, Theoretical Mechanics Course Group.
+All rights reserved. NOT licensed under Apache-2.0.
+
+No public license is granted to copy, modify, redistribute, or use this artwork.
+Commercial use is prohibited without separate written permission from the
+copyright holder. Statutory exceptions remain unaffected. Availability in a
+webpage, repository, task, build, or downloadable template does not grant these
+permissions. No trademark rights or official endorsement are granted.
+
+This notice covers the black, white, and gray VMAIL-BUAA logo artwork, including
+copies used in task floors, model previews, and frontend builds. These rights
+restrictions apply to the artwork, not to separately licensed platform code.
+
+VMAIL-BUAA 标志图像版权归 BUAA 5系 理论力学课程组。保留全部权利，
+不适用 Apache-2.0，不予公开授权，禁止商用。未经另行书面许可，不得
+复制、修改、再分发或使用；法律规定的例外除外。展示或可下载不构成授权。
+本声明也适用于任务地面、模型预览和前端构建中的黑／白／灰 Logo 副本。

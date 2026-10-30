@@ -5,10 +5,10 @@ import {readAssistantImage, validateImageFiles} from "./assistant-images.js";
 export function setupAssistant({onOpen, onCreated, onError, getTask = () => null}) {
   const panel = document.getElementById("panel-assistant");
   panel.innerHTML = `
-    <div class="assistant-heading"><div><span class="panel-kicker">DEEPSEEK</span><h2>把问题变成实验</h2></div><button id="aiNew" class="quiet-button" type="button">新对话</button></div>
-    <div class="assistant-history"><label for="aiHistory">历史对话</label><select id="aiHistory" aria-label="选择历史对话"><option value="">新对话</option></select><button id="aiDelete" class="quiet-button" type="button">删除此对话</button><span id="aiHistoryState" role="status"></span></div>
+    <div class="assistant-heading"><h2>我是菜鸟，需要辅助<span class="panel-kicker">DEEPSEEK</span></h2><button id="aiNew" class="quiet-button" type="button">新对话</button></div>
     <details id="aiSettings" class="assistant-settings">
-      <summary><span>连接设置</span><span id="aiConnectionState" class="ai-connection-state">读取中</span></summary>
+      <summary><span>历史与连接</span><span class="assistant-summary-state"><span id="aiConnectionState" class="ai-connection-state">读取中</span><span id="aiHistoryState" role="status"></span></span></summary>
+      <div class="assistant-history"><label class="sr-only" for="aiHistory">历史对话</label><select id="aiHistory" aria-label="选择历史对话"><option value="">新对话</option></select><button id="aiDelete" class="quiet-button" type="button">删除此对话</button></div>
       <form id="aiConnectionForm" class="assistant-connection">
         <p>使用你自己的 API Key，无需填写账号密码。<a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener noreferrer">获取 API Key ↗</a></p>
         <label>API Key<input id="aiKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…" aria-describedby="aiKeyHelp" /></label>
@@ -21,12 +21,14 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     <div id="aiConversation" class="assistant-conversation" role="log" aria-label="与 DeepSeek 的对话" aria-live="off">
       <div id="aiWelcome" class="assistant-welcome"><span class="assistant-orbit" aria-hidden="true">＋</span><h3>你想研究什么现象？</h3><button id="aiExample" type="button">试试：比较单摆在不同初始角度下的周期 ↗</button></div>
     </div>
-    <section id="aiDraft" class="assistant-draft hidden" aria-label="任务草稿">
-      <div class="assistant-draft-heading"><strong>任务文件</strong><span id="aiDraftId"></span></div>
-      <p id="aiValidation"></p><ul id="aiErrors" class="assistant-errors"></ul>
-      <details><summary>查看生成的文件 <span id="aiFileCount"></span></summary><label class="sr-only" for="aiFile">草稿文件</label><select id="aiFile"></select><pre id="aiFileContent" tabindex="0"></pre></details>
-    </section>
     <div class="assistant-bottom">
+      <details id="aiDraft" class="assistant-draft hidden">
+        <summary class="assistant-draft-heading"><strong>任务文件 <span id="aiFileCount"></span></strong><span id="aiDraftId"></span></summary>
+        <div class="assistant-draft-popover" role="region" aria-label="任务文件内容">
+          <p id="aiValidation"></p><ul id="aiErrors" class="assistant-errors"></ul>
+          <label class="sr-only" for="aiFile">草稿文件</label><select id="aiFile"></select><pre id="aiFileContent" tabindex="0"></pre>
+        </div>
+      </details>
       <p id="aiStatus" class="assistant-status" role="status"></p>
       <form id="aiChatForm" class="assistant-composer"><div id="aiAttachments" class="assistant-attachments hidden" aria-label="待发送的图片"></div><label class="sr-only" for="aiInput">你的研究问题</label><textarea id="aiInput" rows="3" maxlength="12000" placeholder="描述机构、已知条件；也可以添加题目图或草图…" title="Enter 发送，Shift+Enter 换行"></textarea><input id="aiImageFiles" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple /><div class="assistant-compose-actions"><button id="aiChooseImages" class="quiet-button" type="button" aria-label="添加图片">＋ 图片</button><button id="aiStop" class="quiet-button hidden" type="button">停止等待</button><button id="aiSend" class="primary-button" type="submit">发送</button></div></form>
     </div>`;
@@ -58,7 +60,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   }
   function persist() {
     clearTimeout(saveTimer);
-    if (!history.length && !el.Input.value && !attachments.length && !draft) return saveQueue;
+    if (!history.length && !el.Input.value && !attachments.length && !draft && !conversations.some(item => item.id === conversationId)) return saveQueue;
     const id = conversationId;
     const state = JSON.parse(JSON.stringify({messages: history, input: el.Input.value, attachments, draft, validation, saved_task: savedTask}));
     el.HistoryState.textContent = "正在保存…";
@@ -115,7 +117,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     el.Model.value = data.model; el.Remember.checked = data.remember;
     el.Remember.dataset.supported = String(data.can_remember);
     el.Key.placeholder = configured ? "已保存；留空保留原密钥" : "sk-…";
-    if (!configured) el.Settings.open = true;
+    el.Settings.open = !configured;
     sync();
     if (data.notice) status(data.notice, true);
   }
@@ -170,6 +172,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     return usage?.total_tokens ? `本次 ${usage.total_tokens.toLocaleString()} tokens` : "";
   }
   function drawDraft() {
+    el.Draft.open = false;
     el.Draft.classList.toggle("hidden", !draft);
     if (!draft) return;
     el.DraftId.textContent = draft.task_id;
@@ -182,7 +185,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     for (const name of Object.keys(draft.files)) { const option = document.createElement("option"); option.value = name; option.textContent = name; el.File.append(option); }
     el.FileCount.textContent = `（${Object.keys(draft.files).length}）`;
     el.FileContent.textContent = draft.files[el.File.value];
-    el.Draft.scrollIntoView({block: "nearest"}); sync();
+    sync();
   }
   async function chat() {
     const originalText = el.Input.value.trim();
@@ -252,6 +255,10 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   el.Input.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); chat(); } });
   el.Stop.addEventListener("click", () => controller?.abort());
   el.File.addEventListener("change", () => { el.FileContent.textContent = draft?.files[el.File.value] || ""; });
+  document.addEventListener("pointerdown", event => { if (!el.Draft.contains(event.target)) el.Draft.open = false; });
+  panel.addEventListener("keydown", event => {
+    if (event.key === "Escape" && el.Draft.open) { event.stopPropagation(); el.Draft.open = false; el.Draft.querySelector("summary").focus(); }
+  });
   el.Example.addEventListener("click", () => { el.Input.value = "我想创建一个单摆实验，比较不同初始角度下的周期。请先和我确认建模条件及需要观察的量。"; scheduleSave(); el.Input.focus(); });
   el.Input.addEventListener("input", scheduleSave);
   el.New.addEventListener("click", async () => {

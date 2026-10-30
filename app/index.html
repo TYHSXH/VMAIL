@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL-BUAA 理论力学虚拟仿真实验平台</title>
-    <script type="module" crossorigin src="/static/assets/main-ByEWm6sv.js"></script>
-    <link rel="modulepreload" crossorigin href="/static/assets/rolldown-runtime-CbXtAM7H.js">
-    <link rel="modulepreload" crossorigin href="/static/assets/task-notes-Awec8EyU.js">
-    <link rel="stylesheet" crossorigin href="/static/assets/task-notes-BoKezOPT.css">
+    <script type="module" crossorigin src="/static/assets/main-DMB1QJYm.js"></script>
+    <link rel="modulepreload" crossorigin href="/static/assets/rolldown-runtime-WkwZ5CU-.js">
+    <link rel="modulepreload" crossorigin href="/static/assets/task-notes-CubpfVvb.js">
+    <link rel="stylesheet" crossorigin href="/static/assets/task-notes-rEHfeLe0.css">
   </head>
   <body>
     <div id="app">
@@ -38,9 +38,9 @@
             <h1 id="taskTitle">选择一个学习任务</h1>
           </div>
           <div class="topbar-actions">
-            <button id="openPreview" class="quiet-button" data-icon="cube" type="button">模型预览</button>
-            <button id="openAssistant" class="quiet-button assistant-entry" type="button" aria-controls="panel-assistant">AI 创建任务</button>
             <button id="toggleInspector" class="quiet-button" data-icon="sliders" type="button">参数与数据</button>
+            <button id="openPreview" class="quiet-button" data-icon="cube" type="button">模型预览</button>
+            <button id="openAssistant" class="quiet-button" type="button" aria-controls="panel-assistant">我是菜鸟·AI</button>
             <a class="quiet-button help-link" href="/help" target="_blank" rel="noopener noreferrer">帮助</a>
           </div>
         </header>
@@ -51,22 +51,27 @@
             <strong>正在准备实验台</strong>
             <span>首次加载需要一点时间</span>
           </div>
-          <div class="viewer-toolbar" role="toolbar" aria-label="仿真控制">
-            <div class="mode-switch" aria-label="鼠标模式">
-              <button id="cameraMode" class="active" data-icon="orbit" type="button">旋转</button>
-              <button id="panMode" data-icon="move" type="button">平移</button>
-              <button id="dragMode" data-icon="hand" type="button">拖动</button>
+          <div class="viewer-toolbar task-toolbar" role="toolbar" aria-label="仿真控制">
+            <div class="toolbar-row">
+              <div class="mode-switch" role="group" aria-label="视角与鼠标模式">
+                <button id="cameraMode" class="active" data-icon="orbit" type="button">旋转</button>
+                <button id="panMode" data-icon="move" type="button">平移</button>
+                <button id="dragMode" data-icon="hand" type="button">拖动</button>
+                <button id="homeCameraButton" data-icon="frame" type="button" disabled>复位视角</button>
+              </div>
+              <span class="toolbar-divider" aria-hidden="true"></span>
+              <div class="mode-switch" role="group" aria-label="渲染效果">
+                <button id="lightingButton" class="active" type="button" aria-pressed="true" disabled>光照</button>
+                <button id="shadowButton" class="active" type="button" aria-pressed="true" disabled>阴影</button>
+              </div>
             </div>
-            <span class="toolbar-divider"></span>
-            <button id="contactButton" type="button" disabled>接触点</button>
-            <button id="shadowButton" class="active" type="button" aria-pressed="true" disabled>阴影</button>
-            <button id="lightingButton" class="active" type="button" aria-pressed="true" disabled>光照</button>
-            <span class="toolbar-divider"></span>
-            <button data-overlay="loads" class="active" type="button" aria-pressed="true" title="仅显示施加的外载荷；拖拽箭头从作用点连接到鼠标目标，不代表合力" disabled>外载荷</button>
-            <button data-overlay="inertia" type="button" aria-pressed="false" title="显示与主惯量等效的惯量盒" disabled>惯量</button>
-            <button data-overlay="com" type="button" aria-pressed="false" title="黄色标记各刚体质心" disabled>质心</button>
-            <button data-overlay="joints" type="button" aria-pressed="false" title="显示刚体转动／滑动关节的正轴方向" disabled>关节轴</button>
-            <button id="homeCameraButton" data-icon="frame" type="button" disabled>复位视角</button>
+            <div class="toolbar-row" role="group" aria-label="力学标记">
+              <button data-overlay="loads" class="active" type="button" aria-pressed="true" title="仅显示施加的外载荷；拖拽箭头从作用点连接到鼠标目标，不代表合力" disabled>外载荷</button>
+              <button data-overlay="com" type="button" aria-pressed="false" title="黄色标记各刚体质心" disabled>质心</button>
+              <button data-overlay="joints" type="button" aria-pressed="false" title="显示刚体转动／滑动关节的正轴方向" disabled>关节轴</button>
+              <button data-overlay="inertia" type="button" aria-pressed="false" title="显示与主惯量等效的惯量盒" disabled>惯量</button>
+              <button id="contactButton" type="button" disabled>接触点</button>
+            </div>
           </div>
           <div class="simulation-controls">
             <span id="simTime" class="sim-time">t = 0.000 s</span>
@@ -82,7 +87,7 @@
         </section>
       </main>
 
-      <aside id="inspector" class="inspector">
+      <aside id="inspector" class="inspector collapsed">
         <div id="inspectorResizeHandle" class="resize-handle resize-handle-left" role="separator" aria-label="调整参数与数据面板宽度" aria-orientation="vertical" tabindex="0"></div>
         <header class="inspector-header">
           <nav class="tabs" role="tablist" aria-label="任务面板">
@@ -123,7 +128,7 @@
             <button id="cancelRun" class="quiet-button hidden" type="button">取消计算</button>
           </div>
           <p id="dataSource" class="data-source" role="status"></p>
-          <details class="usage-notes"><summary>图表与导出说明</summary><p>悬停读取数据，Shift＋滚轮缩放时间轴，双击恢复全程。先完成一次网页仿真，再选择导出网页数据或后台重算并下载 CSV。后台继承本次实验参数、关节／拖动后的起始状态及中途控制记录，不从结束姿态起跑。两端使用同版本 MuJoCo，后台不天然更准确；重算后保留网页曲线并检查数值差异。</p></details>
+          <details class="usage-notes"><summary>图表与导出说明</summary><p>悬停联动读取数据；单击图表固定时间，再次单击任意图表解除固定。Shift＋滚轮缩放时间轴，双击恢复全程；图表右上角 ↑／↓ 调整显示顺序，并按任务保存在本浏览器。先完成一次网页仿真，再选择导出网页数据或后台重算并下载 CSV。后台继承本次实验参数、关节／拖动后的起始状态及中途控制记录，不从结束姿态起跑。两端使用同版本 MuJoCo，后台不天然更准确；重算后保留网页曲线并检查数值差异。</p></details>
           <div id="chartStack" class="chart-stack"></div>
           <details class="result-history"><summary>已保存的实验</summary><div id="resultHistory"></div></details>
         </section>

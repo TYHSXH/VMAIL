@@ -1,9 +1,29 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import {forecastLoads} from "../frontend/load-preview.js";
 
 const source=fs.readFileSync(new URL("../frontend/main.js",import.meta.url),"utf8");
 function extract(name,next){return source.slice(source.indexOf(`function ${name}(`),source.indexOf(`function ${next}(`));}
+
+test("web simulation accepts one million steps and rejects one additional step",()=>{
+  const el={durationInput:{value:"100"},timestepInput:{value:"0.0001"}};
+  const code=source.slice(source.indexOf("function simulationSettings("),source.indexOf("async function initViewer("));
+  const settings=new Function("el",code+";return simulationSettings;")(el);
+  assert.deepEqual(settings(),{duration:100,timestep:.0001});
+  el.durationInput.value="100.0001";
+  assert.throws(settings,/1000000/);
+});
+
+test("load forecasting uses the same million-step boundary before allocating a simulation",async()=>{
+  let allocated=0,deleted=0;
+  const viewer={mujoco:{MjData:class {constructor(){allocated++;this.ctrl=new Float64Array();this.act=new Float64Array();}delete(){deleted++;}}},
+    model:{opt:{timestep:.0001}},loadProgram:{entries:[{}],units:{}},configuredTimestep:.0001,data:{ctrl:[],act:[]}};
+  await assert.rejects(forecastLoads(viewer,100,{cancelled:()=>true}),error=>error.name==="AbortError");
+  assert.equal(allocated,1);assert.equal(deleted,1);
+  await assert.rejects(forecastLoads(viewer,100.0001),/1000000/);
+  assert.equal(allocated,1);
+});
 
 test("same-time pose updates replace the sample, and missing observations stay aligned",()=>{
   const state={task:{id:"a"},seriesMode:"realtime",series:{time:[]},batch:null,chartFrameId:1};
@@ -24,6 +44,51 @@ test("pose preparation and model loading cannot append experiment samples",()=>{
     fn({time:.1,values:{position:2}});
     assert.deepEqual(state.series,{time:[0,1]});
   }
+});
+
+test("loading and native replay lock model inputs until they finish",()=>{
+  const inputs=[{disabled:false},{disabled:false}],durationInput={},timestepInput={},applyParameters={};
+  const state={task:{id:"a"},modelLoading:true,batch:null,runtimeRows:[]};
+  const button=()=>({classList:{toggle(){}},setAttribute(){}});
+  const el={parameterForm:{querySelectorAll:()=>inputs},durationInput,timestepInput,applyParameters,
+    ...Object.fromEntries(["resetButton","stepButton","playButton","contactButton","homeCameraButton","shadowButton","lightingButton"].map(key=>[key,button()]))};
+  const fn=new Function("state","el","document","taskJointPanel","syncRuntimeControls",extract("setPlaybackEnabled","simulationSettings")+";return setPlaybackEnabled;")(
+    state,el,{querySelectorAll:()=>[]},{sync(){}},()=>{});
+  fn(false);
+  for(const input of [...inputs,durationInput,timestepInput,applyParameters])assert.equal(input.disabled,true);
+  state.modelLoading=false;state.batch={};fn(false);
+  for(const input of [...inputs,durationInput,timestepInput,applyParameters])assert.equal(input.disabled,true);
+  state.batch=null;fn(false);
+  for(const input of [...inputs,durationInput,timestepInput,applyParameters])assert.equal(input.disabled,false);
+});
+
+test("failed task selection restores the previous usable task without losing its data",async()=>{
+  const previous={id:"old"},series={time:[0,1]};
+  const state={task:previous,series,selectionVersion:0,modelLoadVersion:0,viewerTaskId:"old",viewer:{model:{},setPaused(){},setSuspended(){}}};
+  const el={mujocoViewport:{classList:{remove(){}}}};
+  const messages=[],enabled=[];
+  const start=source.indexOf("async function selectTask(");
+  const fn=new Function("state","el","loadPreview","setPlaybackEnabled","rememberViewerControls","requestJson","showMessage",source.slice(start,source.indexOf("function renderTask(",start))+";return selectTask;")(
+    state,el,{clear(){}},value=>enabled.push(value),()=>{},async()=>{throw Error("任务配置损坏");},message=>messages.push(message));
+  await fn("broken");
+  assert.equal(state.task,previous);assert.equal(state.series,series);
+  assert.equal(state.modelLoading,false);assert.equal(enabled.at(-1),true);
+  assert.match(messages[0],/配置损坏/);
+});
+
+test("parameter range validation runs before model inputs are disabled",async()=>{
+  const input={name:"mass",value:"-1",disabled:false,checkValidity(){return this.disabled;},reportValidity(){},focus(){}};
+  const el={parameterForm:{querySelectorAll:()=>[input]},viewerLoading:{classList:{remove(){}},innerHTML:""}};
+  const state={task:{id:"a",parameters:{parameters:{mass:{label:"质量"}}}},viewerReady:true,viewer:{setPaused(){}},modelLoadVersion:0};
+  const requests=[],messages=[];
+  const start=source.indexOf("async function loadBrowserModel(");
+  const code="const escapeHtml=String;"+extract("collectParameters","rememberViewerControls")+source.slice(start,source.indexOf("function updatePlaybackButton(",start));
+  const fn=new Function("state","el","loadPreview","setPlaybackEnabled","rememberViewerControls","simulationSettings","activateTab","requestJson","showMessage",code+";return loadBrowserModel;")(
+    state,el,{invalidate(){}},()=>{input.disabled=Boolean(state.modelLoading);},()=>{},()=>({duration:1,timestep:.01}),()=>{},async(...args)=>{requests.push(args);},message=>messages.push(message));
+  assert.equal(await fn(),false);
+  assert.equal(requests.length,0);
+  assert.match(messages[0],/质量/);
+  assert.equal(input.disabled,false);
 });
 
 test("late batch result cannot replace another task's data",async()=>{

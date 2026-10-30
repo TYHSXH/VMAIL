@@ -1,0 +1,13 @@
+id: planetary_gear_point_acceleration
+title: "例7-5 外啮合行星齿轮 M 点加速度"
+question: "定齿轮Ⅰ固定、杆 OA 以角速度 ω₀ 和角加速度 α₀ 转动时，动齿轮Ⅱ上固连点 M（OA 延长线上、AM=r₂）的加速度如何随 ω₀、α₀、r₁、r₂ 变化，并与解析结果对照？"
+simulation:
+  engine: mujoco
+  duration: 6.0
+  timestep: 0.001
+theory_topics:
+  - 刚体平面运动
+  - 速度瞬心
+  - 基点法
+  - 点的加速度合成
+  - 齿轮传动

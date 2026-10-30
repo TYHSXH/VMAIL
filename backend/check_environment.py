@@ -23,7 +23,7 @@ def check_project(root: Path = ROOT) -> None:
     required = ["app/index.html", "app/help.html", "requirements.txt", "tasks/manifest.yaml",
                 "docs/user-guide.md", "prompts/student-task-builder.md", "model_library/catalog.json",
                 "docs/task-package-spec.md", "docs/mesh-modeling.md", "assets/logos/logo-gray.png", "constraints.txt",
-                "app/.vite/manifest.json", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md"]
+                "app/.vite/manifest.json", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE", "assets/logos/LICENSE.txt"]
     required.extend("licenses/" + name for name in ["mujoco-LICENSE.txt", "mujoco-THIRD_PARTY.md", "three-LICENSE.txt",
                     "katex-LICENSE.txt", "marked-LICENSE.txt", "dompurify-LICENSE.txt", "emscripten-LICENSE.txt"])
     for name in required:

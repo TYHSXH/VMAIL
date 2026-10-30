@@ -60,7 +60,7 @@ python -m pip install -r requirements.txt
 ## 3. AI 辅助：直接在系统中使用 DeepSeek API
 
 1. 在 [DeepSeek 开放平台](https://platform.deepseek.com/api_keys) 创建自己的 API Key。
-2. 打开实验台“AI 创建任务”或“AI 助手”，展开“连接设置”，填写 Key、选择模型并“保存连接”，再“测试连接”。这里填写 API Key，不是账号密码。
+2. 打开实验台“我是菜鸟·AI”或“AI 助手”，展开“历史与连接”，填写 Key、选择模型并“保存连接”，再“测试连接”。这里填写 API Key，不是账号密码。
 3. 描述机构、已知尺寸、质量、关节、载荷，以及想改变和观察的量。可以上传题目图片或草图；图片理解选择 **DeepSeek Flash**，具体服务能力以 [DeepSeek 官方文档](https://api-docs.deepseek.com/)为准。
 4. 明确要求创建任务后，助手生成文件，系统校验并试运行，通过后自动写入任务目录并刷新列表。失败时把报错继续交给助手修正。
 5. 修改已有任务前先在左侧选中它，再说“修复这个任务”或“增加一个观测量”；也可以明确提供任务编号。助手会在原任务上修改，并备份原文件。
@@ -155,6 +155,8 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 
 ## 版权与第三方资源
 
-© 2026 **BUAA 5系 理论力学课程组**。VMAIL 平台原创代码、课程原创文档及标志沿用课程组版权标注；未经另行许可，不得将课程标志用于冒名或暗示官方背书。公开托管在 GitHub 不等同于对全部原创内容授予开源许可证，授权范围见 [COPYRIGHT.md](COPYRIGHT.md)，进一步使用请联系课程组确认。
+© 2026 **BUAA 5系 理论力学课程组及相应贡献者**。除 Logo、学生作品和第三方内容外，有权发布的平台原创代码、网页、文档与原创示例／模板采用 [Apache-2.0](LICENSE)，允许商业使用。分发时保留许可证、版权与适用的 [NOTICE](NOTICE)，修改文件时说明修改。完整范围见 [COPYRIGHT.md](COPYRIGHT.md)，许可证区别见[授权说明](docs/licensing.md)。
+
+**Logo 和学生作品保留全部权利，不予公开授权，禁止商用，不适用 Apache-2.0。** 此声明包含网页、地面及构建产物中的 Logo 副本，以及入选展示的学生作品；展示或下载不构成复用许可。未经相关权利人另行书面许可不得使用，法律规定的例外除外。复用平台代码时应替换／移除 Logo 和学生作品或先取得许可，见 [Logo 声明](assets/logos/LICENSE.txt)与[贡献说明](CONTRIBUTING.md)。
 
 MuJoCo、Three.js、KaTeX、Marked、DOMPurify 及其资源属于各自权利人，按各自许可证提供，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [licenses/](licenses/)。模型资料库按每组 `SOURCE.md`、`LICENSE` 保留原作者、固定来源与许可，不因本项目的版权声明改变。学生添加的 CAD／STL、题图、教材内容及其他素材，须确认使用与再分发权限，并保留来源。教学仿真结果需经力学核对，不作为工程安全认证。

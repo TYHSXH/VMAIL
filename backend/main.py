@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .task_io import TaskValidationError, load_task, list_tasks, save_run_result, rename_task, delete_task, TASK_STATE_LOCK, ACTIVE_SIMULATIONS
-from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
+from .simulator import MAX_STEPS, SimulationError, prepare_browser_model, run_mujoco_task
 from .preview import preview_choices, prepare_preview, pack_preview
 from .assistant import router as assistant_router, local_request, local_origin
 
@@ -25,7 +25,7 @@ TASKS_DIR = ROOT / "tasks"
 
 
 class ControlEvent(BaseModel):
-    step: int = Field(ge=0, le=200000)
+    step: int = Field(ge=0, le=MAX_STEPS)
     controls: list[float] = Field(max_length=200000)
 
 
@@ -34,7 +34,7 @@ class ExperimentReplay(BaseModel):
     model_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
     initial_state: list[float] = Field(max_length=1000000)
     control_events: list[ControlEvent] = Field(default_factory=list, max_length=10000)
-    sample_steps: list[int] = Field(min_length=2, max_length=200001)
+    sample_steps: list[int] = Field(min_length=2, max_length=MAX_STEPS + 1)
 
 
 class SimulationRequest(BaseModel):
@@ -281,6 +281,10 @@ def task_template() -> Response:
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
         package.writestr("model.xml", model.group(1) + "\n")
         package.write(ROOT / "assets/logos/logo-gray.png", "assets/logo-gray.png")
+        package.write(ROOT / "LICENSE", "LICENSE")
+        package.write(ROOT / "NOTICE", "NOTICE")
+        package.write(ROOT / "COPYRIGHT.md", "COPYRIGHT.md")
+        package.write(ROOT / "assets/logos/LICENSE.txt", "assets/LOGO_RIGHTS.txt")
     return Response(archive.getvalue(), media_type="application/zip", headers={"Content-Disposition": 'attachment; filename="vmail-buaa-model-template.zip"'})
 
 
@@ -294,7 +298,7 @@ app.mount("/static", StaticFiles(directory=APP_DIR), name="static")
 
 @app.get("/{document_name}")
 def project_document(document_name: str):
-    if document_name not in {"README.md", "README_EN.md", "COPYRIGHT.md", "THIRD_PARTY_NOTICES.md"}:
+    if document_name not in {"README.md", "README_EN.md", "COPYRIGHT.md", "THIRD_PARTY_NOTICES.md", "LICENSE", "NOTICE", "CONTRIBUTING.md"}:
         raise HTTPException(404, "文件不存在。")
     return FileResponse(ROOT / document_name, media_type="text/plain; charset=utf-8")
 

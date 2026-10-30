@@ -1,6 +1,8 @@
 # VMAIL Task Package Specification
 
-从零创建或重写模型时，使用本文“默认 XML 模板”中的代码，并将项目根目录的 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`，再替换示例物体。保留地面中央的大号灰色 logo、纹理和材质；不要跨任务目录引用模板资源。平台与标志版权归 BUAA 5系 理论力学课程组，第三方模型保留自身来源与许可证。
+从零创建或重写模型时，使用本文“默认 XML 模板”中的代码；经课程组许可的课程任务将 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`，再替换示例物体并保留居中 Logo 地面。不要跨任务目录引用资源。
+
+**模板 XML 代码采用 [Apache-2.0](../LICENSE)，Logo 图像不在该许可内：保留全部权利，不予公开授权，禁止商用。** 未取得 Logo 的单独书面许可时，应改用自有素材或移除 Logo 纹理／材质引用，保留普通地面；本规范中的保留 Logo 要求只适用于已获许可的课程任务。分发可授权的独立模板时保留 `LICENSE`、`NOTICE` 和 `COPYRIGHT.md`；网页下载同时附带 `assets/LOGO_RIGHTS.txt`，可下载不构成 Logo 使用授权。学生作品不适用平台 Apache-2.0，第三方模型保持原许可，完整范围见 [COPYRIGHT.md](../COPYRIGHT.md)。
 
 VMAIL 的核心不是预置很多模型，而是定义一种稳定的“学习任务包”。只要 AI coding 工具生成的任务包符合这个规范，网页实验台就能读取、展示参数、运行 MuJoCo 仿真并保存结果。
 
@@ -144,6 +146,38 @@ mjcf:
 ```
 
 这会在运行前修改 `model.xml` 中对应元素的属性。
+
+**一个参数可以联动多个 MJCF 属性。** 将 `mjcf` 写成列表即可；原来的单对象写法继续有效。每个目标可选 `value`：省略时直接使用该参数值；填写时支持数字、引用任意已声明参数的数学表达式，以及由数字／表达式组成的向量列表。向量必须使用 YAML 列表，不能写成包含多项的空格字符串。
+
+例如，改变杆长时，同时调整杆件尺寸、质心位置和末端连接点：
+
+```yaml
+parameters:
+  length:
+    label: 杆长
+    value: 1.0
+    unit: m
+    min: 0.2
+    max: 3.0
+    step: 0.1
+    mjcf:
+      - tag: geom
+        name: rod_geom
+        attribute: size
+        value: ["length / 2", 0.03, 0.03]  # box 的半长、半宽、半高
+      - tag: geom
+        name: rod_geom
+        attribute: pos
+        value: ["length / 2", 0, 0]
+      - tag: body
+        name: rod_tip
+        attribute: pos
+        value: [length, 0, 0]
+```
+
+表达式在“应用参数并重载模型”时统一计算，网页与后台使用相同结果；可以引用其他参数的新值，计算不依赖参数的书写顺序。支持 `+ - * / **`、括号、`pi`、`e` 及载荷表达式的数学白名单函数（如 `sqrt`、`sin`、`cos`），不执行 Python 代码，不支持时间 `t`、关节状态 `q/v` 或表格信号。每个参数最多 128 个映射目标，每个向量最多 16 项；目标不存在、表达式非法或结果非有限数字会明确报错。
+
+目标属性的单位、向量长度和物理意义仍须符合 MJCF。改变几何尺寸不会自动保证所有约束、惯量和载荷正确：使用 MJCF 根据几何体自动推算惯量时可保留其推算；显式给定惯量、连接位置或碰撞参数时，按实际模型补齐相关映射。不要把同一个属性交给多个参数重复覆盖。
 
 ```yaml
 initial_state:

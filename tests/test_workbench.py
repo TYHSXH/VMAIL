@@ -2,6 +2,7 @@ import copy
 import shutil
 import tempfile
 import threading
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +11,9 @@ from fastapi import HTTPException
 
 from backend import main
 from backend.simulator import SimulationError, prepare_browser_model, run_mujoco_task, _model_source, MAX_MODEL_RESOURCE_BYTES
-from backend.task_io import TaskValidationError, list_tasks, load_task, rename_task, save_run_result
+from backend.task_io import TaskValidationError, list_tasks, load_task, rename_task, save_run_result, TITLE_LOCK
+from backend.validate_task import validate_task
+import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,6 +57,69 @@ class WorkbenchTests(unittest.TestCase):
         for value in (10, -1, "abc", float("nan"), float("inf")):
             with self.subTest(value=value), self.assertRaises(SimulationError):
                 prepare_browser_model(self.task, {"mass": value})
+
+    def test_malformed_task_configuration_reports_validation_errors(self):
+        cases = [
+            ("parameters.yaml", {"parameters": {"mass": {"value": 1, "unit": "kg", "mjcf": "bad"}}}),
+            ("parameters.yaml", {"parameters": {"mass": {"value": 1, "unit": "kg", "initial_state": []}}}),
+            ("ui.yaml", {"layout": {"charts": [{"title": "bad", "series": None}]}}),
+            ("ui.yaml", {"camera": []}),
+            ("ui.yaml", {"camera": {"position": "bad", "target": [0, 0, 0]}}),
+            ("observe.yaml", {"observe": {"joints": [{"name": "slide_x", "fields": [{}]}]}}),
+        ]
+        for filename, document in cases:
+            with self.subTest(filename=filename, document=document):
+                path = self.tasks / "example_mass_spring" / filename
+                original = path.read_bytes()
+                try:
+                    path.write_text(yaml.safe_dump(document), encoding="utf-8")
+                    with self.assertRaises(TaskValidationError):
+                        load_task(self.tasks, "example_mass_spring")
+                    self.assertTrue(validate_task("example_mass_spring", self.tasks))
+                finally:
+                    path.write_bytes(original)
+
+    def test_non_utf8_task_text_reports_the_file_instead_of_crashing(self):
+        for filename in ("model.xml", "notes.md", "parameters.yaml"):
+            with self.subTest(filename=filename):
+                path = self.tasks / "example_mass_spring" / filename
+                original = path.read_bytes()
+                try:
+                    path.write_bytes(b"\xff\xfe\x80")
+                    with self.assertRaisesRegex(TaskValidationError, filename):
+                        load_task(self.tasks, "example_mass_spring")
+                finally:
+                    path.write_bytes(original)
+
+    def test_task_reader_waits_for_a_complete_multi_file_update(self):
+        folder = self.tasks / "example_mass_spring"
+        written, finish, reading = threading.Event(), threading.Event(), threading.Event()
+        new_xml = self.task["model_xml"] + "\n<!-- complete update -->\n"
+        def writer():
+            with TITLE_LOCK:
+                metadata = dict(self.task["task"], title="Updated")
+                (folder / "task.yaml").write_text(yaml.safe_dump(metadata), encoding="utf-8")
+                written.set()
+                if not finish.wait(5):
+                    raise RuntimeError("Reader test did not finish")
+                (folder / "model.xml").write_text(new_xml, encoding="utf-8")
+        def reader():
+            reading.set()
+            return load_task(self.tasks, "example_mass_spring")
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            write = pool.submit(writer)
+            self.assertTrue(written.wait(5))
+            read = pool.submit(reader)
+            try:
+                self.assertTrue(reading.wait(5))
+                with self.assertRaises(FutureTimeout):
+                    read.result(timeout=.1)
+            finally:
+                finish.set()
+            write.result(timeout=5)
+            result = read.result(timeout=5)
+        self.assertEqual(result["task"]["title"], "Updated")
+        self.assertEqual(result["model_xml"], new_xml)
 
     def test_zero_negative_and_excessive_simulations_rejected(self):
         for duration, timestep in ((0, .005), (1, 0), (1, -.1), (float("inf"), .01), (100, .00001)):

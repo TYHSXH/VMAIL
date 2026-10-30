@@ -32,7 +32,7 @@ def _finite(value: Any) -> float:
     return float(value)
 
 
-def compile_signal(source: Any, parameters: dict, model: Any, mujoco: Any) -> Any:
+def compile_signal(source: Any, parameters: dict, model: Any, mujoco: Any, *, static: bool = False) -> Any:
     if isinstance(source, (int, float)):
         return _finite(source)
     if isinstance(source, dict):
@@ -58,6 +58,8 @@ def compile_signal(source: Any, parameters: dict, model: Any, mujoco: Any) -> An
         if isinstance(node, ast.Constant):
             return _finite(node.value)
         if isinstance(node, ast.Name):
+            if static and node.id in parameters: return _finite(parameters[node.id])
+            if static and node.id == "t": raise LoadError("MJCF 参数表达式不能引用时间 t。")
             if node.id == "t": return ["t"]
             if node.id in {"pi", "e"}: return getattr(math, node.id)
             if node.id in parameters: return _finite(parameters[node.id])
@@ -73,6 +75,7 @@ def compile_signal(source: Any, parameters: dict, model: Any, mujoco: Any) -> An
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and not node.keywords:
             name = node.func.id
             if name in {"q", "v"} and len(node.args) == 1 and isinstance(node.args[0], ast.Constant) and isinstance(node.args[0].value, str):
+                if static: raise LoadError("MJCF 参数表达式不能引用运行时关节状态 q/v。")
                 joint = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, node.args[0].value)
                 if joint < 0 or model.jnt_type[joint] not in (mujoco.mjtJoint.mjJNT_HINGE, mujoco.mjtJoint.mjJNT_SLIDE):
                     raise LoadError(f"q/v 只能引用存在的转动或滑动关节：{node.args[0].value}")

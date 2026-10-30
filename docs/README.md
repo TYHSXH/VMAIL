@@ -27,3 +27,4 @@
 - `model_library/README.md`、`AI_TASK_PROMPT.md`：素材检索与复用。
 - `model_library/**/SOURCE.md`：对应资源来源和许可记录。
 - 根目录 `README_EN.md`：英文入口；完整操作统一维护在中文使用手册中。
+- [授权说明](licensing.md)、[版权范围](../COPYRIGHT.md)与[贡献说明](../CONTRIBUTING.md)：Apache-2.0 条件、第三方来源和学生作品公开要求。

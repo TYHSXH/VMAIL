@@ -14,7 +14,11 @@ ROOT = Path(__file__).resolve().parents[1]
 class TemplateTests(unittest.TestCase):
     def test_downloaded_template_is_self_contained_and_compiles(self):
         archive = zipfile.ZipFile(io.BytesIO(task_template().body))
-        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png"})
+        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png", "LICENSE", "NOTICE", "COPYRIGHT.md", "assets/LOGO_RIGHTS.txt"})
+        self.assertEqual(archive.read("LICENSE"), (ROOT / "LICENSE").read_bytes())
+        self.assertEqual(archive.read("NOTICE"), (ROOT / "NOTICE").read_bytes())
+        self.assertEqual(archive.read("COPYRIGHT.md"), (ROOT / "COPYRIGHT.md").read_bytes())
+        self.assertEqual(archive.read("assets/LOGO_RIGHTS.txt"), (ROOT / "assets/logos/LICENSE.txt").read_bytes())
         model = mujoco.MjModel.from_xml_string(archive.read("model.xml").decode("utf-8"), {"assets/logo-gray.png": archive.read("assets/logo-gray.png")})
         self.assertEqual(model.ntex, 1)
         data = mujoco.MjData(model)

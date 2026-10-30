@@ -24,3 +24,14 @@ tasks:
   path: wedge_rod_acceleration_v4
   status: ready
   description: 杆 AB 与楔块 C 的质量比如何影响杆的竖直加速度与楔块的水平加速度？两者加速度是否满足 a_B = a_C·tanθ？
+- id: planetary_gear_point_acceleration
+  title: 例7-5 外啮合行星齿轮 M 点加速度
+  path: planetary_gear_point_acceleration
+  status: ready
+  description: 定齿轮Ⅰ固定、杆 OA 以角速度 ω₀ 和角加速度 α₀ 转动时，动齿轮Ⅱ上固连点 M（OA 延长线上、AM=r₂）的加速度如何随 ω₀、α₀、r₁、r₂
+    变化，并与解析结果对照？
+- id: planetary_gear_point_acceleration_relative_speed
+  title: 例7-5 外啮合行星齿轮 M 点加速度（相对转速修正版）
+  path: planetary_gear_point_acceleration_relative_speed
+  status: ready
+  description: 原任务的对照副本；仅修正齿轮相对杆的目标转速比为 r1/r2，其余设置保留。

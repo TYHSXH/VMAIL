@@ -17,6 +17,7 @@ from uuid import uuid4
 import yaml
 
 from .task_io import REQUIRED_FILES, TITLE_LOCK, TASK_STATE_LOCK, ACTIVE_SIMULATIONS, TaskValidationError, _read_yaml, list_tasks
+from .simulator import MAX_STEPS
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_FILES = set(REQUIRED_FILES) | {"loads.yaml", "README.md"}
@@ -45,8 +46,8 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
         raise TaskValidationError("请提供 1–80 字符的单行任务标题。")
     simulation = metadata.get("simulation", {})
     duration, timestep = float(simulation.get("duration", 6)), float(simulation.get("timestep", .005))
-    if not (math.isfinite(duration) and math.isfinite(timestep) and 0 < duration <= 60 and timestep >= .0001 and duration / timestep <= 30_000):
-        raise TaskValidationError("AI 任务试运行限 60 秒仿真时长、30000 步，请缩短时长或增大步长。")
+    if not (math.isfinite(duration) and math.isfinite(timestep) and 0 < duration <= 60 and timestep >= .00001 and math.ceil(duration / timestep) <= MAX_STEPS):
+        raise TaskValidationError(f"AI 任务试运行限 60 秒仿真时长、{MAX_STEPS} 步，步长至少 0.00001 秒；请缩短时长或增大步长。")
     xml = files["model.xml"]
     if "<!" in xml:
         # Comments are harmless; declarations and entities are not accepted.

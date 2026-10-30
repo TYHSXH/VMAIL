@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .parameter_mapping import ParameterMappingError, mjcf_targets
+
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -31,7 +33,7 @@ def _read_yaml(path: Path) -> dict[str, Any]:
     try:
         with path.open("r", encoding="utf-8") as handle:
             data = yaml.safe_load(handle) or {}
-    except (yaml.YAMLError, OSError) as exc:
+    except (yaml.YAMLError, OSError, UnicodeError) as exc:
         raise TaskValidationError(f"无法读取 {path.name}: {exc}") from exc
     if not isinstance(data, dict):
         raise TaskValidationError(f"{path.name} must contain a YAML object.")
@@ -145,6 +147,12 @@ def delete_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
 
 
 def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
+    # Readers must see one complete version while rename/AI updates replace files.
+    with TITLE_LOCK:
+        return _load_task(tasks_dir, task_id)
+
+
+def _load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
     task_id = _safe_task_id(task_id)
     task_dir = tasks_dir / task_id
     if not task_dir.exists():
@@ -154,6 +162,12 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
     if missing:
         raise TaskValidationError(f"Task {task_id} is incomplete. Missing: {', '.join(missing)}")
 
+    texts = {}
+    for filename in ("model.xml", "notes.md"):
+        try:
+            texts[filename] = (task_dir / filename).read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeError) as exc:
+            raise TaskValidationError(f"无法读取 {filename}，请检查文件编码（UTF-8）与访问权限。") from exc
     task = {
         "id": task_id,
         "path": str(task_dir),
@@ -161,17 +175,24 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
         "parameters": _read_yaml(task_dir / "parameters.yaml"),
         "observe": _read_yaml(task_dir / "observe.yaml"),
         "ui": _read_yaml(task_dir / "ui.yaml"),
-        "model_xml": (task_dir / "model.xml").read_text(encoding="utf-8"),
-        "notes": (task_dir / "notes.md").read_text(encoding="utf-8"),
+        "model_xml": texts["model.xml"],
+        "notes": texts["notes.md"],
         "loads": _read_yaml(task_dir / "loads.yaml") if (task_dir / "loads.yaml").exists() else {},
     }
-    for document, field in (("task", "simulation"), ("parameters", "parameters"), ("observe", "observe"), ("ui", "layout"), ("ui", "controls")):
+    for document, field in (("task", "simulation"), ("parameters", "parameters"), ("observe", "observe"), ("ui", "layout"), ("ui", "controls"), ("ui", "camera")):
         value = task[document].get(field, {})
         if not isinstance(value, dict):
             raise TaskValidationError(f"{document}.yaml 的 {field} 必须是对象。")
     for name, spec in task["parameters"].get("parameters", {}).items():
         if not isinstance(spec, dict):
             raise TaskValidationError(f"参数 {name} 必须是对象。")
+        try:
+            mjcf_targets(spec, name)
+        except ParameterMappingError as exc:
+            raise TaskValidationError(str(exc)) from exc
+        for field in ("initial_state",):
+            if field in spec and not isinstance(spec[field], dict):
+                raise TaskValidationError(f"参数 {name} 的 {field} 必须是对象。")
         for bound in ("min", "max", "value"):
             if bound in spec:
                 try:
@@ -185,8 +206,14 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
     for group, entries in task["observe"].get("observe", {}).items():
         if group not in {"joints", "bodies", "sites", "equalities"}:
             raise TaskValidationError(f"未知观测类型：{group}")
-        if not isinstance(entries, list) or any(not isinstance(item, dict) or not isinstance(item.get("fields", []), list) for item in entries):
+        if not isinstance(entries, list) or any(not isinstance(item, dict) or not isinstance(item.get("fields", []), list) or any(not isinstance(field, str) for field in item.get("fields", [])) for item in entries):
             raise TaskValidationError(f"观测 {group} 格式错误。")
+        for item in entries:
+            if not isinstance(item.get("name"), str) or not item["name"].strip():
+                raise TaskValidationError(f"观测 {group} 必须提供非空名称。")
+            components = item.get("components", list("xyz"))
+            if group == "sites" and (not isinstance(components, list) or not components or any(not isinstance(axis, str) or axis not in "xyz" or len(axis) != 1 for axis in components)):
+                raise TaskValidationError(f"点 {item['name']} 的 components 必须是 x/y/z 分量列表。")
     controls = task["ui"].get("controls", {})
     actuators = controls.get("actuators", {})
     if not isinstance(actuators, dict) or any(not isinstance(spec, dict) for spec in actuators.values()):
@@ -198,6 +225,20 @@ def load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
         entries = task["ui"].get("layout", {}).get(field, [])
         if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
             raise TaskValidationError(f"ui.yaml 的 {field} 必须是对象列表。")
+        key = "series" if field == "charts" else "parameters"
+        for item in entries:
+            values = item.get(key, [])
+            if not isinstance(values, list) or any(not isinstance(value, str) for value in values):
+                raise TaskValidationError(f"ui.yaml 的 {field}.{key} 必须是名称列表。")
+    camera = task["ui"].get("camera", {})
+    if camera:
+        for field in ("position", "target"):
+            vector = camera.get(field)
+            if not isinstance(vector, list) or len(vector) != 3 or any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in vector):
+                raise TaskValidationError(f"ui.yaml 的 camera.{field} 必须是三个有限数字。")
+    loads = task["loads"].get("loads", [])
+    if not isinstance(loads, list) or any(not isinstance(item, dict) for item in loads):
+        raise TaskValidationError("loads.yaml 的 loads 必须是对象列表。")
     return task
 
 
