@@ -27,13 +27,15 @@ try {
     menu.append(start);
     const counts = new Map();
     const headings = new Map();
-    for (const heading of section.querySelectorAll("h2")) {
+    for (const heading of section.querySelectorAll("h2, h3, h4, h5, h6")) {
       const base = headingSlug(heading.textContent);
       const count = counts.get(base) || 0;
       counts.set(base, count + 1);
       const slug = count ? `${base}-${count}` : base;
       heading.id = `${section.id}-${slug}`;
       headings.set(slug, heading.id);
+      // Resolve merged chapters' nested anchors while keeping the menu compact.
+      if (heading.tagName !== "H2") continue;
       const link = document.createElement("a");
       link.href = `#${heading.id}`;
       link.textContent = heading.textContent;

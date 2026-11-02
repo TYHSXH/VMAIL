@@ -6,7 +6,8 @@ export class FloorBranding {
     this.texture = texture || new THREE.TextureLoader().load(new URL("../assets/logos/logo-gray.png", import.meta.url).href, onLoad);
     this.texture.colorSpace = THREE.SRGBColorSpace;
     this.geometry = new THREE.PlaneGeometry(1, 1);
-    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, alphaTest: .02, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
+    // Blend the original gray artwork into the floor as a faint watermark.
+    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, opacity: .035, alphaTest: .001, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
   }
 
   update(mesh, geom, model, mujoco) {

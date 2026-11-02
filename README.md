@@ -6,11 +6,36 @@ VMAIL 是面向理论力学课程的本地虚拟仿真实验台。学生可以�
 
 浏览器使用 MuJoCo WASM 进行实时仿真，本机 Python 后端负责任务文件、AI 连接和批量计算。模型和实验数据保存在自己的电脑上；使用 DeepSeek 时，发送的对话、图片及相关任务文本会交给 DeepSeek 处理。
 
+## 关于本平台
+
+本平台由**北航理论力学教研室、教师和学生共同开发**，旨在帮助学生将理论力学知识用于问题分析、仿真验证与工程设计，通过与 AI 协作、对照理论与实验数据，培养独立思考、力学建模、误差分析和设计优化能力，并逐步从课本问题走向真实机构与自动化样机。
+
+课程按照“知识学习 → 工程应用”展开：
+
+- **知识学习：解题思路 → 仿真验证 → 调参优化。** 与 AI 讨论分析过程，核对作业求解；建立模型、观察运动、导出数据，从定性和定量两方面验证结果并分析误差；检查参数的物理合理性，围绕实际需求优化设计。
+- **工程应用：仿真设计 → 实验实践 → 前沿拓展。** 从题目中的局部机构出发，探索并设计完整工程对象；结合工程图学、CAD 与 3D 打印实现机构运动；通过 AI 和线上线下课程补充机械设计、自动控制、电工电子等知识，逐步完成自动化样机设计与制作。
+
+平台提供建模、交互仿真和数据分析环境，实物制作与控制实验在相应的课程和实验条件下完成。完整教学目标与各阶段成果见[课程教学路径](docs/user-guide.md#课程教学路径)。
+
+第一次使用从下方安装步骤开始；查阅专题时直接使用[文档导航](#文档导航)，按“使用、创建任务、配置、维护、版权”选择对应文件。
+
 ## 1. 安装与启动（Windows）
 
-推荐 **Windows x64 + 64 位 x86 Python 3.12 + 最新版 Edge 或 Chrome**，浏览器需启用 JavaScript、WebAssembly 和 WebGL。当前启动脚本要求 Python 3.12 或更新版本，发布验证环境为 Python 3.12；不支持 32 位或 Windows ARM Python。请安装 Python 并勾选加入 PATH。首次安装需联网下载 Python 依赖，学生无需安装 Node.js，也无需另行安装 MuJoCo。
+推荐 **Windows x64 + 64 位 x86 Python 3.12 + 最新版 Edge 或 Chrome**。
 
-有 Git 时，在可读写的目录执行：
+### Python安装
+
+当前启动脚本要求 Python 3.12 或更新版本，发布验证环境为 Python 3.12；不支持 32 位或 Windows ARM Python。请安装 Python 并勾选加入 PATH。首次安装需联网下载 Python 依赖。
+
+Python 从[官网 Windows 下载页](https://www.python.org/downloads/windows/)下载。安装时注意：
+
+- 优先使用本项目已验证的 **Python 3.12、Windows x86-64** 环境；不要只因首页推荐就直接选择最新大版本。选择 **Windows installer (64-bit)**，不要选 32-bit、ARM64、embeddable package（嵌入式包）或源码压缩包。3.12 后期安全维护版本可能只提供源码，不熟悉版本选择时可使用下方 Miniconda 创建 3.12 环境。
+- 使用传统安装器时，勾选 **Add python.exe to PATH**，保留 `pip` 和 `venv` 组件。安装完重新打开终端，运行 `python --version` 和 `python -m pip --version` 检查；安装操作可参考 [Python 官方 Windows 说明](https://docs.python.org/3.12/using/windows.html)。
+- 若安装了多个 Python，运行 `python -c "import sys; print(sys.executable)"` 确认当前路径；`python` 打开应用商店时，先检查命令别名与 PATH，或使用已激活的 Conda 环境。项目放在自己有写权限的目录，勿在压缩包内运行。
+
+### 项目启动
+
+本机有 Git 时，在可读写的目录执行：
 
 ```powershell
 git clone https://github.com/TYHSXH/VMAIL.git
@@ -18,19 +43,32 @@ cd VMAIL
 .\start.bat
 ```
 
-也可以在 [GitHub 仓库](https://github.com/TYHSXH/VMAIL) 点击 **Code → Download ZIP**，完整解压后双击 `start.bat`。不要在压缩包内直接运行，不要只下载单个 HTML 或 XML 文件。
+若本机未装Git，可以直接在 [GitHub 仓库](https://github.com/TYHSXH/VMAIL) 点击 **Code → Download ZIP**。
 
-启动脚本会创建本机 `.venv`、安装固定版本依赖并自检，然后自动打开 [本地实验台](http://127.0.0.1:8000)。保留启动窗口；使用完毕按 **Ctrl+C** 关闭服务。以后仍运行 `start.bat`，环境正常时不会重复安装。默认只监听本机地址，适合学生个人使用。
+完整解压后双击 `start.bat`，可以一键配置所有依赖，创建本机 `.venv`、安装固定版本依赖并自检，然后自动打开 [本地实验台](http://127.0.0.1:8000)。使用完毕在终端按 **Ctrl+C** 关闭服务。
 
-已使用 Conda 的同学，也可以选择自己的 Python 3.12 环境：
+注意：不要在压缩包内直接运行，不要只下载单个 HTML 或 XML 文件。
+
+除第一次安装使用外，以后启动前均需运行 `start.bat`，不会重复安装依赖。本实验台默认只监听本机地址，适合学生个人使用。
+
+### 可选：使用 Miniconda 管理环境
+
+**Conda 是包管理和环境管理工具**，能为不同课程／项目分别管理 Python 版本与依赖。**Miniconda** 提供 Conda、Python 及少量基础依赖；完整的 **Anaconda Distribution** 另外预装大量科学计算软件包。本项目已有固定依赖清单，推荐安装更轻量的 **Miniconda**，按需安装即可，无须下载完整 Anaconda。两者区别见[官方介绍](https://www.anaconda.com/docs/getting-started/concepts/anaconda-or-miniconda)。只运行本项目也可以使用上面的普通 Python 配合 `start.bat`，无须再装 Conda。
+
+从 [Miniconda 官方下载入口](https://www.anaconda.com/download/success)选择 Windows x86-64 安装器，安装步骤见[官方安装指南](https://www.anaconda.com/docs/getting-started/installation)。可按默认建议仅为当前用户安装，使用安装后提供的 **Anaconda Prompt**，无须为了运行本项目强行将 Miniconda 加入系统 PATH。先在该终端切换到 VMAIL 项目根目录，再创建专用环境：
 
 ```powershell
-conda activate 你的环境名
+conda create -n vmail python=3.12 pip
+conda activate vmail
 python -m pip install -r requirements.txt
 .\start-current-python.bat
 ```
 
-该方式使用当前 Python，不使用项目 `.venv`。更完整的安装和迁移说明见[学生使用手册](docs/user-guide.md)与[迁移检查](docs/migration-check.md)。
+以后打开终端，切换到项目目录并执行 `conda activate vmail` 和 `.\start-current-python.bat` 即可；
+
+已有合适环境时可直接激活自己的环境，不必重建。该方式使用当前 Python，不使用项目 `.venv`；不要把项目依赖装到 Conda 的 `base` 环境。
+
+更完整的安装和迁移说明见[学生使用手册](docs/user-guide.md)与[迁移检查](docs/development.md#迁移与换机检查)。
 
 ## 2. 完成第一次实验
 
@@ -51,7 +89,7 @@ python -m pip install -r requirements.txt
 | 条件与采样 | 记录实际起点和中途控制变化 | 继承同一份记录，在网页采样时刻输出以便核对 |
 | 精度 | 取决于模型、步长和求解设置 | **不因在后台运行就天然更准确**；相同版本和条件下应在数值误差范围内一致 |
 
-两端当前均为 MuJoCo 3.13.0。浏览器帧率影响动画流畅度和运行速度，不应改变设定的物理步长。后台会核对模型与载荷版本，并比较两端数据；接触、碰撞或敏感系统可能放大跨平台浮点误差，不能保证逐位相同。想提高数值精度，应先合理减小步长或调整模型／求解设置，重新完成网页实验，再按新条件重算。详见[网页计算、后台重算与导出说明](docs/simulation-export.md)。
+两端当前均为 MuJoCo 3.13.0。浏览器帧率影响动画流畅度和运行速度，不影响设定的物理步长。后台会核对模型与载荷版本，并比较两端数据；接触、碰撞或敏感系统可能放大跨平台浮点误差，不能保证逐位相同。想提高数值精度，应先合理减小步长或调整模型／求解设置，重新完成网页实验，再按新条件重算。详见[网页计算、后台重算与导出说明](docs/user-guide.md#网页计算后台重算与实验导出)。
 
 一次重算一组已完成实验，自动扫描多个参数组合仍需单独的实验脚本。任务名称旁的编辑按钮可改名，垃圾桶可删除任务及其结果，删除前请备份。
 
@@ -93,7 +131,7 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 
 ```text
 请先阅读 tasks/AGENTS.md、docs/task-package-spec.md，
-涉及复杂外形时再读 docs/mesh-modeling.md。
+涉及复杂外形时再读 docs/task-guide.md。
 在 tasks/ 下创建独立任务，不修改公共前后端。
 我的研究对象是……；已知条件是……；希望改变……，观察……。
 请说明简化假设与单位，复用默认灰色 logo 地面，补齐任务配置，
@@ -104,7 +142,7 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 .\.venv\Scripts\python.exe -m backend.validate_task 你的任务编号
 ```
 
-完整提示词见 [AI 任务创建指南](prompts/student-task-builder.md)。AI 输出可运行只是第一步，还需对照理论、量纲、初始状态和极限工况验证。
+完整提示词见 [AI 任务创建指南](docs/task-guide.md#ai-提问与提示词)。AI 输出可运行只是第一步，还需对照理论、量纲、初始状态和极限工况验证。
 
 ## 5. 复杂几何体：学生建 STL，AI 辅助写 MJCF
 
@@ -112,7 +150,7 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 
 建议学生在 CAD 中按尺寸建立零件、导出**二进制 STL**，放到任务自己的 `assets/` 文件夹，再借助 AI 编写 MJCF 中的刚体、关节、惯量、碰撞体和观测点。STL 只描述外形，不自带质量、铰链或控制规律。MuJoCo 的普通 mesh 碰撞使用凸包，凹槽或孔洞通常需要分解成多个凸碰撞体；视觉上有洞不保证可以穿过。
 
-具体步骤、可复制的 MJCF 片段、单位换算与排错见[复杂几何体与 STL／MJCF 建模指南](docs/mesh-modeling.md)。也可从[模型资料库](model_library/README.md)整组复制已授权的模型与资源，保留原许可证后改编。
+具体步骤、可复制的 MJCF 片段、单位换算与排错见[复杂几何体与 STL／MJCF 建模指南](docs/task-guide.md#复杂几何体与-stlmjcf-建模)。也可从[模型资料库](model_library/README.md)整组复制已授权的模型与资源，保留原许可证后改编。
 
 ## 6. MuJoCo 官方学习导航
 
@@ -136,7 +174,7 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 | 8000 端口已占用 | 先确认 VMAIL 是否已经运行；或在 PowerShell 执行 `$env:VMAIL_PORT="8001"` 后运行 `.\start.bat` |
 | 模型区空白或物理引擎启动失败 | 查看页面报错；使用新版 Edge / Chrome 并启用硬件加速，检查是否完整解压 `app/`（包含 `.wasm`、字体和图片） |
 | API 无法连接 | 检查 Key、账户余额、网络与所选模型权限；用“测试连接”，不要把密钥或 `.local/` 发到问题反馈中 |
-| STL 有显示但碰撞不对 | 检查凸包、单位、坐标与惯量，按[网格指南](docs/mesh-modeling.md)拆分碰撞体 |
+| STL 有显示但碰撞不对 | 检查凸包、单位、坐标与惯量，按[网格指南](docs/task-guide.md#复杂几何体与-stlmjcf-建模)拆分碰撞体 |
 | 新任务没有出现或校验失败 | 检查六个必需文件和 `tasks/manifest.yaml`，运行任务校验并刷新列表 |
 | 更新后仍是旧界面 | 先停止旧服务，再用完整新版本启动并强制刷新浏览器；开发者修改前端后必须重建 `app/` |
 
@@ -144,19 +182,39 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 
 卸载时先停止服务，再运行 `uninstall.bat`，清除一键安装创建的 `.venv`。任务、结果和 `.local/` 保留；若要清除个人数据，请先通过历史列表删除对话并解除绑定，再按需自行删除项目目录。Conda 环境由使用者自行管理。
 
-## 8. 进一步阅读与维护
+## 文档导航
 
-- [学生使用手册](docs/user-guide.md)：详细操作与故障排查。
-- [任务工作流](docs/workflow.md) · [任务目录规则](tasks/AGENTS.md)：如何把真实问题整理成任务。
-- [任务包规范](docs/task-package-spec.md) · [载荷与控制](docs/load-controls.md)：配置字段与标准载荷。
-- [开发维护](docs/development.md) · [发布验收](docs/release-check.md)：构建、测试、安装与分发检查。
+相近内容已合并到下列文件，每份正文开头提供章节目录；网页顶部“帮助”集中展示前两份指南。
+
+| 想了解什么 | 阅读文件 | 内容与章节入口 |
+| --- | --- | --- |
+| 课程怎么学、平台怎么用 | [学生使用手册](docs/user-guide.md) | [课程教学路径](docs/user-guide.md#课程教学路径)、安装与卸载、AI 连接、参数与视角、图表操作、[网页计算与实验导出](docs/user-guide.md#网页计算后台重算与实验导出)、常见问题 |
+| 如何把题目做成学习任务 | [任务创建指南](docs/task-guide.md) | [任务创建流程](docs/task-guide.md#任务创建流程)、[可复制的 AI 提示词](docs/task-guide.md#ai-提问与提示词)、修复与验证、[CAD／STL 与 MJCF 建模](docs/task-guide.md#复杂几何体与-stlmjcf-建模) |
+| 配置文件具体怎么写 | [任务包规范与载荷参考](docs/task-package-spec.md) | 六个任务文件、[默认 XML 模板](docs/task-package-spec.md#默认-xml-模板)、参数与观测、界面配置、[loads.yaml 载荷与控制](docs/task-package-spec.md#任务载荷与控制规律) |
+| 如何修改、迁移和发布系统 | [开发与维护](docs/development.md) | 项目结构、构建与测试、前后端实现、[迁移与换机检查](docs/development.md#迁移与换机检查)、[发布验收](docs/development.md#发布验收)及历史检查记录 |
+| 能否复用、展示和申请软著 | [版权、贡献与软著说明](COPYRIGHT.md) | 平台／Logo／学生作品的权利范围、[贡献与展示规则](COPYRIGHT.md#贡献与学生作品展示)、[许可证选择](COPYRIGHT.md#许可证选择与使用)、[软著登记与模型库版权边界](COPYRIGHT.md#软件著作权登记) |
+| 用到了哪些第三方内容 | [第三方声明](THIRD_PARTY_NOTICES.md) | 组件版本、许可证、模型来源与分发要求；[MuJoCo 上游通知](licenses/mujoco-THIRD_PARTY.md)保留原文 |
+| AI 修改任务必须遵守什么 | [任务目录规则](tasks/AGENTS.md) | 任务目录、建模与单位、观测、载荷、校验规则；给 AI 的操作约束 |
+| 模型素材和 Logo 怎么使用 | [模型资料库](model_library/README.md) · [模型复用提示词](model_library/AI_TASK_PROMPT.md) · [Logo 说明](assets/logos/README.md) | 模型选题与资源入口、按原许可证复用、Logo 的单独权利说明 |
+
+各题目的背景、假设、理论公式和操作步骤统一放在各自的 `notes.md`，网页“任务”页直接读取，无需再找单独的任务 README：
+
+| 学习任务 | 任务说明 |
+| --- | --- |
+| 弹簧阻尼滑块 | [notes.md](tasks/example_mass_spring/notes.md) |
+| 变方向外力与偏心力矩 | [notes.md](tasks/rotating_load_demo/notes.md) |
+| 曲柄滑块速度验证 | [notes.md](tasks/slider_crank_block_force/notes.md) |
+| 改型全回转纯滚圆盘 | [notes.md](tasks/rolling_disk_points_bc/notes.md) |
+| 铅垂杆推动楔块 | [notes.md](tasks/wedge_rod_acceleration_v4/notes.md) |
+| 行星齿轮 M 点加速度 | [notes.md](tasks/planetary_gear_point_acceleration/notes.md) |
+| 行星齿轮相对转速修正版 | [notes.md](tasks/planetary_gear_point_acceleration_relative_speed/notes.md) |
 
 仓库包含可直接运行的 `app/` 构建产物。开发者才需要 Node.js，使用 `npm ci`、`npm test`、`npm run build`；Python 依赖由 `requirements.txt` 与 `constraints.txt` 固定。所有学生运行文件、版权说明和模型许可证都应随发行版保留。
 
 ## 版权与第三方资源
 
-© 2026 **BUAA 5系 理论力学课程组及相应贡献者**。除 Logo、学生作品和第三方内容外，有权发布的平台原创代码、网页、文档与原创示例／模板采用 [Apache-2.0](LICENSE)，允许商业使用。分发时保留许可证、版权与适用的 [NOTICE](NOTICE)，修改文件时说明修改。完整范围见 [COPYRIGHT.md](COPYRIGHT.md)，许可证区别见[授权说明](docs/licensing.md)。
+© 2026 **BUAA 5系 理论力学课程组及相应贡献者**。除 Logo、学生作品和第三方内容外，有权发布的平台原创代码、网页、文档与原创示例／模板采用 [Apache-2.0](LICENSE)，允许商业使用。分发时保留许可证、版权与适用的 [NOTICE](NOTICE)，修改文件时说明修改。完整范围见 [COPYRIGHT.md](COPYRIGHT.md)，许可证区别见[授权说明](COPYRIGHT.md#许可证选择与使用)。
 
-**Logo 和学生作品保留全部权利，不予公开授权，禁止商用，不适用 Apache-2.0。** 此声明包含网页、地面及构建产物中的 Logo 副本，以及入选展示的学生作品；展示或下载不构成复用许可。未经相关权利人另行书面许可不得使用，法律规定的例外除外。复用平台代码时应替换／移除 Logo 和学生作品或先取得许可，见 [Logo 声明](assets/logos/LICENSE.txt)与[贡献说明](CONTRIBUTING.md)。
+**Logo 和学生作品保留全部权利，不予公开授权，禁止商用，不适用 Apache-2.0。** 此声明包含网页、地面及构建产物中的 Logo 副本，以及入选展示的学生作品；展示或下载不构成复用许可。未经相关权利人另行书面许可不得使用，法律规定的例外除外。复用平台代码时应替换／移除 Logo 和学生作品或先取得许可，见 [Logo 声明](assets/logos/LICENSE.txt)与[贡献说明](COPYRIGHT.md#贡献与学生作品展示)。
 
-MuJoCo、Three.js、KaTeX、Marked、DOMPurify 及其资源属于各自权利人，按各自许可证提供，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [licenses/](licenses/)。模型资料库按每组 `SOURCE.md`、`LICENSE` 保留原作者、固定来源与许可，不因本项目的版权声明改变。学生添加的 CAD／STL、题图、教材内容及其他素材，须确认使用与再分发权限，并保留来源。教学仿真结果需经力学核对，不作为工程安全认证。
+MuJoCo、Three.js、KaTeX、Marked、DOMPurify 及其资源属于各自权利人，按各自许可证提供，见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [licenses/](licenses)。模型资料库按每组 `SOURCE.md`、`LICENSE` 保留原作者、固定来源与许可，不因本项目的版权声明改变。学生添加的 CAD／STL、题图、教材内容及其他素材，须确认使用与再分发权限，并保留来源。教学仿真结果需经力学核对，不作为工程安全认证。

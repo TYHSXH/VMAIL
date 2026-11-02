@@ -15,4 +15,4 @@
 
 ## 借助 AI 扩展
 
-参考 `docs/load-controls.md`，让 AI 修改本任务的 `loads.yaml` 和参数。例如把力改为分段加载，或者将 frame 改为 body 比较随动力。保持作用点与单位明确。无需修改网页或后端代码。
+参考[任务包规范的载荷章节](../../docs/task-package-spec.md#任务载荷与控制规律)，让 AI 修改本任务的 `loads.yaml` 和参数。例如把力改为分段加载，或者将 frame 改为 body 比较随动力。保持作用点与单位明确。无需修改网页或后端代码。

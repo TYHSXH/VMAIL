@@ -4,8 +4,8 @@ import { resolveHelpLink, headingSlug } from '../frontend/help-navigation.js';
 
 const origin = 'http://127.0.0.1:8000';
 test('help resolves nested Markdown links relative to each document', () => {
-  assert.deepEqual(resolveHelpLink('load-controls.md', 'docs/user-guide.md', origin), {path:'docs/load-controls.md', anchor:''});
-  assert.deepEqual(resolveHelpLink('../tasks/AGENTS.md', 'docs/README.md', origin), {path:'tasks/AGENTS.md', anchor:''});
+  assert.deepEqual(resolveHelpLink('task-package-spec.md#任务载荷与控制规律', 'docs/user-guide.md', origin), {path:'docs/task-package-spec.md', anchor:'任务载荷与控制规律'});
+  assert.deepEqual(resolveHelpLink('../tasks/AGENTS.md', 'docs/task-guide.md', origin), {path:'tasks/AGENTS.md', anchor:''});
   assert.deepEqual(resolveHelpLink('01_engineering_mechanisms/fridge_door/SOURCE.md', 'model_library/README.md', origin), {path:'model_library/01_engineering_mechanisms/fridge_door/SOURCE.md', anchor:''});
   assert.deepEqual(resolveHelpLink('#安装步骤', 'docs/user-guide.md', origin), {path:'docs/user-guide.md', anchor:'安装步骤'});
   assert.deepEqual(resolveHelpLink('task-package-spec.md#notesmd', 'docs/user-guide.md', origin), {path:'docs/task-package-spec.md', anchor:'notesmd'});

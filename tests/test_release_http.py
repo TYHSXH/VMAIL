@@ -77,14 +77,17 @@ uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error'
                     self.assertEqual(headers.get_content_type(), "application/wasm")
         archive = zipfile.ZipFile(io.BytesIO(self.request("/api/task-template")[0]))
         self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png", "LICENSE", "NOTICE", "COPYRIGHT.md", "assets/LOGO_RIGHTS.txt"})
-        for document in ("LICENSE", "NOTICE", "COPYRIGHT.md", "CONTRIBUTING.md"):
+        for document in ("LICENSE", "NOTICE", "COPYRIGHT.md"):
             self.assertEqual(self.request("/" + document)[0], (ROOT / document).read_bytes())
         self.assertEqual(archive.read("LICENSE"), self.request("/LICENSE")[0])
         self.assertEqual(archive.read("NOTICE"), self.request("/NOTICE")[0])
         self.assertEqual(archive.read("COPYRIGHT.md"), self.request("/COPYRIGHT.md")[0])
         self.assertEqual(archive.read("assets/LOGO_RIGHTS.txt"), (ROOT / "assets/logos/LICENSE.txt").read_bytes())
         self.assertEqual(archive.read("assets/logo-gray.png"), (ROOT / "assets/logos/logo-gray.png").read_bytes())
-        self.assertEqual(len(self.request("/api/help-documents")[0]["documents"]), 3)
+        documents = self.request("/api/help-documents")[0]["documents"]
+        self.assertEqual([doc["path"] for doc in documents], ["docs/user-guide.md", "docs/task-guide.md"])
+        for doc in documents:
+            self.assertEqual(self.request("/" + doc["path"])[0].decode("utf-8-sig").replace("\r\n", "\n"), doc["source"])
 
     def test_every_task_loads_simulates_and_exports_csv(self):
         for task in self.request("/api/tasks")[0]["tasks"]:

@@ -266,7 +266,7 @@ def model_library_readme() -> FileResponse:
 @app.get("/api/help-documents")
 def help_documents() -> dict[str, Any]:
     documents = []
-    for path, title in [("docs/user-guide.md", "学生使用手册"), ("prompts/student-task-builder.md", "AI 使用与提示词"), ("docs/mesh-modeling.md", "复杂几何体与 STL 建模")]:
+    for path, title in [("docs/user-guide.md", "学生使用手册"), ("docs/task-guide.md", "任务创建指南：AI 提示词与 STL 建模")]:
         documents.append({"path": path, "title": title, "source": (ROOT / path).read_text(encoding="utf-8-sig")})
     return {"documents": documents}
 
@@ -298,7 +298,7 @@ app.mount("/static", StaticFiles(directory=APP_DIR), name="static")
 
 @app.get("/{document_name}")
 def project_document(document_name: str):
-    if document_name not in {"README.md", "README_EN.md", "COPYRIGHT.md", "THIRD_PARTY_NOTICES.md", "LICENSE", "NOTICE", "CONTRIBUTING.md"}:
+    if document_name not in {"README.md", "README_EN.md", "COPYRIGHT.md", "THIRD_PARTY_NOTICES.md", "LICENSE", "NOTICE"}:
         raise HTTPException(404, "文件不存在。")
     return FileResponse(ROOT / document_name, media_type="text/plain; charset=utf-8")
 

@@ -12,15 +12,19 @@ from backend.main import help_documents
 
 
 class InstallationTests(unittest.TestCase):
-    def test_student_help_contains_manual_prompt_and_mesh_guide(self):
+    def test_student_help_contains_consolidated_manual_and_task_guide(self):
         documents = help_documents()["documents"]
-        self.assertEqual([item["path"] for item in documents], ["docs/user-guide.md", "prompts/student-task-builder.md", "docs/mesh-modeling.md"])
+        self.assertEqual([item["path"] for item in documents], ["docs/user-guide.md", "docs/task-guide.md"])
         self.assertTrue(all(item["source"].strip() for item in documents))
+        self.assertIn("## 课程教学路径", documents[0]["source"])
+        self.assertIn("## 网页计算、后台重算与实验导出", documents[0]["source"])
+        self.assertIn("#### 详细版提示词", documents[1]["source"])
+        self.assertIn("## 复杂几何体与 STL／MJCF 建模", documents[1]["source"])
 
     def test_missing_built_asset_is_reported_before_startup(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            for name in ["requirements.txt", "tasks/manifest.yaml", "docs/user-guide.md", "prompts/student-task-builder.md", "model_library/catalog.json", "docs/task-package-spec.md", "assets/logos/logo-gray.png", "assets/logos/LICENSE.txt", "docs/mesh-modeling.md", "constraints.txt", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE"]:
+            for name in ["requirements.txt", "tasks/manifest.yaml", "docs/user-guide.md", "docs/task-guide.md", "model_library/catalog.json", "docs/task-package-spec.md", "assets/logos/logo-gray.png", "assets/logos/LICENSE.txt", "constraints.txt", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE"]:
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, path)
@@ -37,7 +41,7 @@ class InstallationTests(unittest.TestCase):
     def test_transitive_built_resource_is_checked(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            for name in ["app", "docs", "prompts", "assets", "licenses"]:
+            for name in ["app", "docs", "assets", "licenses"]:
                 shutil.copytree(ROOT / name, root / name)
             for name in ["requirements.txt", "constraints.txt", "COPYRIGHT.md", "THIRD_PARTY_NOTICES.md", "LICENSE", "NOTICE", "model_library/catalog.json", "tasks/manifest.yaml"]:
                 target = root / name

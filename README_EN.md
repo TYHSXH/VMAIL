@@ -6,9 +6,17 @@ VMAIL is a local virtual simulation workbench for theoretical mechanics courses.
 
 The browser runs real-time simulations with MuJoCo WASM. A local Python backend manages task files, AI connections, and batch calculations. Models and experimental data stay on your computer. When you use DeepSeek, the conversation, images, and relevant task text included in a request are sent to DeepSeek for processing.
 
+## About the platform
+
+Developed jointly by Beihang University's theoretical mechanics teaching group, teachers, and students, VMAIL helps students apply mechanics to problem analysis, simulation validation, and engineering design. Working with AI and comparing theory with experimental data builds skills in independent reasoning, mechanical modeling, error analysis, and design optimization.
+
+The course progresses from **knowledge learning** (solution reasoning, simulation validation, and parameter optimization) to **engineering applications** (simulation design, physical prototyping, and advanced exploration toward automated prototypes). CAD, 3D printing, assembly, and hardware control experiments use external tools and appropriate laboratory facilities. See the [course learning pathway (Chinese)](docs/user-guide.md#课程教学路径).
+
 ## 1. Installation and startup (Windows)
 
 Recommended setup: **Windows x64, 64-bit x86 Python 3.12, and an up-to-date Edge or Chrome browser** with JavaScript, WebAssembly, and WebGL enabled. The launch scripts require Python 3.12 or newer; release verification uses Python 3.12. 32-bit Python and Windows ARM Python are not supported. Install Python and select the option to add it to PATH. The first setup requires internet access to download Python dependencies. Students do not need Node.js or a separate MuJoCo installation.
+
+Download Python from the [official Windows downloads page](https://www.python.org/downloads/windows/). Use an available **Windows installer (64-bit)** for the tested Python 3.12 environment; avoid 32-bit, ARM64, embeddable, and source packages. Later Python 3.12 security releases may only offer source archives; Miniconda below is an alternative for creating a Python 3.12 environment. With the traditional installer, enable **Add python.exe to PATH** and keep pip and venv. Reopen your terminal and check `python --version` and `python -m pip --version`. If multiple versions are installed, check the selected executable with `python -c "import sys; print(sys.executable)"`. See the [official Windows instructions](https://docs.python.org/3.12/using/windows.html).
 
 If you have Git, run the following in a directory where you have read and write access:
 
@@ -22,15 +30,20 @@ Alternatively, choose **Code → Download ZIP** in the [GitHub repository](https
 
 The launcher creates a local `.venv`, installs pinned dependencies, runs environment checks, and opens the [local workbench](http://127.0.0.1:8000). Keep the server window open; press **Ctrl+C** there when finished. Use `start.bat` for subsequent sessions. A healthy environment does not need to be installed again. The server listens only on the local computer by default and is intended for individual student use.
 
-If you already use Conda, you can use your own Python 3.12 environment:
+### Optional: manage environments with Miniconda
+
+Conda manages packages and separate Python environments for different projects. **Miniconda** includes conda, Python, and basic dependencies; full **Anaconda Distribution** additionally preinstalls many scientific packages. Since this project supplies its dependency list, we recommend the lighter **Miniconda**. See the [official comparison](https://www.anaconda.com/docs/getting-started/concepts/anaconda-or-miniconda). Ordinary Python with `start.bat` is also sufficient; you do not need both installations.
+
+Choose the Windows x86-64 Miniconda installer from the [official download page](https://www.anaconda.com/download/success), following the [installation guide](https://www.anaconda.com/docs/getting-started/installation). Use the installed **Anaconda Prompt** without forcing Miniconda onto the system PATH. Change to the VMAIL project directory, then run:
 
 ```powershell
-conda activate your_environment_name
+conda create -n vmail python=3.12 pip
+conda activate vmail
 python -m pip install -r requirements.txt
 .\start-current-python.bat
 ```
 
-This method uses the active Python environment rather than the project's `.venv`. See the [student user guide](docs/user-guide.md) and [migration checklist](docs/migration-check.md) for more detailed installation and migration instructions.
+For later sessions, activate `vmail` in the project directory and run `.\start-current-python.bat`. You can reuse an existing suitable environment instead of creating one. This method uses the active Python environment rather than the project's `.venv`; keep project dependencies out of conda's `base` environment. See the [student user guide](docs/user-guide.md) and [migration checklist](docs/development.md#迁移与换机检查) for more detailed installation and migration instructions.
 
 ## 2. Your first experiment
 
@@ -53,7 +66,7 @@ Native replay inherits the parameters, duration, timestep, joint positions, actu
 | Conditions and samples | Records the actual starting state and control changes | Inherits the same record and outputs at browser sample times for comparison |
 | Accuracy | Depends on the model, timestep, and solver settings | **Not inherently more accurate because it runs in the backend**; the same version and conditions should agree within numerical tolerance |
 
-Both engines currently use MuJoCo 3.13.0. Browser frame rate affects visual smoothness and elapsed wall-clock time, not the configured physics timestep. Native replay checks the model and load revision and compares both datasets. Contacts, impacts, and sensitive systems can amplify floating-point differences between platforms; bitwise equality is not guaranteed. To improve numerical accuracy, choose a suitable smaller timestep or revise the model/solver settings, complete a new browser experiment, then replay those new conditions. See the [browser calculation, native replay, and export guide](docs/simulation-export.md).
+Both engines currently use MuJoCo 3.13.0. Browser frame rate affects visual smoothness and elapsed wall-clock time, not the configured physics timestep. Native replay checks the model and load revision and compares both datasets. Contacts, impacts, and sensitive systems can amplify floating-point differences between platforms; bitwise equality is not guaranteed. To improve numerical accuracy, choose a suitable smaller timestep or revise the model/solver settings, complete a new browser experiment, then replay those new conditions. See the [browser calculation, native replay, and export guide](docs/user-guide.md#网页计算后台重算与实验导出).
 
 One replay uses one completed experiment; automated parameter sweeps still require a separate script. The edit button beside a task name renames it; the trash button deletes the task and its results. Back up anything you need before deleting it.
 
@@ -97,7 +110,7 @@ For other DeepSeek coding extensions that support an OpenAI-compatible interface
 
 ```text
 First read tasks/AGENTS.md and docs/task-package-spec.md.
-If the task involves complex geometry, also read docs/mesh-modeling.md.
+If the task involves complex geometry, also read docs/task-guide.md.
 Create an independent task under tasks/ without modifying the shared
 frontend or backend.
 My research object is ...; the known conditions are ...;
@@ -111,7 +124,7 @@ in tasks/manifest.yaml, and validate it with backend.validate_task.
 .\.venv\Scripts\python.exe -m backend.validate_task your_task_id
 ```
 
-See the [AI task creation guide](prompts/student-task-builder.md) for complete prompts. Getting AI-generated files to run is only the first step: verify them against theory, dimensional consistency, initial conditions, and limiting cases.
+See the [AI task creation guide](docs/task-guide.md#ai-提问与提示词) for complete prompts. Getting AI-generated files to run is only the first step: verify them against theory, dimensional consistency, initial conditions, and limiting cases.
 
 ## 5. Complex geometry: students create STL models, AI helps write MJCF
 
@@ -119,7 +132,7 @@ Primitive shapes such as boxes, spheres, and cylinders suit many idealized probl
 
 Students can model parts to their specified dimensions in CAD, export **binary STL**, and place the files in the task's own `assets/` folder. AI can then help write the bodies, joints, inertia, collision geometry, and observation sites in MJCF. STL describes shape only; it does not contain mass, hinges, or control laws. Ordinary MuJoCo mesh collisions use the convex hull, so holes and grooves usually require decomposition into multiple convex collision shapes. A visible hole does not guarantee that another object can pass through it.
 
-The [complex geometry and STL/MJCF guide](docs/mesh-modeling.md) provides steps, a reusable MJCF fragment, unit conversions, and troubleshooting. You can also copy a complete model and its assets from the [model library](model_library/README.md), subject to its license, and retain the original license when adapting it.
+The [complex geometry and STL/MJCF guide](docs/task-guide.md#复杂几何体与-stlmjcf-建模) provides steps, a reusable MJCF fragment, unit conversions, and troubleshooting. You can also copy a complete model and its assets from the [model library](model_library/README.md), subject to its license, and retain the original license when adapting it.
 
 ## 6. Official MuJoCo learning resources
 
@@ -143,7 +156,7 @@ Start with `body → joint → geom`, coordinate frames, SI units, mass, and ine
 | Port 8000 is occupied | Check whether VMAIL is already running. Alternatively, set `$env:VMAIL_PORT="8001"` in PowerShell, then run `.\start.bat`. |
 | The model area is blank or the physics engine fails to start | Read the page error, use an up-to-date Edge or Chrome with hardware acceleration enabled, and check that `app/` was fully extracted, including `.wasm`, fonts, and images. |
 | The API cannot connect | Check the key, account balance, network, and access to the selected model. Use **测试连接** (Test connection). Do not include keys or `.local/` in a bug report. |
-| An STL is visible but collisions are wrong | Check convex hulls, units, coordinate frames, and inertia. Decompose collision geometry as described in the [mesh guide](docs/mesh-modeling.md). |
+| An STL is visible but collisions are wrong | Check convex hulls, units, coordinate frames, and inertia. Decompose collision geometry as described in the [mesh guide](docs/task-guide.md#复杂几何体与-stlmjcf-建模). |
 | A new task does not appear or fails validation | Check the six required files and `tasks/manifest.yaml`, run task validation, and refresh the list. |
 | The interface still looks like an older version after an update | Stop the old server, start the complete updated release, and force-refresh the browser. Developers must rebuild `app/` after changing the frontend. |
 
@@ -153,19 +166,25 @@ To uninstall, stop the server and run `uninstall.bat` to remove the `.venv` crea
 
 ## 8. Further reading and maintenance
 
-The supporting guides below are currently maintained in Chinese.
+The supporting guides below are maintained in Chinese. The [complete document navigation](README.md#文档导航) also links to every task's notes.
 
-- [Student user guide](docs/user-guide.md): detailed operation and troubleshooting.
-- [Task workflow](docs/workflow.md) · [Task directory rules](tasks/AGENTS.md): turn a real problem into a learning task.
-- [Task package specification](docs/task-package-spec.md) · [Loads and controls](docs/load-controls.md): configuration fields and standard loads.
-- [Development and maintenance](docs/development.md) · [Release verification](docs/release-check.md): builds, tests, installation, and distribution checks.
+| File | Purpose |
+| --- | --- |
+| [Student user guide](docs/user-guide.md) | Course pathway, installation, operation, AI connection, charts, simulation comparison, exports, and troubleshooting |
+| [Task creation guide](docs/task-guide.md) | Workflow, copyable AI prompts, model validation, and CAD/STL/MJCF modeling |
+| [Task package and load reference](docs/task-package-spec.md) | Required files, default XML template, parameters, observations, UI, and loads.yaml |
+| [Development and maintenance](docs/development.md) | Architecture, builds, tests, migration, release checks, and dated verification records |
+| [Copyright and contributions](COPYRIGHT.md) | Rights, student work display, license choices, software registration, and third-party model boundaries |
+| [Third-party notices](THIRD_PARTY_NOTICES.md) | Component versions, licenses, model sources, and redistribution requirements |
+| [Task directory rules](tasks/AGENTS.md) | Mandatory rules for AI tools editing tasks |
+| [Model library](model_library/README.md) · [Logo rights](assets/logos/README.md) | Resource selection, original model licenses, and separate logo rights |
 
 The repository includes the ready-to-run `app/` build. Only developers need Node.js; use `npm ci`, `npm test`, and `npm run build`. Python dependencies are pinned through `requirements.txt` and `constraints.txt`. Keep all student runtime files, copyright notices, and model licenses in the distributed release.
 
 ## Copyright and third-party resources
 
-© 2026 **BUAA Department 5, Theoretical Mechanics Course Group (BUAA 5系 理论力学课程组) and the respective contributors**. Except for logo artwork, student works, and third-party material, authorized original platform code, webpages, documentation, and original examples/templates are licensed under [Apache-2.0](LICENSE), including commercial use. Retain the license, applicable copyright notices and [NOTICE](NOTICE), and mark modified files. See [COPYRIGHT.md](COPYRIGHT.md) for the scope and [the licensing guide](docs/licensing.md) for a comparison of licenses.
+© 2026 **BUAA Department 5, Theoretical Mechanics Course Group (BUAA 5系 理论力学课程组) and the respective contributors**. Except for logo artwork, student works, and third-party material, authorized original platform code, webpages, documentation, and original examples/templates are licensed under [Apache-2.0](LICENSE), including commercial use. Retain the license, applicable copyright notices and [NOTICE](NOTICE), and mark modified files. See [COPYRIGHT.md](COPYRIGHT.md) for the scope and [the licensing guide](COPYRIGHT.md#许可证选择与使用) for a comparison of licenses.
 
-**Logo artwork and student works are excluded from Apache-2.0: all rights reserved, no public reuse license granted, and commercial use prohibited without separate written permission.** This covers webpage/floor/build copies of the logos and selected student works on display. Display or download availability does not grant reuse rights; statutory exceptions remain unaffected. Replace/remove these materials and their references when reusing the platform, or obtain the relevant rights holders' separate written permission. See [the logo rights notice](assets/logos/LICENSE.txt) and [CONTRIBUTING.md](CONTRIBUTING.md). Display of student works requires the relevant rights holders' consent and actual author credits.
+**Logo artwork and student works are excluded from Apache-2.0: all rights reserved, no public reuse license granted, and commercial use prohibited without separate written permission.** This covers webpage/floor/build copies of the logos and selected student works on display. Display or download availability does not grant reuse rights; statutory exceptions remain unaffected. Replace/remove these materials and their references when reusing the platform, or obtain the relevant rights holders' separate written permission. See [the logo rights notice](assets/logos/LICENSE.txt) and [contribution and display rules](COPYRIGHT.md#贡献与学生作品展示). Display of student works requires the relevant rights holders' consent and actual author credits.
 
-MuJoCo, Three.js, KaTeX, Marked, DOMPurify, and their resources belong to their respective rights holders and are provided under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [licenses/](licenses/). Each model library group retains its original authors, pinned sources, and license in `SOURCE.md` and `LICENSE`; this project's copyright notice does not change those terms. For CAD/STL files, problem images, textbook content, and other materials added by students, confirm permission to use and redistribute them and retain their sources. Educational simulation results require mechanical verification and do not constitute engineering safety certification.
+MuJoCo, Three.js, KaTeX, Marked, DOMPurify, and their resources belong to their respective rights holders and are provided under their own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and [licenses/](licenses). Each model library group retains its original authors, pinned sources, and license in `SOURCE.md` and `LICENSE`; this project's copyright notice does not change those terms. For CAD/STL files, problem images, textbook content, and other materials added by students, confirm permission to use and redistribute them and retain their sources. Educational simulation results require mechanical verification and do not constitute engineering safety certification.

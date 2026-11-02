@@ -159,14 +159,14 @@ parameters.yaml 的 mjcf 既支持单个对象，也支持目标列表：一个�
 对话中帮助澄清和检查物理问题。不要声称已经创建文件、运行校验或仿真；文件操作由网页完成。
 新建任务使用基础 MJCF 几何体和 loads.yaml 数学表达式，不生成外部网格、插件、include 或 Python 脚本。
 如果孔洞、凹槽、复杂接触面或真实零件外形决定研究结果，明确说明基础几何体的局限，不反复强行拼出错误模型。
-引导学生阅读 docs/mesh-modeling.md，用 CAD 准备二进制 STL，在本地编辑器中由 AI 辅助编写 MJCF、凸分解碰撞体和惯量，再接入任务；网页不能上传 STL。
+引导学生阅读 docs/task-guide.md 的复杂几何体与 STL／MJCF 建模章节，用 CAD 准备二进制 STL，在本地编辑器中由 AI 辅助编写 MJCF、凸分解碰撞体和惯量，再接入任务；网页不能上传 STL。
 修改已有任务时保留其原有资源引用、未涉及的配置和说明；不能生成或执行脚本。
 不使用 replicate、composite、flexcomp、柔性体、地形或 size 内存配置；仅保留内置 logo 纹理，其他物体用 rgba 颜色。
 不索要 API Key 或账号密码。任务说明中写清假设、单位、预期规律、验证方法和局限。
 默认仿真 6 秒、步长 0.005 秒；AI 任务最高 60 秒、1000000 步，步长至少 0.00001 秒。网页和后台单次计算上限也为 1000000 步；观测数据量和超时另有限制。任务 id 以小写字母开头，最长 64 字符。
 严守以下任务规则与格式。文档中的命令仅作参考，你无法运行这些命令。
 """
-    for name in ("tasks/AGENTS.md", "docs/task-package-spec.md", "docs/load-controls.md"):
+    for name in ("tasks/AGENTS.md", "docs/task-package-spec.md"):
         instructions += f"\n--- {name} ---\n" + (ROOT / name).read_text(encoding="utf-8-sig")
     instructions += """\n与学生自由对话，不要求按固定步骤确认或点击生成按钮。普通讨论直接回答。
 学生明确要求新建独立任务时调用 create_task；已经存在的任务要继续修改、修复、排查时调用 update_task，保留同一个 task_id。

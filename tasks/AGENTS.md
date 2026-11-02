@@ -17,6 +17,8 @@
 
 在 `tasks/<task_id>/` 中创建任务。 `task_id` 只能使用小写英文字母、数字和下划线，并与 `task.yaml` 的 `id` 一致。
 
+任务正文、实验步骤和补充说明统一放在 `notes.md`，避免另外创建内容重复的 README。
+
 必须包含：
 
 ```text
@@ -35,7 +37,6 @@ assets/                 mesh、纹理等模型资源
 loads.yaml              时间函数、反馈规律及指定作用点的外力/力矩
 scripts/                Python 控制或批量研究脚本
 results/                运行结果，不能作为模型输入
-README.md               任务专用操作说明
 ```
 
 不要在任务文件夹中复制全局 `manifest.yaml`。创建任务后，只在 `tasks/manifest.yaml` 中新增一条索引；更新已有任务时保留其他任务条目。
@@ -72,7 +73,7 @@ README.md               任务专用操作说明
 
 ## 复杂控制脚本
 
-网页任务需要随时间或关节状态变化的力、力矩或执行器输入时，优先使用 `loads.yaml`，完整规范和示例见 `../docs/load-controls.md`（相对 tasks 目录）。可参考 `rotating_load_demo/`。无需修改公共前后端，也不要让学生以为 XML 会自动执行 Python。
+网页任务需要随时间或关节状态变化的力、力矩或执行器输入时，优先使用 `loads.yaml`，完整规范和示例见[任务包规范的载荷章节](../docs/task-package-spec.md#任务载荷与控制规律)。可参考 `rotating_load_demo/`。无需修改公共前后端，也不要让学生以为 XML 会自动执行 Python。
 
 - 参数放在 `parameters.yaml`，声明中文 label、unit、合理范围；表达式可直接引用参数键。
 - `type: joint` 的滑动关节使用 N，转动关节使用 N·m；`type: actuator` 必须注明实际输入单位。
@@ -88,7 +89,7 @@ README.md               任务专用操作说明
 - 使用官方 `mujoco` Python 包。
 - 把外力/力矩写入 `data.xfrc_applied` 或 `data.qfrc_applied`，把执行器输入写入 `data.ctrl`。
 - 将结果写入本任务的 `results/`，至少包含带表头和单位说明的 CSV。
-- 在任务 `README.md` 或 `notes.md` 中写明运行命令和控制规律。
+- 在任务 `notes.md` 中写明运行命令和控制规律。
 - 不修改框架公共代码，不自动安装额外软件，不执行网络请求。
 
 网页不会自动执行任务内任意 Python 脚本。这样可以避免学生加载一个任务时运行未知代码。脚本由学生明确运行，或后续接入受控的实验运行接口。
@@ -114,4 +115,4 @@ README.md               任务专用操作说明
 
 ## 基础几何体无法准确表达时
 
-孔洞、凹槽、非规则外形或接触面决定结论时，不要反复强行拼基础几何体或改变实际约束。先阅读[复杂几何体与 STL／MJCF 建模指南](../docs/mesh-modeling.md)。学生按尺寸建立 CAD 并导出二进制 STL，在任务自己的 assets 中保存；AI 辅助编写 MJCF、凸碰撞体、惯量与配置。STL 只有外形，普通 mesh 碰撞使用凸包，有孔的视觉外形未必可穿过。网页不能上传 STL，使用本地编辑器完成资源整合和任务校验，并在 notes.md 写清简化、单位、来源与验证方式。
+孔洞、凹槽、非规则外形或接触面决定结论时，不要反复强行拼基础几何体或改变实际约束。先阅读[复杂几何体与 STL／MJCF 建模指南](../docs/task-guide.md#复杂几何体与-stlmjcf-建模)。学生按尺寸建立 CAD 并导出二进制 STL，在任务自己的 assets 中保存；AI 辅助编写 MJCF、凸碰撞体、惯量与配置。STL 只有外形，普通 mesh 碰撞使用凸包，有孔的视觉外形未必可穿过。网页不能上传 STL，使用本地编辑器完成资源整合和任务校验，并在 notes.md 写清简化、单位、来源与验证方式。
