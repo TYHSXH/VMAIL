@@ -23,10 +23,12 @@ assets/logos/           黑、白、灰三版原始标志（默认地面与新�
 licenses/               随运行包保留的第三方许可文本
 backend/                本地 API 与 Python 批量仿真
 docs/                   使用手册、任务指南、配置规范与开发维护
-tasks/
-  AGENTS.md              AI 创建任务时必须遵守的规则
+tasks/AGENTS.md          个人任务和课程任务的创建规范
+course_resources/       公开分发的课程模型与完整任务
+.local/tasks/            不参与 Git 的个人任务工作区
   manifest.yaml          全部学习任务的全局索引
   <task_id>/             每个学习任务的独立文件夹
+.local/models/           不参与 Git 的独立个人模型及其资源
 setup.bat                首次环境配置
 start.bat                自动检查环境并启动
 start-current-python.bat 使用当前 Python/Conda 环境启动
@@ -91,7 +93,7 @@ npm run build
 
 文档入口统一见[项目首页的文档导航](../README.md#文档导航)。新增功能时同步更新用户手册或对应技术规范，避免在多个 README 中重复维护操作步骤。任务正文和操作步骤统一写入所属目录的 notes.md；外部模型的 SOURCE.md 与许可证保留原位置。
 
-`MUJOCO_LOG.TXT`、`*.log`、`__pycache__/`、`.pytest_cache/` 是运行日志或缓存，不作为交付内容。`tasks/*/results/` 是实验结果，不按日志清理。`model_library/resource_limit_audit.json` 是模型资源审计数据，应保留。
+`MUJOCO_LOG.TXT`、`*.log`、`__pycache__/`、`.pytest_cache/` 是运行日志或缓存，不作为交付内容。`.local/tasks/*/results/` 是实验结果，不按日志清理。`model_library/resource_limit_audit.json` 是模型资源审计数据，应保留。
 
 ## 安装环境实现
 
@@ -127,7 +129,7 @@ npm run build
 
 ### 拷贝内容
 
-复制项目文件，排除 `.venv`、`.venv.backup-*`、`node_modules`、`.npm-cache`、`.local`、`.git` 和 Python 缓存。保留 `app`（含 WASM、JS、CSS、字体）、`backend`、`docs`、`prompts`、`tasks`、`model_library`、`assets`、`licenses`、版权文件、`requirements.txt`、`constraints.txt` 和安装、启动、卸载 BAT 脚本。源码和开发文件可一起保留；已有 `tasks/*/results/` 按需保留。
+复制项目文件，排除 `.venv`、`.venv.backup-*`、`node_modules`、`.npm-cache`、`.local`、`.git` 和 Python 缓存。保留 `app`（含 WASM、JS、CSS、字体）、`backend`、`docs`、`prompts`、`tasks`、`model_library`、`assets`、`licenses`、版权文件、`requirements.txt`、`constraints.txt` 和安装、启动、卸载 BAT 脚本。源码和开发文件可一起保留；已有 `.local/tasks/*/results/` 按需保留。
 
 新电脑需要自行安装 64 位 x86 Python，建议 3.12。安装脚本不会安装 Python 本身，也不会自动配置浏览器、显卡驱动或网络代理。首次安装需要能访问 pip 使用的软件包源；安装完成后运行已打包的程序不需要 Node.js。
 
@@ -138,7 +140,7 @@ npm run build
 1. 解压到普通用户有读写权限的路径，建议包含中文和空格，以验证路径兼容性。
 2. 双击 `start.bat`：首次应创建本机 `.venv`、安装依赖，并显示原生 MuJoCo 自检成功；浏览器应打开实验台。
 3. 选择一个任务运行实时仿真，检查模型、按钮和数据曲线；停止并调整参数再运行。
-4. 调整参数、关节和拖动姿态，完整运行网页实验，再用“导出本次实验”分别验证网页 CSV 与后台重算 CSV。核对实际起始状态和中途控制变化均被继承，结果在 `tasks/<id>/results/run_*/`，包含 `experiment.json`。
+4. 调整参数、关节和拖动姿态，完整运行网页实验，再用“导出本次实验”分别验证网页 CSV 与后台重算 CSV。核对实际起始状态和中途控制变化均被继承，结果在 `.local/tasks/<id>/results/run_*/`，包含 `experiment.json`。
 5. 打开帮助：包含“学生使用手册”“AI 使用与提示词”和“复杂几何体与 STL 建模”；三篇内容都能直接阅读，页内链接正常。
 6. 打开模型库预览，确认模型和配套资源可加载。
 7. 关闭服务，再次双击 `start.bat`，不应重新下载已安装的依赖。
@@ -221,7 +223,7 @@ npm audit
 
 GitHub 发布时提交本次新增源文件、品牌资源、文档、测试和最新 `app/`（包括 `app/.vite/manifest.json`）。仅复制已有被跟踪文件会漏掉尚未提交的新功能，请发布前检查 `git status`。
 
-分发至少保留：`app/`、`backend/`、`assets/`、`docs/`、`tasks/`、`model_library/`、`licenses/`、两个 README、`LICENSE`、`NOTICE`、`COPYRIGHT.md`、`THIRD_PARTY_NOTICES.md`、`requirements.txt`、`constraints.txt` 与全部安装／启动／卸载 BAT。模型 `SOURCE.md`、`LICENSE` 随资源一起分发；源码仓库另保留前端源码、测试与 npm 锁文件。学生作品公开范围按贡献说明确认。
+分发至少保留：`app/`、`backend/`、`assets/`、`docs/`、`.local/tasks/`、`model_library/`、`licenses/`、两个 README、`LICENSE`、`NOTICE`、`COPYRIGHT.md`、`THIRD_PARTY_NOTICES.md`、`requirements.txt`、`constraints.txt` 与全部安装／启动／卸载 BAT。模型 `SOURCE.md`、`LICENSE` 随资源一起分发；源码仓库另保留前端源码、测试与 npm 锁文件。学生作品公开范围按贡献说明确认。
 
 不要分发 `.local/`、`.venv`、`.venv.backup-*`、`node_modules`、缓存、个人 API Key 或个人实验结果。`.local/` 含加密密钥、明文对话／图片及任务修改备份，Git 忽略规则不能代替人工压缩包排除。学生原有任务与结果在更新前自行备份；不要用教师的任务目录无条件覆盖学生的自建任务。
 
@@ -264,7 +266,7 @@ GitHub 发布时提交本次新增源文件、品牌资源、文档、测试和�
 - 读取任务配置与模型时使用和多文件写入共用的锁，避免 AI 修改／重命名期间读到新旧混合文件。补齐参数映射、相机、观测与图线配置的类型检查，错误编码返回含文件名的可读错误；HTTP 400 后服务与其他任务仍可用。
 - Vite 固定更新到 8.3.5，锁文件中的 source-map-js 更新到 1.2.2。对应告警见 [Vite／Windows 编辑器调用公告](https://github.com/advisories/GHSA-587h-7wmj-h5pm)及 [source-map-js 公告](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)。全量 `npm audit` 和仅生产依赖审计均为 0。
 - Python 共 85 项：84 项通过、1 项因系统无符号链接权限跳过。前端 48 项全部通过；真实 HTTP 回归、`pip check`、任务校验、环境自检、静态检查与 Vite 构建通过。新增测试覆盖草稿清空、输入锁定、禁用输入前的参数范围校验、失败恢复、并发读取、错误配置、AI 修改保存／版本冲突／计算保护／回滚。
-- 现有 5 个任务均完成默认全时长计算；模型库 419 个 XML／资源文件的长度与 SHA-256 和清单一致，28 个入口全部编译通过。原 `tasks/` 的 54 个文件按本次开始时的哈希快照保持一致。
+- 现有 5 个任务均完成默认全时长计算；模型库 419 个 XML／资源文件的长度与 SHA-256 和清单一致，28 个入口全部编译通过。原 `.local/tasks/` 的 54 个文件按本次开始时的哈希快照保持一致。
 - 在包含中文与空格的独立运行副本中实际执行 `setup.bat`，未复制旧 `.venv` 或 Node 依赖，联网安装及原生自检通过；随后实际执行 `start.bat`，自定义空闲端口与健康检查通过，未重复安装依赖。本机配置的 pip 镜像超时，本次验收仅在子进程设置 `PIP_INDEX_URL=https://pypi.org/simple` 后完成；未修改用户全局 pip 配置。原始日志保留在待删除文件夹。
 - 浏览器使用该全新环境与独立任务／对话副本：验证加载时输入锁定、损坏任务报错后恢复、质量 2 kg／时长 0.2 s 的仿真及后台重算 CSV（采样在容差内一致）、空草稿刷新、AI 修改同一编号后保存、模型库预览及帮助导航。AI 上游为本地模拟，真实编译、计算、备份与写入流程均实际运行；不消耗真实 API。
 
@@ -278,7 +280,7 @@ GitHub 发布时提交本次新增源文件、品牌资源、文档、测试和�
 - 5 个现有任务校验、真实 HTTP 回归、构建资源与原生运行环境自检、`pip check`、Python F 类静态检查及前端未使用变量／不可达代码检查通过；`npm audit --omit=dev` 报告 0 个已知漏洞。
 - 模型库 25 组、419 个 XML 与资源文件的长度／SHA-256 与来源清单一致，28 个场景入口全部通过原生 MuJoCo 编译；资源审计无缺失或超限。
 - 浏览器实测：弹簧任务参数重载、0.2 秒完整网页实验、后台重算与 CSV 下载通过，页面报告两端采样在容差内一致；冰箱门模型预览、帮助页三篇文档与导航加载正常。使用独立临时任务副本及对话数据库。
-- 现有 `tasks/` 全部 54 个文件按清理前 SHA-256 快照复核，保留任务配置、资源、说明和已有结果。已确认过期的一次性探测脚本、截图、日志、开发缓存及隔离验收副本集中移至根目录 `待删除_20261023/`，由维护者自行删除；本机对话数据库与开发环境保留。
+- 现有 `.local/tasks/` 全部 54 个文件按清理前 SHA-256 快照复核，保留任务配置、资源、说明和已有结果。已确认过期的一次性探测脚本、截图、日志、开发缓存及隔离验收副本集中移至根目录 `待删除_20261023/`，由维护者自行删除；本机对话数据库与开发环境保留。
 
 运行发布包位于 `dist/VMAIL-0.2.0-20261023-runtime.zip`，同目录提供 SHA-256 校验文件、逐文件清单和浏览器验收截图。包内保留完整运行目录、5 个现有任务、模型来源与许可证；排除待删除文件夹、`.local/`、Python／Node 环境、缓存和个人实验结果。解压到中文空格临时路径后，运行环境自检与全部 5 个任务的默认完整时长计算通过；ZIP 完整性及逐文件 SHA-256 核对通过。此项使用现有解释器验证运行文件，不等同于再次执行首次联网安装。前端源码、正式测试、npm 锁文件仍在源码仓库中。`dist/` 和待删除文件夹已加入 Git 忽略。
 

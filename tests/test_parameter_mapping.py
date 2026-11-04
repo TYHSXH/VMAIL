@@ -25,7 +25,7 @@ class ParameterMappingTests(unittest.TestCase):
         self.folder = self.tasks / "example_mass_spring"
         self.folder.mkdir()
         for name in REQUIRED_FILES:
-            shutil.copyfile(ROOT / "tasks/example_mass_spring" / name, self.folder / name)
+            shutil.copyfile(ROOT / "course_resources/tasks/course_team/example_mass_spring" / name, self.folder / name)
         self.task = load_task(self.tasks, self.folder.name)
 
     def linked(self):

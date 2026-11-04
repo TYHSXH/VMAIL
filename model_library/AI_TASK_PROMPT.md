@@ -25,10 +25,10 @@
 如需把复杂外形简化为基本几何体，必须明确说明质量、惯量和
 碰撞形状如何处理，以及简化对本研究问题的影响。
 
-把模型复制到新的 tasks/<task_id>/ 中开发，保留原始资料库不变，
+把模型复制到新的 .local/tasks/<task_id>/ 中开发，保留原始资料库不变，
 并带上原始许可证、来源链接与版本号。
 根据任务规范创建 task.yaml、parameters.yaml、observe.yaml、
-ui.yaml、notes.md，并登记到 tasks/manifest.yaml。
+ui.yaml、notes.md，并登记到 .local/tasks/manifest.yaml。
 
 页面参数与控制量用简短中文名并明确单位，曲线按物理量分组。
 默认控制值应与初始状态及说明一致，给出能看清完整机构的默认视角。

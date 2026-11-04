@@ -1,6 +1,6 @@
 # VMAIL 学习任务创建规则
 
-本文件适用于 `tasks/` 及其全部子目录。任何 AI coding 工具在这里创建或修改学习任务时，都必须遵守以下约定。
+本文件适用于 `.local/tasks/` 及其全部子目录。任何 AI coding 工具在这里创建或修改学习任务时，都必须遵守以下约定。
 
 ## 先明确学习问题
 
@@ -15,7 +15,7 @@
 
 ## 一个任务一个文件夹
 
-在 `tasks/<task_id>/` 中创建任务。 `task_id` 只能使用小写英文字母、数字和下划线，并与 `task.yaml` 的 `id` 一致。
+在 `.local/tasks/<task_id>/` 中创建任务。 `task_id` 只能使用小写英文字母、数字和下划线，并与 `task.yaml` 的 `id` 一致。
 
 任务正文、实验步骤和补充说明统一放在 `notes.md`，避免另外创建内容重复的 README。
 
@@ -39,12 +39,13 @@ scripts/                Python 控制或批量研究脚本
 results/                运行结果，不能作为模型输入
 ```
 
-不要在任务文件夹中复制全局 `manifest.yaml`。创建任务后，只在 `tasks/manifest.yaml` 中新增一条索引；更新已有任务时保留其他任务条目。
+不要在任务文件夹中复制全局 `manifest.yaml`。创建任务后，只在 `.local/tasks/manifest.yaml` 中新增一条索引；更新已有任务时保留其他任务条目。
 
 ## 模型与参数
 
 - 从零创建或重写 XML 时，以 `docs/task-package-spec.md` 中“默认 XML 模板”的代码为起点，将项目 `assets/logos/logo-black.png` 复制为任务内的 `assets/logo-black.png`；保留 floor、logo 纹理和材质。地面使用居中、单个、大尺寸的黑色标志，不平铺为小图标。模型尺度变化时相应调整地面与 logo 尺寸。
 - 模板中的示例球体可替换为目标机构。不要让任务引用任务目录外的模板资源；保留第三方模型原本的来源与许可证。
+- `floor` 是 `worldbody` 下的静态水平 `plane`，地面及 `buaa_floor` 材质的 alpha 保持 `1`，使用 `texrepeat="1 1"`、`texuniform="false"`。网页通过共享 `FloorBranding` 以 `opacity=0.1` 叠加黑色 Logo 水印；不要将地面本身设为半透明，也不要另建贴花叠层。模型的碰撞、摩擦与机构尺寸按物理条件设置。
 
 - `model.xml` 必须是可由 MuJoCo 编译的 MJCF。
 - 被参数、观测量、执行器或脚本引用的 body、joint、geom、site、sensor 和 actuator 必须显式命名，并保持名称稳定。

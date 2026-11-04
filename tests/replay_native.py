@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from backend.simulator import prepare_browser_model, run_mujoco_task
 from backend.task_io import load_task
 request = json.loads(sys.stdin.read())
-task = load_task(Path(__file__).resolve().parents[1] / "tasks", request["task_id"])
+task = load_task(Path(__file__).resolve().parents[1] / "course_resources/tasks/course_team", request["task_id"])
 if request.get("mode") == "prepare":
     result = prepare_browser_model(task, request.get("parameters", {}), request["timestep"], request["duration"])
 else:

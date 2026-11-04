@@ -19,11 +19,12 @@ from .preview import preview_choices, prepare_preview, pack_preview
 from .assistant import router as assistant_router, local_request, local_origin
 from .course_resources import course_resources, public_resource, find_resource, reproduce_task
 from .branding import referenced_logos
+from .workspace import TASKS_DIR, ensure_tasks
+from .personal_models import model_choices, save_model, hide_model
 
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_DIR = ROOT / "app"
-TASKS_DIR = ROOT / "tasks"
 
 
 class ControlEvent(BaseModel):
@@ -63,6 +64,10 @@ class PreviewRequest(BaseModel):
     entry: str | None = Field(default=None, max_length=255)
 
 
+class SaveModelRequest(PreviewRequest):
+    title: str = Field(default="", max_length=120)
+
+
 RUNS: dict[str, dict[str, Any]] = {}
 CANCELLED_TOKENS: dict[str, float] = {}
 RUN_LOCK = TASK_STATE_LOCK
@@ -91,6 +96,7 @@ def health() -> dict[str, str]:
 @app.get("/api/tasks")
 def api_list_tasks() -> dict[str, Any]:
     try:
+        ensure_tasks(TASKS_DIR)
         return {"tasks": list_tasks(TASKS_DIR)}
     except TaskValidationError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -123,11 +129,35 @@ def api_course_image(resource_id: str):
 @app.post("/api/course-resources/{resource_id}/reproduce", dependencies=[Depends(local_request)])
 def api_reproduce_resource(resource_id: str):
     try:
+        ensure_tasks(TASKS_DIR)
         return reproduce_task(resource_id, TASKS_DIR)
     except TaskValidationError as exc:
         raise HTTPException(400, str(exc)) from None
     except OSError:
         raise HTTPException(500, "复现失败，请检查任务目录的写入权限。") from None
+
+
+@app.get('/api/personal-models')
+def api_personal_models():
+    return {'models': model_choices()}
+
+
+@app.post('/api/personal-models', dependencies=[Depends(local_request)])
+def api_save_model(request: SaveModelRequest):
+    try:
+        return save_model(request.xml, request.filename, request.model_id, request.entry, request.title)
+    except (TaskValidationError, SimulationError, ValueError) as exc:
+        raise HTTPException(422, str(exc)) from None
+    except OSError:
+        raise HTTPException(500, '模型保存失败，请检查个人模型目录的写入权限。') from None
+
+
+@app.delete('/api/personal-models/{model_id}', dependencies=[Depends(local_request)])
+def api_hide_model(model_id: str):
+    try:
+        return hide_model(model_id)
+    except TaskValidationError as exc:
+        raise HTTPException(404, str(exc)) from None
 
 
 @app.post("/api/preview-model")

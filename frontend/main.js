@@ -152,7 +152,7 @@ async function initViewer() {
     });
     await state.viewer.init();state.viewerReady=true;
     el.engineBadge.textContent="MuJoCo 3.13";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
-    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>选择任务，开始实验</strong><span>从左侧载入任务，或拖入 XML 预览模型。</span>";
+    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>选择任务，开始实验</strong><span>从课程空间复现任务，或在 AI 助手中创建个人任务。</span>";
   }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
 async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}

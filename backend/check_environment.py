@@ -44,10 +44,10 @@ def check_project(root: Path = ROOT) -> None:
             if not path.is_relative_to((root / "app").resolve()) or not path.is_file():
                 raise RuntimeError(f"Missing built asset: {asset}. Copy the complete app/ folder.")
     # Batch results are written here. Verify permissions before starting the server.
-    with tempfile.TemporaryFile(dir=root / "tasks"):
-        pass
-    (root / ".local").mkdir(exist_ok=True)
-    with tempfile.TemporaryFile(dir=root / ".local"):
+    from .workspace import ensure_tasks
+    ensure_tasks(root / '.local/tasks')
+    (root / '.local/models').mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryFile(dir=root / ".local/tasks"):
         pass
 
 

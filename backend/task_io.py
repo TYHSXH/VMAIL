@@ -53,7 +53,7 @@ def list_tasks(tasks_dir: Path) -> list[dict[str, Any]]:
     manifest = _read_yaml(manifest_path)
     tasks = manifest.get("tasks", [])
     if not isinstance(tasks, list):
-        raise TaskValidationError("tasks/manifest.yaml field 'tasks' must be a list.")
+        raise TaskValidationError("任务索引 manifest.yaml 的 tasks 字段必须是列表。")
     seen = set()
     for entry in tasks:
         if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):

@@ -26,7 +26,7 @@ for t, q, v in [(0, 0, 0), (.15, -.4, .2), (.7, 1.2, -.6)]:
     values = apply_loads(program, model, data)
     cases.append({"time": t, "qpos": data.qpos.tolist(), "qvel": data.qvel.tolist(), "values": values,
                   "qfrc": data.qfrc_applied.tolist(), "xfrc": data.xfrc_applied.flatten().tolist()})
-task = load_task(ROOT / "tasks", "rotating_load_demo")
+task = load_task(ROOT / "course_resources/tasks/course_team", "rotating_load_demo")
 payload = prepare_browser_model(task, {}, .002, .1)
 result = run_mujoco_task(task, {}, .1, .002)
 print(json.dumps({"xml": XML, "program": program, "cases": cases, "demo": {"payload": payload, "series": result["series"]}}, ensure_ascii=False))

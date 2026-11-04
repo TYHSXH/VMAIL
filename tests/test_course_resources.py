@@ -25,7 +25,7 @@ class CourseResourceTests(unittest.TestCase):
 
     def add_task(self):
         folder = self.course / 'tasks/course_team/vibration/spring'
-        shutil.copytree(course.ROOT / 'tasks/example_mass_spring', folder, ignore=shutil.ignore_patterns('results'))
+        shutil.copytree(course.ROOT / 'course_resources/tasks/course_team/example_mass_spring', folder, ignore=shutil.ignore_patterns('results'))
         (folder / 'results').mkdir()
         (folder / 'results/personal.txt').write_text('private')
         return folder

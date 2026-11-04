@@ -26,14 +26,14 @@
 **AI coding 工具**
 
 - 把真实对象简化成理论力学模型。
-- 创建或修改 `tasks/` 下的学习任务包。
+- 创建或修改 `.local/tasks/` 下的学习任务包。
 - 编写 MuJoCo MJCF 模型。
 - 配置参数、观测量和网页展示。
 - 根据网页报错修复任务包。
 
 **VMAIL 网页实验台**
 
-- 读取 `tasks/manifest.yaml`。
+- 读取 `.local/tasks/manifest.yaml`。
 - 打开任务包。
 - 展示可调参数。
 - 在浏览器中运行 MuJoCo WASM，并显示三维运动视图和实时数据曲线。
@@ -45,8 +45,8 @@
 1. 学生在 AI coding 工具中打开 VMAIL 项目。
 2. 学生说：“我想新建一个学习任务，研究……”
 3. AI 询问或推断建模对象、参数、观测量和初始条件。
-4. AI 在 `tasks/` 下创建任务文件夹。
-5. AI 更新 `tasks/manifest.yaml`。
+4. AI 在 `.local/tasks/` 下创建任务文件夹。
+5. AI 更新 `.local/tasks/manifest.yaml`。
 6. 学生运行 `start.bat`。
 7. 学生在网页中选择任务、修改参数、运行仿真。
 8. 结果保存到该任务的 `results/` 文件夹。
@@ -110,7 +110,7 @@ AI 应先说明：
 
 请先说明简化假设、自由度和单位；缺少必要条件时先问我。
 先阅读 tasks/AGENTS.md 和 docs/task-package-spec.md；需要载荷时查阅其中的“任务载荷与控制规律”章节。
-只在 tasks/ 下新建独立任务，登记 tasks/manifest.yaml，不为单个任务修改公共前后端。
+只在 .local/tasks/ 下新建独立任务，登记 .local/tasks/manifest.yaml，不为单个任务修改公共前后端。
 如果需要新写或重写 XML，使用 docs/task-package-spec.md 中“默认 XML 模板”的代码，并把项目的 assets/logos/logo-black.png 复制为任务内 assets/logo-black.png；保留深色地面中央的黑色 Logo，按模型尺度调整，不平铺；网页以低透明度水印呈现，使其隐约可见并融入地面。
 参数提供中文名称、单位与范围，观测量对应实际模型；固定研究点用具名 site。
 完成后运行 backend.validate_task 和完整默认时长的计算，检查数值稳定性。
@@ -157,8 +157,8 @@ AI 可以辅助分析、写 MJCF 和检查错误，但无法仅凭一张题图�
 1. 学生列出尺寸、单位、零件、关节位置、自由度、接触面、材料或质量数据和简化假设。缺少决定结果的条件时先补全，不让 AI 猜测。
 2. 学生用自己熟悉的 CAD 工具建模，每个独立运动的刚体分别导出三角网格，保留原始 CAD 文件以便修改。
 3. 导出**二进制 STL**；MuJoCo 也支持 OBJ。STL 不记录单位，必须说明导出坐标是米还是毫米。毫米模型通过 `scale="0.001 0.001 0.001"` 转为米。`body`、`joint`、`site` 的位置仍应使用米，不会跟着 mesh scale 自动换算。
-4. 将资源放到 `tasks/<task_id>/assets/`，路径使用任务内相对路径，保持大小写一致，不引用其他任务、桌面或绝对路径。尽量减少无关细节和面数。
-5. 学生与 AI 共同编写 `model.xml`：定义刚体层级、关节轴、质量／惯量、接触、驱动和观测点，补齐六个任务文件并更新 `tasks/manifest.yaml`。新建时复用[默认黑色 Logo 模板](task-package-spec.md#默认-xml-模板)。
+4. 将资源放到 `.local/tasks/<task_id>/assets/`，路径使用任务内相对路径，保持大小写一致，不引用其他任务、桌面或绝对路径。尽量减少无关细节和面数。
+5. 学生与 AI 共同编写 `model.xml`：定义刚体层级、关节轴、质量／惯量、接触、驱动和观测点，补齐六个任务文件并更新 `.local/tasks/manifest.yaml`。新建时复用[默认黑色 Logo 模板](task-package-spec.md#默认-xml-模板)。
 6. 编译、预览、短时仿真，再比较理论、实验或极限工况。每次只改一类内容，保留能运行的版本。
 
 STL 只提供表面三角形，不包含关节、载荷、密度、质量、惯量或控制器。装配 CAD 直接导出一个 STL，通常也不会保留可运动的装配关系。
@@ -200,7 +200,7 @@ MuJoCo 普通 mesh 的碰撞检测使用网格的**凸包**。一个带孔或凹
 ### 任务结构与验证
 
 ```text
-tasks/my_mesh_task/
+.local/tasks/my_mesh_task/
   task.yaml
   model.xml
   parameters.yaml
@@ -225,7 +225,7 @@ tasks/my_mesh_task/
 
 ```text
 请阅读 tasks/AGENTS.md 和 docs/task-guide.md。
-我已将零件 STL 放入 tasks/my_mesh_task/assets/，尺寸单位为毫米。
+我已将零件 STL 放入 .local/tasks/my_mesh_task/assets/，尺寸单位为毫米。
 零件原点、朝向、关节位置、质量与惯量分别为……。
 研究重点是……，必须保留的接触面／孔槽是……。
 请先检查条件是否足够，区分视觉 mesh 与凸碰撞体，协助编写 MJCF

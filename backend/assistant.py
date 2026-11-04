@@ -14,6 +14,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request as URLRequest, urlopen
 
+import anyio
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, SecretStr
@@ -22,14 +23,15 @@ from .assistant_credentials import CredentialStore, MODELS
 from .assistant_history import ConversationStore
 from .assistant_tasks import publish_bundle, validate_bundle, read_task_snapshot, prepare_update, update_bundle, task_folder
 from .task_io import TaskValidationError, list_tasks
+from .workspace import TASKS_DIR
 
 ROOT = Path(__file__).resolve().parents[1]
-TASKS_DIR = ROOT / "tasks"
 STORE = CredentialStore(ROOT / ".local" / "deepseek.key")
 HISTORY = ConversationStore(ROOT / ".local" / "assistant-history.sqlite3")
 AI_SLOT = threading.BoundedSemaphore(1)
 VALIDATION_SLOT = threading.BoundedSemaphore(1)
 BASE_URL = "https://api.deepseek.com"
+MAX_TOOL_ROUNDS = 12
 
 
 async def local_origin(request: Request):
@@ -156,7 +158,7 @@ def system_prompt():
 网页中的模型参数、关节姿态、执行器与载荷统一位于“参数与控制”页；操作说明使用这个名称。
 parameters.yaml 的 mjcf 既支持单个对象，也支持目标列表：一个参数可以联动多个 MJCF 属性。每个目标可用 value 写数字、引用参数名的安全数学表达式或向量列表；省略 value 时使用该参数本身。几何尺寸、位置和惯量等联动直接通过这些映射实现，不要再声称每个参数只能对应一个属性，不需要生成 Python 脚本。历史对话中的单目标限制已过时，以当前规范为准。
 先在网页完整运行，再用“导出本次实验”选择网页 CSV 或“后台重算并下载 CSV”。后台继承该次实际起始状态与中途控制记录；两端都是 MuJoCo，后台不天然更准确。
-对话中帮助澄清和检查物理问题。不要声称已经创建文件、运行校验或仿真；文件操作由网页完成。
+对话中帮助澄清和检查物理问题。任务工具会执行校验、默认工况试运行和保存；仅以工具返回结果判断成功，不预先声称已完成。
 新建任务使用基础 MJCF 几何体和 loads.yaml 数学表达式，不生成外部网格、插件、include 或 Python 脚本。
 如果孔洞、凹槽、复杂接触面或真实零件外形决定研究结果，明确说明基础几何体的局限，不反复强行拼出错误模型。
 引导学生阅读 docs/task-guide.md 的复杂几何体与 STL／MJCF 建模章节，用 CAD 准备二进制 STL，在本地编辑器中由 AI 辅助编写 MJCF、凸分解碰撞体和惯量，再接入任务；网页不能上传 STL。
@@ -181,7 +183,10 @@ create_task 不覆盖现有任务；update_task 在原任务中保存修改。�
 不要在正文倾倒完整文件或声称已保存；网页会报告真实结果。
 create_task 的 files 必须包含六个必需文件，可选 loads.yaml、README.md；update_task 的 files 只包含改动文件，每个值都是完整文本。
 程序自动提供 assets/logo-black.png 并登记索引，不生成二进制资源或 manifest.yaml。
-失败不意味着对话结束；结合错误和当前文件继续修复。原任务已经存在时始终使用 update_task；尚未成功新建才继续 create_task。
+新建模型的 floor 必须是 worldbody 下的静态水平 plane，使用 buaa_floor 材质、buaa_logo 黑色纹理，texrepeat="1 1"、texuniform="false"。地面和材质保持不透明（rgba 的 alpha 为 1），不得把地面 alpha 设为 0.1。网页统一通过 FloorBranding 以 opacity=0.1 叠加单个居中的黑色 Logo 水印，XML 不另建贴花、透明叠层或重复地板；保留地面原本的碰撞、摩擦参数。
+任务工具会返回真实的校验、试运行和保存结果。失败后在本轮直接结合错误修复并再次调用工具，不让学生重复发送“继续”；需要关键物理条件、权限或人工操作时才说明阻碍并提问。
+原任务已经存在时始终使用 update_task；尚未成功新建才继续 create_task，不换编号逃避错误。版本冲突先 read_task 再修改。
+保存成功后本轮自动结束。不要在未收到保存成功结果时声称任务已创建，也不把试运行通过等同于物理模型正确。
 """
     instructions += "\n已有任务（可读取和修改）：" + json.dumps([{"id": t["id"], "title": t.get("title", t["id"])} for t in list_tasks(TASKS_DIR)], ensure_ascii=False)
     return instructions
@@ -354,20 +359,91 @@ def task_tool_result(name, arguments):
     return {"type": "draft", "draft": bundle.model_dump(), "validation": validation}
 
 
+def save_tool_draft(result):
+    """Commit the exact validated draft; revision checks still run at write time."""
+    if result.get("type") != "draft" or not result["validation"]["valid"]:
+        return result
+    try:
+        with slot(VALIDATION_SLOT):
+            if result.get("operation") == "update":
+                edit = result["edit"]
+                task = update_bundle(TASKS_DIR, edit["task_id"], edit["files"], edit["base_revision"])
+            else:
+                draft = result["draft"]
+                task = publish_bundle(TASKS_DIR, draft["task_id"], draft["files"])
+    except TaskValidationError as exc:
+        return {**result, "validation": {"valid": False, "errors": [str(exc)[:2000]]}}
+    except (OSError, UnicodeError):
+        return {**result, "validation": {"valid": False, "errors": ["保存失败，请检查文件占用与目录写入权限；任务尚未保存。"]}}
+    if task.get("base_revision"):
+        result["draft"]["base_revision"] = task["base_revision"]
+    return {**result, "type": "task_saved", "task": task}
+
+
+def append_tool_feedback(payload, start, tool_id, name, arguments, content, result):
+    # Keep the latest read and latest attempted edit. Older full bundles otherwise
+    # accumulate on every repair and can exhaust the model's context window.
+    previous = payload["messages"][start:]
+    latest_read = []
+    for index in range(0, len(previous), 2):
+        if previous[index]["tool_calls"][0]["function"]["name"] == "read_task":
+            latest_read = previous[index:index + 2]
+    if name == "read_task":
+        latest_read = []
+    feedback = result.get("snapshot", result) if name == "read_task" else result
+    payload["messages"][start:] = [*latest_read,
+        {"role": "assistant", "content": content or None, "tool_calls": [{"id": tool_id, "type": "function", "function": {"name": name, "arguments": arguments}}]},
+        {"role": "tool", "tool_call_id": tool_id, "content": json.dumps(feedback, ensure_ascii=False)},
+    ]
+
+
+async def cancellable_stream(iterator, stopped):
+    """Signal disconnects even while a synchronous upstream read is blocked."""
+    exhausted = object()
+    running = threading.Lock()
+
+    def advance():
+        with running:
+            if stopped.is_set():
+                iterator.close()
+                return exhausted
+            return next(iterator, exhausted)
+
+    try:
+        while True:
+            item = await anyio.to_thread.run_sync(advance, abandon_on_cancel=True)
+            if item is exhausted:
+                return
+            yield item
+    finally:
+        stopped.set()
+        if running.acquire(blocking=False):
+            try:
+                iterator.close()
+            finally:
+                running.release()
+
+
 @router.post("/chat")
 def chat(request: ConversationRequest):
     key, payload = payload_for(request)
+    stopped = threading.Event()
+    feedback_start = len(payload["messages"])
 
     def stream():
         try:
             with slot(AI_SLOT):
                 usage_total = {}
-                for round_index in range(4):
+                for round_index in range(MAX_TOOL_ROUNDS):
+                    if stopped.is_set():
+                        return
                     received, finish, completed = False, None, False
                     tool_name, arguments, tool_id, content_text = "", "", "", ""
                     preparing, usage = False, None
                     with open_upstream("/chat/completions", key, payload) as response:
                         for raw in response:
+                            if stopped.is_set():
+                                return
                             if len(raw) > 1_000_000:
                                 raise ValueError()
                             line = raw.decode("utf-8").strip()
@@ -407,35 +483,46 @@ def chat(request: ConversationRequest):
                     for name, value in (usage or {}).items():
                         if isinstance(value, (int, float)):
                             usage_total[name] = usage_total.get(name, 0) + value
-                    if finish == "tool_calls" and preparing:
-                        if tool_name == "read_task":
+                    if preparing and (finish == "tool_calls" or finish == "length" and tool_id):
+                        if not tool_id:
+                            raise ValueError("Missing tool call id")
+                        if finish == "length":
+                            result = {"type": "task_error", "message": "任务输出达到单次长度上限，未执行或保存。请精简模型与说明，在保留必要文件和功能的前提下重新提交完整内容。"}
+                            yield event(result)
+                        elif tool_name == "read_task":
                             result = task_tool_result(tool_name, arguments)
-                            if round_index == 3:
-                                yield event({"type": "task_error", "message": "本轮读取次数较多，尚未保存修改。可以继续对话。"})
+                        else:
+                            yield event({"type": "status", "message": f"正在检查任务文件并试运行（第 {round_index + 1}/{MAX_TOOL_ROUNDS} 轮）…"})
+                            result = task_tool_result(tool_name, arguments)
+                            if stopped.is_set():
+                                return
+                            if result.get("validation", {}).get("valid"):
+                                yield event({"type": "status", "message": "校验通过，正在保存任务…"})
+                                if stopped.is_set():
+                                    return
+                                result = save_tool_draft(result)
+                            yield event(result)
+                            if result["type"] == "task_saved":
                                 yield event({"type": "done", "usage": usage_total})
                                 return
-                            if not tool_id:
-                                raise ValueError("Missing tool call id")
-                            payload["messages"].extend([
-                                {"role": "assistant", "content": content_text or None, "tool_calls": [{"id": tool_id, "type": "function", "function": {"name": tool_name, "arguments": arguments}}]},
-                                {"role": "tool", "tool_call_id": tool_id, "content": json.dumps(result["snapshot"], ensure_ascii=False)},
-                            ])
-                            yield event({"type": "status", "message": "已返回任务读取结果，DS 正在继续分析…"})
-                            continue
-                        yield event({"type": "status", "message": "正在检查任务文件并试运行…"})
-                        yield event(task_tool_result(tool_name, arguments))
-                        yield event({"type": "done", "usage": usage_total})
+                        append_tool_feedback(payload, feedback_start, tool_id, tool_name, arguments, content_text, result)
+                        if round_index + 1 < MAX_TOOL_ROUNDS:
+                            message = "已返回任务读取结果，DS 正在继续分析…" if tool_name == "read_task" else "已将错误返回 DS，正在自动排查并修复…"
+                            yield event({"type": "status", "message": message})
+                        continue
                     elif not received or finish != "stop" or preparing:
                         yield event({"type": "error", "message": "回答未完整结束，请重试或缩短问题。"})
                     else:
                         yield event({"type": "done", "usage": usage_total})
                     return
+                yield event({"type": "task_error", "message": f"本轮已达到 {MAX_TOOL_ROUNDS} 次工具调用上限，尚未保存任务变更。草稿和错误已保留，可继续对话修复。"})
+                yield event({"type": "done", "usage": usage_total})
         except HTTPException as exc:
             yield event({"type": "error", "message": exc.detail})
         except (ValueError, KeyError, TypeError, OSError, URLError):
             yield event({"type": "error", "message": "DeepSeek 响应中断或格式异常，请重试。"})
 
-    return StreamingResponse(stream(), media_type="application/x-ndjson", headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
+    return StreamingResponse(cancellable_stream(stream(), stopped), media_type="application/x-ndjson", headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
 
 
 @router.post("/tasks")

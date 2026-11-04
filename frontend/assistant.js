@@ -30,7 +30,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
         </div>
       </details>
       <p id="aiStatus" class="assistant-status" role="status"></p>
-      <form id="aiChatForm" class="assistant-composer"><div id="aiAttachments" class="assistant-attachments hidden" aria-label="待发送的图片"></div><label class="sr-only" for="aiInput">你的研究问题</label><textarea id="aiInput" rows="3" maxlength="12000" placeholder="描述机构、已知条件；也可以添加题目图或草图…" title="Enter 发送，Shift+Enter 换行"></textarea><input id="aiImageFiles" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple /><div class="assistant-compose-actions"><button id="aiChooseImages" class="quiet-button" type="button" aria-label="添加图片">＋ 图片</button><button id="aiStop" class="quiet-button hidden" type="button">停止等待</button><button id="aiSend" class="primary-button" type="submit">发送</button></div></form>
+      <form id="aiChatForm" class="assistant-composer"><div id="aiAttachments" class="assistant-attachments hidden" aria-label="待发送的图片"></div><label class="sr-only" for="aiInput">你的研究问题</label><textarea id="aiInput" rows="3" maxlength="12000" placeholder="描述机构、已知条件；也可以添加题目图或草图…" title="Enter 发送，Shift+Enter 换行"></textarea><input id="aiImageFiles" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple /><div class="assistant-compose-actions"><button id="aiChooseImages" class="quiet-button" type="button" aria-label="添加图片">＋ 图片</button><button id="aiStop" class="quiet-button hidden" type="button">停止</button><button id="aiSend" class="primary-button" type="submit">发送</button></div></form>
     </div>`;
   const ids = ["Settings", "ConnectionState", "ConnectionForm", "Key", "Model", "Remember", "Save", "Test", "Forget", "Conversation", "Welcome", "Example", "New", "Draft", "DraftId", "Validation", "Errors", "FileCount", "File", "FileContent", "Status", "ChatForm", "Input", "Stop", "Send", "Attachments", "ChooseImages", "ImageFiles"];
   const el = Object.fromEntries(ids.map(name => [name, document.getElementById("ai" + name)]));
@@ -177,7 +177,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     if (!draft) return;
     el.DraftId.textContent = draft.task_id;
     const updating = draft.operation === "update";
-    el.Validation.textContent = savedTask ? (updating ? "已更新，可在左侧任务列表打开" : "已创建，可在左侧任务列表打开") : validation.valid ? "文件已通过校验" : (updating ? "修改未保存，可继续对话修正" : "尚未创建，可继续对话修正");
+    el.Validation.textContent = savedTask ? (updating ? "已更新，可在左侧任务列表打开" : "已创建，可在左侧任务列表打开") : busy ? "正在自动排查并修复…" : validation.valid ? "文件已通过校验" : (updating ? "修改未保存，可继续对话修正" : "尚未创建，可继续对话修正");
     el.Validation.className = validation.valid ? "passed" : "error";
     el.Errors.replaceChildren();
     for (const error of validation.errors || []) { const li = document.createElement("li"); li.textContent = error; el.Errors.append(li); }
@@ -202,7 +202,14 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     busy = true; controller = new AbortController(); sync(); status("DeepSeek 正在思考…");
     void persist();
     const body = message("assistant", "正在连接…", true);
-    let answer = "", taskEvent = null;
+    let answer = "", taskEvent = null, savedShown = false;
+    async function showSavedTask() {
+      if (savedShown) return;
+      savedShown = true;
+      const updating = taskEvent.operation === "update";
+      answer += `\n\n程序结果：已${updating ? "更新" : "创建"}任务「${taskEvent.task.title}」，校验与默认工况试运行通过，可以在左侧打开。`;
+      try { await onCreated(taskEvent.task); } catch (error) { onError("任务已保存，刷新列表后可打开。" + error.message); }
+    }
     try {
       const context = history.map(item => item === turn ? {...item, incomplete: false} : item);
       const {messages, omitted} = prepareAssistantContext(context, savedTask && getTask() ? null : draft, savedTask ? [] : validation?.errors || []);
@@ -213,37 +220,37 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
         if (nearBottom) el.Conversation.scrollTop = el.Conversation.scrollHeight;
       }, item => {
         if (item.type === "status") status(item.message);
-        if (item.type === "draft") taskEvent = item;
+        if (item.type === "draft" || item.type === "task_saved") {
+          taskEvent = item;
+          draft = item.draft; validation = item.validation; savedTask = item.type === "task_saved";
+          drawDraft();
+        }
         if (item.type === "task_error") answer += "\n\n程序结果：" + item.message;
       });
       if (taskEvent) {
-        draft = taskEvent.draft; validation = taskEvent.validation; savedTask = false;
-        if (validation.valid) {
-          controller = null; sync(); status("正在保存任务…");
-          try {
-            const updating = taskEvent.operation === "update";
-            const result = await (await api(updating ? `/tasks/${encodeURIComponent(draft.task_id)}` : "/tasks", {method: updating ? "PATCH" : "POST", body: updating ? taskEvent.edit : draft})).json();
-            savedTask = true;
-            if (result.task.base_revision) draft.base_revision = result.task.base_revision;
-            answer += `\n\n程序结果：已${updating ? "更新" : "创建"}任务「${result.task.title}」，可以在左侧打开。`;
-            try { await onCreated(result.task); } catch (error) { onError("任务已保存，刷新列表后可打开。" + error.message); }
-          } catch (error) { validation = {valid: false, errors: [error.message]}; }
-        }
-        if (!validation.valid) answer += "\n\n程序结果：" + (draft.operation === "update" ? "修改未保存，原任务保留。" : "任务尚未创建。") + "\n" + validation.errors.map(error => "- " + error).join("\n") + "\n可以继续告诉我如何修改，或让我根据错误重试。";
-        drawDraft();
+        if (savedTask) await showSavedTask();
+        else if (!validation.valid) answer += "\n\n程序结果：" + (draft.operation === "update" ? "修改未保存，原任务保留。" : "任务尚未创建。") + "\n" + validation.errors.map(error => "- " + error).join("\n") + "\n草稿已保留，可以继续告诉我如何修改，或让我根据错误重试。";
       }
       if (!answer.trim()) answer = "本次未保存任务变更，可以继续描述你的需求。";
       turn.incomplete = false;
       renderTaskNotes(body, answer); history.push({role: "assistant", content: answer});
       status([usageText(usage), omitted ? `本次使用近期上下文，较早 ${omitted} 条消息仍可在上方查看。` : ""].filter(Boolean).join(" · "));
     } catch (error) {
-      history.push({role: "assistant", content: answer || "未获得完整回答。", incomplete: true});
-      if (!el.Input.value.trim()) el.Input.value = originalText;
-      if (!attachments.length) { attachments = images; drawAttachments(); }
-      body.textContent = answer || "未获得完整回答。";
-      body.classList.add("incomplete");
-      status(error.name === "AbortError" ? "已停止等待；已发出的请求仍可能产生 API 费用。" : error.message, true);
-    } finally { busy = false; controller = null; sync(); void persist(); el.Input.focus(); }
+      if (taskEvent?.type === "task_saved") {
+        await showSavedTask();
+        turn.incomplete = false;
+        history.push({role: "assistant", content: answer}); renderTaskNotes(body, answer);
+        status("任务已保存；后续连接中断不影响保存结果。");
+      } else {
+        const reason = error.name === "AbortError" ? "已停止本轮自动处理；如已进入保存阶段，写入可能完成，请查看任务列表。已发出的请求仍可能计费。" : error.message;
+        answer += "\n\n程序结果：" + reason;
+        history.push({role: "assistant", content: answer, incomplete: true});
+        if (!el.Input.value.trim()) el.Input.value = originalText;
+        if (!attachments.length) { attachments = images; drawAttachments(); }
+        body.textContent = answer; body.classList.add("incomplete");
+        status(reason, true);
+      }
+    } finally { busy = false; controller = null; drawDraft(); sync(); void persist(); el.Input.focus(); }
   }
   el.ChatForm.addEventListener("submit", event => { event.preventDefault(); chat(); });
   el.ChooseImages.addEventListener("click", () => el.ImageFiles.click());

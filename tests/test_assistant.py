@@ -2,11 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import copy
 import io
 import json
 import os
 from pathlib import Path
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 from urllib.error import HTTPError, URLError
@@ -19,13 +21,13 @@ import yaml
 from backend import assistant
 from backend.assistant_credentials import CredentialStore
 from backend.assistant_tasks import publish_bundle, validate_bundle, check_bundle
-from backend.task_io import REQUIRED_FILES, TaskValidationError, list_tasks, load_task
+from backend.task_io import REQUIRED_FILES, TaskValidationError, list_tasks, load_task, rename_task
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def example_bundle(task_id="ai_test_spring"):
-    files = {name: (ROOT / "tasks" / "example_mass_spring" / name).read_text(encoding="utf-8") for name in REQUIRED_FILES}
+    files = {name: (ROOT / "course_resources/tasks/course_team" / "example_mass_spring" / name).read_text(encoding="utf-8") for name in REQUIRED_FILES}
     metadata = yaml.safe_load(files["task.yaml"]); metadata["id"] = task_id
     metadata["simulation"]["duration"] = .1
     files["task.yaml"] = yaml.safe_dump(metadata, allow_unicode=True)
@@ -36,6 +38,12 @@ def example_bundle(task_id="ai_test_spring"):
     ET.SubElement(root.find("worldbody"), "geom", name="floor", type="plane", size="4 4 .1", pos="0 0 -.5", material="buaa_floor")
     files["model.xml"] = ET.tostring(root, encoding="unicode")
     return files
+
+
+def tool_stream(name, arguments, number=1, finish="tool_calls"):
+    call = {"index": 0, "id": f"call_{number}", "function": {"name": name, "arguments": arguments if isinstance(arguments, str) else json.dumps(arguments)}}
+    chunk = {"choices": [{"delta": {"tool_calls": [call]}, "finish_reason": finish}], "usage": {"total_tokens": 10}}
+    return io.BytesIO(("data: " + json.dumps(chunk) + "\n\ndata: [DONE]\n").encode())
 
 
 class AssistantTests(unittest.TestCase):
@@ -135,12 +143,12 @@ class AssistantTests(unittest.TestCase):
         self.assertIn("默认 XML", payload["messages"][0]["content"])
         self.assertEqual(payload["messages"][0]["role"], "system")
 
-    def test_free_chat_tool_stream_produces_valid_files_without_writing_until_complete(self):
+    def test_free_chat_tool_stream_saves_only_after_complete_output(self):
         self.store.save(self.key, "deepseek-flash", False)
         (self.folder / "manifest.yaml").write_text("tasks: []\n", encoding="utf-8")
         arguments = json.dumps({"task_id": "ai_test_spring", "files": example_bundle()})
         chunks = [
-            {"choices": [{"delta": {"tool_calls": [{"index": 0, "function": {"name": "create_task", "arguments": arguments[:80]}}]}, "finish_reason": None}]},
+            {"choices": [{"delta": {"tool_calls": [{"index": 0, "id": "call_1", "function": {"name": "create_task", "arguments": arguments[:80]}}]}, "finish_reason": None}]},
             {"choices": [{"delta": {"tool_calls": [{"index": 0, "function": {"arguments": arguments[80:]}}]}, "finish_reason": None}]},
             {"choices": [{"delta": {}, "finish_reason": "tool_calls"}], "usage": {"total_tokens": 80}},
         ]
@@ -149,13 +157,168 @@ class AssistantTests(unittest.TestCase):
             return [json.loads(item) async for item in response.body_iterator]
         with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", return_value=io.BytesIO(raw.encode())):
             events = asyncio.run(collect(assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "直接创建弹簧任务"}]))))
-            self.assertFalse((self.folder / "ai_test_spring").exists())
-            task = next(event for event in events if event["type"] == "draft")
+            self.assertTrue((self.folder / "ai_test_spring").exists())
+            task = next(event for event in events if event["type"] == "task_saved")
             self.assertTrue(task["validation"]["valid"], task)
             self.assertEqual(events[-1]["type"], "done")
-            result = assistant.create_task(assistant.BundleRequest.model_validate(task["draft"]))
-            self.assertEqual(result["task"]["id"], "ai_test_spring")
+            self.assertEqual(task["task"]["id"], "ai_test_spring")
         self.assertTrue((self.folder / "ai_test_spring/model.xml").is_file())
+
+    def run_tool_sequence(self, responses, current_task_id=None):
+        self.store.save(self.key, "deepseek-flash", False)
+        calls = []
+        sequence = iter(responses)
+        def upstream(path, key, payload):
+            calls.append(copy.deepcopy(payload))
+            response = next(sequence)
+            return response() if callable(response) else response
+        async def collect():
+            response = assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建或修复任务直到成功"}], current_task_id=current_task_id))
+            return [json.loads(item) async for item in response.body_iterator]
+        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", side_effect=upstream):
+            events = asyncio.run(collect())
+        return events, calls
+
+    def test_invalid_task_is_automatically_repaired_and_saved_in_one_turn(self):
+        good = example_bundle()
+        bad = {**good, "model.xml": "<mujoco/>"}
+        events, calls = self.run_tool_sequence([
+            tool_stream("create_task", {"task_id": "ai_test_spring", "files": bad}),
+            tool_stream("create_task", {"task_id": "ai_test_spring", "files": good}, 2),
+        ])
+        failure = next(item for item in events if item["type"] == "draft")
+        self.assertFalse(failure["validation"]["valid"])
+        feedback = json.loads(calls[1]["messages"][-1]["content"])
+        self.assertEqual(feedback["validation"], failure["validation"])
+        self.assertEqual(calls[1]["messages"][-1]["tool_call_id"], "call_1")
+        self.assertEqual(calls[1]["messages"][-2]["tool_calls"][0]["id"], "call_1")
+        self.assertEqual(len(list_tasks(self.folder)), 1)
+        self.assertTrue(load_task(self.folder, "ai_test_spring"))
+        self.assertEqual([item["type"] for item in events][-2:], ["task_saved", "done"])
+        self.assertEqual(events[-1]["usage"]["total_tokens"], 20)
+
+    def test_bad_tool_arguments_are_returned_to_model_for_automatic_repair(self):
+        events, calls = self.run_tool_sequence([
+            tool_stream("create_task", "{broken"),
+            tool_stream("create_task", {"task_id": "ai_test_spring", "files": example_bundle()}, 2),
+        ])
+        self.assertEqual(json.loads(calls[1]["messages"][-1]["content"])["type"], "task_error")
+        self.assertEqual(events[-2]["type"], "task_saved")
+
+    def test_length_limited_tool_output_is_not_executed_and_can_be_repaired(self):
+        events, calls = self.run_tool_sequence([
+            tool_stream("create_task", '{"task_id":"ai_test_spring","files":', finish="length"),
+            tool_stream("create_task", {"task_id": "ai_test_spring", "files": example_bundle()}, 2),
+        ])
+        self.assertIn("长度上限", calls[1]["messages"][-1]["content"])
+        self.assertFalse(any(item["type"] == "draft" for item in events))
+        self.assertEqual(events[-2]["type"], "task_saved")
+
+    def test_save_failure_is_reported_to_model_before_retrying_same_task(self):
+        real_publish = assistant.publish_bundle
+        count = 0
+        def flaky_publish(*args):
+            nonlocal count
+            count += 1
+            if count == 1:
+                raise OSError("temporary file lock")
+            return real_publish(*args)
+        args = {"task_id": "ai_test_spring", "files": example_bundle()}
+        with patch.object(assistant, "publish_bundle", side_effect=flaky_publish):
+            events, calls = self.run_tool_sequence([tool_stream("create_task", args), tool_stream("create_task", args, 2)])
+        self.assertIn("保存失败", calls[1]["messages"][-1]["content"])
+        self.assertEqual(len(list_tasks(self.folder)), 1)
+        self.assertEqual(events[-2]["type"], "task_saved")
+
+    def test_conflicting_update_rereads_and_saves_without_recreating_task(self):
+        publish_bundle(self.folder, "ai_test_spring", example_bundle())
+        folder = self.folder / "ai_test_spring"
+        (folder / "results").mkdir(exist_ok=True)
+        (folder / "results/keep.csv").write_text("retained")
+        revision = assistant.read_task_snapshot(self.folder, "ai_test_spring")["base_revision"]
+        real_update = assistant.update_bundle
+        count = 0
+        def conflicting_update(*args):
+            nonlocal count
+            count += 1
+            if count == 1:
+                rename_task(self.folder, "ai_test_spring", "Changed elsewhere")
+            with patch("backend.assistant_tasks.ROOT", self.folder):
+                return real_update(*args)
+        def edit(number, base_revision):
+            return tool_stream("update_task", {"task_id": "ai_test_spring", "base_revision": base_revision, "files": {"notes.md": "# Repaired explanation\n"}}, number)
+        with patch.object(assistant, "update_bundle", side_effect=conflicting_update):
+            events, calls = self.run_tool_sequence([
+                edit(1, revision),
+                tool_stream("read_task", {"task_id": "ai_test_spring"}, 2),
+                lambda: edit(3, assistant.read_task_snapshot(self.folder, "ai_test_spring")["base_revision"]),
+            ], current_task_id="ai_test_spring")
+        self.assertIn("其他操作修改", calls[1]["messages"][-1]["content"])
+        self.assertNotEqual(json.loads(calls[2]["messages"][-1]["content"])["base_revision"], revision)
+        self.assertEqual(events[-2]["type"], "task_saved")
+        self.assertTrue(events[-2]["task"]["updated"])
+        self.assertEqual(len(list_tasks(self.folder)), 1)
+        self.assertEqual((folder / "notes.md").read_text(), "# Repaired explanation\n")
+        self.assertEqual((folder / "results/keep.csv").read_text(), "retained")
+
+    def test_repeated_failure_stops_at_limit_and_preserves_last_draft(self):
+        bad = {name: "bad" for name in REQUIRED_FILES}
+        args = {"task_id": "ai_test_spring", "files": bad}
+        with patch.object(assistant, "MAX_TOOL_ROUNDS", 3):
+            events, calls = self.run_tool_sequence([tool_stream("create_task", args, number) for number in range(3)])
+        self.assertEqual(len(calls), 3)
+        self.assertIn("3 次", events[-2]["message"])
+        self.assertEqual(events[-1]["type"], "done")
+        self.assertFalse((self.folder / "ai_test_spring").exists())
+        self.assertEqual([item for item in events if item["type"] == "draft"][-1]["draft"]["files"], bad)
+        # Tool history is compacted, with intact call/result pairs.
+        self.assertEqual(len(calls[2]["messages"]), len(calls[1]["messages"]))
+
+    def test_stopping_after_validation_does_not_start_saving(self):
+        self.store.save(self.key, "deepseek-flash", False)
+        async def stop_before_save():
+            response = assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建任务"}]))
+            async for raw in response.body_iterator:
+                item = json.loads(raw)
+                if item.get("message") == "校验通过，正在保存任务…":
+                    await response.body_iterator.aclose()
+                    return
+            self.fail("Did not reach validation")
+        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", return_value=tool_stream("create_task", {"task_id": "ai_test_spring", "files": example_bundle()})), patch.object(assistant, "publish_bundle") as publish:
+            asyncio.run(stop_before_save())
+        publish.assert_not_called()
+        self.assertTrue(assistant.AI_SLOT.acquire(blocking=False))
+        assistant.AI_SLOT.release()
+
+    def test_disconnect_signals_a_blocked_worker_before_it_can_write(self):
+        started, release, stopped, finished = (threading.Event() for _ in range(4))
+        writes = []
+        def worker():
+            try:
+                started.set()
+                release.wait(3)
+                if stopped.is_set():
+                    return
+                writes.append("unexpected write")
+                yield "saved"
+            finally:
+                finished.set()
+        async def disconnect():
+            stream = assistant.cancellable_stream(worker(), stopped)
+            task = asyncio.create_task(anext(stream))
+            while not started.is_set():
+                await asyncio.sleep(.01)
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+            self.assertTrue(stopped.is_set())
+            release.set()
+            await asyncio.to_thread(finished.wait, 3)
+        asyncio.run(disconnect())
+        self.assertTrue(finished.is_set())
+        self.assertEqual(writes, [])
 
     def test_failed_tools_return_files_and_errors_for_followup_repair(self):
         files = example_bundle(); files["model.xml"] = "<mujoco/>"
@@ -222,6 +385,30 @@ class AssistantTests(unittest.TestCase):
         for source in ('<include file="../secret.xml"/>', '<extension><plugin plugin="test"/></extension>', '<asset><texture name="x" fileleft="C:/secret.png"/></asset>', '<replicate count="1000000000"/>', '<asset><texture name="huge" builtin="flat" width="1000000" height="1000000"/></asset>'):
             files = example_bundle(); files["model.xml"] = files["model.xml"].replace("</mujoco>", source + "</mujoco>")
             self.assertFalse(validate_bundle("ai_test_spring", files)["valid"])
+
+    def test_new_tasks_enforce_opaque_plane_and_single_black_floor_logo(self):
+        files = example_bundle()
+        check_bundle("ai_test_spring", files)
+        changes = [
+            (".//texture[@name='buaa_logo']", "file", "assets/logo-gray.png"),
+            (".//geom[@name='floor']", "type", "box"),
+            (".//geom[@name='floor']", "rgba", "1 1 1 .1"),
+            (".//material[@name='buaa_floor']", "rgba", "1 1 1 .1"),
+            (".//material[@name='buaa_floor']", "texrepeat", "4 4"),
+            (".//material[@name='buaa_floor']", "texuniform", "true"),
+        ]
+        for selector, attribute, value in changes:
+            with self.subTest(attribute=attribute, value=value):
+                xml = ET.fromstring(files["model.xml"])
+                xml.find(selector).set(attribute, value)
+                with self.assertRaises(TaskValidationError):
+                    check_bundle("ai_test_spring", {**files, "model.xml": ET.tostring(xml, encoding="unicode")})
+        xml = ET.fromstring(files["model.xml"])
+        floor = xml.find("worldbody/geom[@name='floor']")
+        xml.find("worldbody").remove(floor)
+        ET.SubElement(xml.find("worldbody"), "body", name="moving_floor").append(floor)
+        with self.assertRaises(TaskValidationError):
+            check_bundle("ai_test_spring", {**files, "model.xml": ET.tostring(xml, encoding="unicode")})
 
     def test_bad_observations_and_recursive_yaml_cannot_be_installed(self):
         files = example_bundle(); files["observe.yaml"] = "observe:\n  joints:\n  - name: missing_joint\n    fields: [position]\n"

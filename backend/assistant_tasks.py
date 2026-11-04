@@ -19,6 +19,7 @@ import yaml
 from .task_io import REQUIRED_FILES, TITLE_LOCK, TASK_STATE_LOCK, ACTIVE_SIMULATIONS, TaskValidationError, _read_yaml, list_tasks
 from .simulator import MAX_STEPS
 from .branding import DEFAULT_LOGO, referenced_logos, copy_brand_assets
+from .workspace import ensure_tasks
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_FILES = set(REQUIRED_FILES) | {"loads.yaml", "README.md"}
@@ -76,11 +77,19 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
                     raise TaskValidationError("修改后的模型不能引用任务目录外的文件。")
     if existing_dir is not None:
         return
-    floor = root.find(".//geom[@name='floor']")
+    floor = root.find("worldbody/geom[@name='floor']")
     logo = root.find(".//texture[@name='buaa_logo']")
     material = root.find(".//material[@name='buaa_floor']")
     if floor is None or logo is None or material is None or logo.get("file") != DEFAULT_LOGO or material.get("texture") != "buaa_logo" or floor.get("material") != "buaa_floor":
         raise TaskValidationError("请使用新模板的黑色 Logo，保留 floor、buaa_logo 纹理与 buaa_floor 材质。")
+    if floor.get("type") != "plane":
+        raise TaskValidationError("floor 必须是 worldbody 下的静态 plane 地面，请使用默认 XML 模板。")
+    for node in (floor, material):
+        rgba = [float(value) for value in node.get("rgba", "1 1 1 1").split()]
+        if len(rgba) != 4 or rgba[3] != 1:
+            raise TaskValidationError("地面和 buaa_floor 材质必须保持不透明（rgba 的 alpha=1）；0.1 仅用于网页 FloorBranding 的 Logo 水印，不是地面透明度。")
+    if [float(value) for value in material.get("texrepeat", "1 1").split()] != [1, 1] or material.get("texuniform", "false") != "false":
+        raise TaskValidationError('Logo 地面必须使用 texrepeat="1 1"、texuniform="false"，保留单个居中水印，不平铺。')
 
 
 def write_bundle(folder: Path, files: dict[str, str]):
@@ -120,6 +129,7 @@ def validate_bundle(task_id: str, files: dict[str, str], existing_dir: Path | No
 def publish_bundle(tasks_dir: Path, task_id: str, files: dict[str, str]) -> dict:
     check_bundle(task_id, files)
     with TITLE_LOCK:
+        ensure_tasks(tasks_dir)
         if (tasks_dir / task_id).exists() or any(t["id"] == task_id for t in list_tasks(tasks_dir)):
             raise TaskValidationError("任务编号已存在；继续修改请用 read_task / update_task，保留原编号。")
         manifest_path = tasks_dir / "manifest.yaml"

@@ -51,7 +51,7 @@ export function setupCourseSpace({ onModel, onTask, onEnter, onExit }) {
     get('courseDetailImage').replaceChildren(artwork(item)); get('courseDetailStatus').textContent = '';
     get('courseEntryLabel').hidden = item.kind !== 'models'; get('courseDetailEntry').replaceChildren(...item.entries.map(entry => new Option(entry, entry)));
     get('reproduceCourse').textContent = item.kind === 'models' ? '添加并打开模型预览' : '复现到学习任务';
-    get('courseDetailHint').textContent = item.kind === 'models' ? '模型加入此浏览器的侧边库，配套资源从课程原件读取。' : '在本机创建独立任务副本，不含原作者的实验结果；重复添加会打开已有副本。';
+    get('courseDetailHint').textContent = item.kind === 'models' ? '模型与配套资源复制到本机个人空间，保留课程原件；重复添加打开已有副本。' : '在本机创建独立任务副本，不含原作者的实验结果；重复添加会打开已有副本。';
     detail.showModal();
   }
   document.querySelectorAll('[data-open-course]').forEach(button => button.addEventListener('click', () => {

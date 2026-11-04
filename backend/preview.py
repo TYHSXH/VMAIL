@@ -11,11 +11,12 @@ LIBRARY_ROOT = Path(__file__).resolve().parents[1] / "model_library"
 
 def library_models():
     from .course_resources import contributed_models
+    from .personal_models import personal_models
     path = LIBRARY_ROOT / "catalog.json"
     catalog = json.loads(path.read_text(encoding="utf-8"))["models"] if path.is_file() else []
     # Deleted local resource folders must not break unrelated XML imports.
     available = [model for model in catalog if (LIBRARY_ROOT / model['folder']).is_dir()]
-    return available + contributed_models()
+    return available + contributed_models() + personal_models(include_hidden=True)
 
 
 def preview_choices():
@@ -73,7 +74,8 @@ def prepare_preview(xml=None, filename="", model_id=None, entry=None, binary_ass
     folder = (LIBRARY_ROOT / selected["folder"]).resolve()
     path = (folder / entry).resolve()
     from .course_resources import COURSE_ROOT
-    if not (folder.is_relative_to(LIBRARY_ROOT.resolve()) or folder.is_relative_to((COURSE_ROOT / "models").resolve())) or not path.is_relative_to(folder):
+    from .personal_models import MODELS_DIR
+    if not any(folder.is_relative_to(root.resolve()) for root in (LIBRARY_ROOT, COURSE_ROOT / 'models', MODELS_DIR)) or not path.is_relative_to(folder):
         raise SimulationError("模型路径超出资料库。")
     prepared, assets = _model_source({"path": str(folder), "model_xml": path.read_text(encoding="utf-8")})
     return with_joint_limits({"xml": prepared, "assets": assets if binary_assets else {name: base64.b64encode(blob).decode("ascii") for name, blob in assets.items()}, "name": f"{selected['title']} · {entry}"})

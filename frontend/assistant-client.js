@@ -12,7 +12,7 @@ export async function readAssistantStream(response, onDelta, onEvent = () => {})
     if (item.type === "error") throw new Error(item.message);
     if (item.type === "delta") onDelta(item.content);
     if (item.type === "done") { done = true; usage = item.usage; }
-    if (["status", "draft", "task_error"].includes(item.type)) onEvent(item);
+    if (["status", "draft", "task_saved", "task_error"].includes(item.type)) onEvent(item);
   }
   try {
     while (true) {

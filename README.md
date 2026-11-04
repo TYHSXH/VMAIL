@@ -76,7 +76,7 @@ python -m pip install -r requirements.txt
 2. 在“参数与控制”页调整质量、刚度、阻尼或初始条件，点击“应用参数”。
 3. 点击“开始仿真”，在“数据”页观察曲线；到达指定时长后会自动暂停。用“重置”回到任务初始状态。
 4. 左键旋转、Shift＋左键平移、滚轮缩放；“复位视角”恢复任务视图。“拖动”用于调整起始姿态，拖动期间不计时、不采集数据。
-5. 等网页仿真完整结束后，点击“导出本次实验”，选择“导出网页数据 CSV”或“后台重算并下载 CSV”。也可直接点“后台重算”。后台结果保存在 `tasks/<任务编号>/results/run_*/`，可在“已保存的实验”再次下载。
+5. 等网页仿真完整结束后，点击“导出本次实验”，选择“导出网页数据 CSV”或“后台重算并下载 CSV”。也可直接点“后台重算”。后台结果保存在 `.local/tasks/<任务编号>/results/run_*/`，可在“已保存的实验”再次下载。
 
 后台继承**这次网页实验开始时**的参数、时长、步长、关节姿态、拖动后的实际起点、速度与内部状态，并按仿真步重放中途执行器调节。它不从结束姿态起跑，也不会用导出时刚改的新参数覆盖本次条件。拖动用于准备起始姿态，鼠标移动过程不属于实验时间；再次拖动或修改模型参数、时长、步长、关节姿态后，需要重新完成网页仿真再导出。
 
@@ -96,6 +96,8 @@ python -m pip install -r requirements.txt
 顶部“课程空间”提供课程组和学生共建的模型库、任务库，支持分类、搜索和图片详情。模型可添加至“模型预览”的侧边库，完整任务可独立复现至学习任务栏。课程资源按 `course_resources/models/` 与 `course_resources/tasks/` 下的课程组、年届及子分类目录自动归档；欢迎通过 GitHub PR 分享资源，详见[课程空间与资源共建](docs/course-resources.md)。模型预览也支持单个 XML；只有完整任务包才提供任务说明、参数与曲线配置。顶部“帮助”提供操作手册和 AI 提示词。
 
 ## 3. AI 辅助：直接在系统中使用 DeepSeek API
+
+个人任务存放在 `.local/tasks/`，独立模型存放在 `.local/models/`，不会进入 GitHub 分发。学生首次打开时个人列表为空，可从课程空间复现公共资源。教师已有的任务与课程原件分别保存，互不影响。存储与升级说明见[个人空间与课程空间](docs/user-guide.md#个人空间与课程空间)。
 
 1. 在 [DeepSeek 开放平台](https://platform.deepseek.com/api_keys) 创建自己的 API Key。
 2. 打开实验台“我是菜鸟·AI”或“AI 助手”，展开“历史与连接”，填写 Key、选择模型并“保存连接”，再“测试连接”。这里填写 API Key，不是账号密码。
@@ -132,10 +134,10 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 ```text
 请先阅读 tasks/AGENTS.md、docs/task-package-spec.md，
 涉及复杂外形时再读 docs/task-guide.md。
-在 tasks/ 下创建独立任务，不修改公共前后端。
+在 .local/tasks/ 下创建独立任务，不修改公共前后端。
 我的研究对象是……；已知条件是……；希望改变……，观察……。
 请说明简化假设与单位，复用默认黑色 Logo 地面，补齐任务配置，
-登记 tasks/manifest.yaml，并运行 backend.validate_task 校验。
+登记 .local/tasks/manifest.yaml，并运行 backend.validate_task 校验。
 ```
 
 ```powershell
@@ -175,10 +177,10 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 | 模型区空白或物理引擎启动失败 | 查看页面报错；使用新版 Edge / Chrome 并启用硬件加速，检查是否完整解压 `app/`（包含 `.wasm`、字体和图片） |
 | API 无法连接 | 检查 Key、账户余额、网络与所选模型权限；用“测试连接”，不要把密钥或 `.local/` 发到问题反馈中 |
 | STL 有显示但碰撞不对 | 检查凸包、单位、坐标与惯量，按[网格指南](docs/task-guide.md#复杂几何体与-stlmjcf-建模)拆分碰撞体 |
-| 新任务没有出现或校验失败 | 检查六个必需文件和 `tasks/manifest.yaml`，运行任务校验并刷新列表 |
+| 新任务没有出现或校验失败 | 检查六个必需文件和 `.local/tasks/manifest.yaml`，运行任务校验并刷新列表 |
 | 更新后仍是旧界面 | 先停止旧服务，再用完整新版本启动并强制刷新浏览器；开发者修改前端后必须重建 `app/` |
 
-首次安装完成后，已有任务的仿真、曲线与导出可离线使用；API 对话需要联网。换电脑时复制完整项目，排除 `.venv`、`.venv.backup-*`、`node_modules`、缓存和 `.local/`，在新电脑重新安装依赖。自行备份 `tasks/` 中的自建任务和实验结果。
+首次安装完成后，已有任务的仿真、曲线与导出可离线使用；API 对话需要联网。换电脑时复制完整项目，排除 `.venv`、`.venv.backup-*`、`node_modules`、缓存和 `.local/`，在新电脑重新安装依赖。自行备份 `.local/tasks/` 中的自建任务和实验结果。
 
 卸载时先停止服务，再运行 `uninstall.bat`，清除一键安装创建的 `.venv`。任务、结果和 `.local/` 保留；若要清除个人数据，请先通过历史列表删除对话并解除绑定，再按需自行删除项目目录。Conda 环境由使用者自行管理。
 
@@ -201,13 +203,13 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 
 | 学习任务 | 任务说明 |
 | --- | --- |
-| 弹簧阻尼滑块 | [notes.md](tasks/example_mass_spring/notes.md) |
-| 变方向外力与偏心力矩 | [notes.md](tasks/rotating_load_demo/notes.md) |
-| 曲柄滑块速度验证 | [notes.md](tasks/slider_crank_block_force/notes.md) |
-| 改型全回转纯滚圆盘 | [notes.md](tasks/rolling_disk_points_bc/notes.md) |
-| 铅垂杆推动楔块 | [notes.md](tasks/wedge_rod_acceleration_v4/notes.md) |
-| 行星齿轮 M 点加速度 | [notes.md](tasks/planetary_gear_point_acceleration/notes.md) |
-| 行星齿轮相对转速修正版 | [notes.md](tasks/planetary_gear_point_acceleration_relative_speed/notes.md) |
+| 弹簧阻尼滑块 | [notes.md](.local/tasks/example_mass_spring/notes.md) |
+| 变方向外力与偏心力矩 | [notes.md](.local/tasks/rotating_load_demo/notes.md) |
+| 曲柄滑块速度验证 | [notes.md](.local/tasks/slider_crank_block_force/notes.md) |
+| 改型全回转纯滚圆盘 | [notes.md](.local/tasks/rolling_disk_points_bc/notes.md) |
+| 铅垂杆推动楔块 | [notes.md](.local/tasks/wedge_rod_acceleration_v4/notes.md) |
+| 行星齿轮 M 点加速度 | [notes.md](.local/tasks/planetary_gear_point_acceleration/notes.md) |
+| 行星齿轮相对转速修正版 | [notes.md](.local/tasks/planetary_gear_point_acceleration_relative_speed/notes.md) |
 
 仓库包含可直接运行的 `app/` 构建产物。开发者才需要 Node.js，使用 `npm ci`、`npm test`、`npm run build`；Python 依赖由 `requirements.txt` 与 `constraints.txt` 固定。所有学生运行文件、版权说明和模型许可证都应随发行版保留。
 

@@ -12,6 +12,7 @@ import unittest
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 import zipfile
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -22,7 +23,9 @@ class ReleaseHTTPTests(unittest.TestCase):
         cls.temporary = tempfile.TemporaryDirectory(prefix="vmail-http-")
         folder = Path(cls.temporary.name)
         cls.tasks_dir = folder / "tasks"
-        shutil.copytree(ROOT / "tasks", folder / "tasks", ignore=shutil.ignore_patterns("results", "__pycache__"))
+        shutil.copytree(ROOT / "course_resources/tasks/course_team", folder / "tasks", ignore=shutil.ignore_patterns("results", "__pycache__"))
+        fixtures = [yaml.safe_load(path.read_text(encoding='utf-8')) for path in cls.tasks_dir.glob('*/task.yaml')]
+        (cls.tasks_dir / 'manifest.yaml').write_text(yaml.safe_dump({'tasks': [{'id': item['id'], 'title': item['title']} for item in fixtures]}, allow_unicode=True), encoding='utf-8')
         with socket.socket() as probe:
             probe.bind(("127.0.0.1", 0))
             port = probe.getsockname()[1]

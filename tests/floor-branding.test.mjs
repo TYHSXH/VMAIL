@@ -16,10 +16,19 @@ test("floor logo is large, centered, visual-only and reused without reallocating
   assert.equal(logo.scale.x, 1.9);
   assert.ok(mesh.material.color.r < .1);
   assert.equal(logo.material.depthWrite, false);
+  assert.equal(logo.material.opacity, .1);
+  assert.equal(logo.material.transparent, true);
+  assert.equal(logo.material.alphaTest, .001);
+  assert.equal(logo.material.toneMapped, false);
+  assert.equal(branding.texture.colorSpace, THREE.SRGBColorSpace);
+  mesh.material.opacity = .1;
+  mesh.material.transparent = true;
   const intersections = [];
   logo.raycast(null, intersections);
   assert.equal(intersections.length, 0);
   branding.update(mesh, floor, model, mujoco);
+  assert.equal(mesh.material.opacity, 1);
+  assert.equal(mesh.material.transparent, false);
   assert.equal(mesh.children.length, 1);
   assert.equal(mesh.userData.floorLogo, logo);
   // Reordered scene slots can become walls or dynamic bodies.

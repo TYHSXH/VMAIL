@@ -81,7 +81,7 @@ class LoadTests(unittest.TestCase):
             apply_loads(program, model, data)
 
     def test_demo_full_duration_and_parameter_reload(self):
-        task = load_task(ROOT / "tasks", "rotating_load_demo")
+        task = load_task(ROOT / "course_resources/tasks/course_team", "rotating_load_demo")
         payload = prepare_browser_model(task, {"amplitude": 3})
         self.assertEqual(payload["load_program"]["units"]["load.tip_force.fx"], "N")
         result = run_mujoco_task(task, {}, None, None)

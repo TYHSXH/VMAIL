@@ -22,7 +22,7 @@ class AssistantUpdateTests(unittest.TestCase):
         self.tasks.mkdir()
         self.task_id = "example_mass_spring"
         self.folder = self.tasks / self.task_id
-        shutil.copytree(ROOT / "tasks" / self.task_id, self.folder, ignore=shutil.ignore_patterns("results", "__pycache__"))
+        shutil.copytree(ROOT / "course_resources/tasks/course_team" / self.task_id, self.folder, ignore=shutil.ignore_patterns("results", "__pycache__"))
         (self.tasks / "manifest.yaml").write_text(f"tasks:\n- id: {self.task_id}\n  title: Original\n", encoding="utf-8")
         (self.folder / "assets").mkdir(exist_ok=True)
         (self.folder / "assets/retained.bin").write_bytes(b"retain resource")

@@ -53,7 +53,7 @@ The interface currently uses Chinese labels; the labels below help you locate ea
 2. In **参数与控制** (Parameters and controls), adjust the mass, stiffness, damping, or initial conditions, then click **应用参数** (Apply parameters).
 3. Click **开始仿真** (Start simulation) and inspect the curves in **数据** (Data). The simulation pauses automatically at the specified duration. Use **重置** (Reset) to restore the task's initial state.
 4. Rotate with the left mouse button, pan with Shift + left mouse button, and zoom with the scroll wheel. **复位视角** restores the task's default view. **拖动** (Drag) adjusts the starting pose; time and data recording stop while dragging.
-5. After the browser simulation finishes, click **导出本次实验** (Export this experiment) and choose **导出网页数据 CSV** (Export browser data CSV) or **后台重算并下载 CSV** (Recompute locally and download CSV). **后台重算** (Native replay) is also a shortcut. Native results are saved under `tasks/<task_id>/results/run_*/` and can be downloaded again from **已保存的实验** (Saved experiments).
+5. After the browser simulation finishes, click **导出本次实验** (Export this experiment) and choose **导出网页数据 CSV** (Export browser data CSV) or **后台重算并下载 CSV** (Recompute locally and download CSV). **后台重算** (Native replay) is also a shortcut. Native results are saved under `.local/tasks/<task_id>/results/run_*/` and can be downloaded again from **已保存的实验** (Saved experiments).
 
 Native replay inherits the parameters, duration, timestep, joint positions, actual pose after dragging, velocities, and internal state **at the start of that browser experiment**, and replays actuator changes at their recorded physics steps. It does not start from the final pose or replace the recorded settings with edits made just before export. Dragging prepares the initial pose; mouse movement during preparation is outside experiment time. Dragging again, or changing model parameters, duration, timestep, or joint pose, requires another complete browser run before export.
 
@@ -111,13 +111,13 @@ For other DeepSeek coding extensions that support an OpenAI-compatible interface
 ```text
 First read tasks/AGENTS.md and docs/task-package-spec.md.
 If the task involves complex geometry, also read docs/task-guide.md.
-Create an independent task under tasks/ without modifying the shared
+Create an independent task under .local/tasks/ without modifying the shared
 frontend or backend.
 My research object is ...; the known conditions are ...;
 I want to vary ... and observe ... .
 Explain the simplifying assumptions and units, reuse the default floor
 with the black logo, complete the task configuration, register the task
-in tasks/manifest.yaml, and validate it with backend.validate_task.
+in .local/tasks/manifest.yaml, and validate it with backend.validate_task.
 ```
 
 ```powershell
@@ -157,10 +157,10 @@ Start with `body → joint → geom`, coordinate frames, SI units, mass, and ine
 | The model area is blank or the physics engine fails to start | Read the page error, use an up-to-date Edge or Chrome with hardware acceleration enabled, and check that `app/` was fully extracted, including `.wasm`, fonts, and images. |
 | The API cannot connect | Check the key, account balance, network, and access to the selected model. Use **测试连接** (Test connection). Do not include keys or `.local/` in a bug report. |
 | An STL is visible but collisions are wrong | Check convex hulls, units, coordinate frames, and inertia. Decompose collision geometry as described in the [mesh guide](docs/task-guide.md#复杂几何体与-stlmjcf-建模). |
-| A new task does not appear or fails validation | Check the six required files and `tasks/manifest.yaml`, run task validation, and refresh the list. |
+| A new task does not appear or fails validation | Check the six required files and `.local/tasks/manifest.yaml`, run task validation, and refresh the list. |
 | The interface still looks like an older version after an update | Stop the old server, start the complete updated release, and force-refresh the browser. Developers must rebuild `app/` after changing the frontend. |
 
-After the first installation, existing tasks, simulation, charts, and exports can be used offline. API conversations require internet access. When moving to another computer, copy the complete project but exclude `.venv`, `.venv.backup-*`, `node_modules`, caches, and `.local/`. Install dependencies again on the new computer. Back up your own tasks and experimental results under `tasks/`.
+After the first installation, existing tasks, simulation, charts, and exports can be used offline. API conversations require internet access. When moving to another computer, copy the complete project but exclude `.venv`, `.venv.backup-*`, `node_modules`, caches, and `.local/`. Install dependencies again on the new computer. Back up your own tasks and experimental results under `.local/tasks/`.
 
 To uninstall, stop the server and run `uninstall.bat` to remove the `.venv` created by the installer. Tasks, results, and `.local/` are preserved. To remove personal data, first delete your conversations through the history list and disconnect your key, then delete the project directory yourself if needed. Manage Conda environments separately.
 

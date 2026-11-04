@@ -8,10 +8,10 @@ import math
 from .task_io import REQUIRED_FILES, TaskValidationError, load_task, list_tasks
 from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
 from .parameter_mapping import mjcf_targets
+from .workspace import TASKS_DIR
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TASKS_DIR = ROOT / "tasks"
 OBSERVE_FIELDS = {
     "joints": {"position", "velocity", "acceleration", "force"},
     "bodies": {"position", "velocity"},
@@ -163,7 +163,7 @@ def main() -> int:
     manifest_tasks = list_tasks(TASKS_DIR)
     selected = sys.argv[1:] or [task["id"] for task in manifest_tasks]
     if not selected:
-        print("No tasks found in tasks/manifest.yaml.")
+        print("No personal tasks found in .local/tasks/manifest.yaml.")
         return 1
 
     failed = False

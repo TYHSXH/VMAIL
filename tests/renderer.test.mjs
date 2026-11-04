@@ -161,7 +161,7 @@ test("free joints are not exposed or overwritten as scalar controls", async () =
 
 for (const task of ["slider_crank_block_force", "rolling_disk_points_bc"]) test(`${task}: full-turn crank adjustment preserves closed-loop constraints without recording`, async () => {
   let samples = 0;
-  const xml = readFileSync(new URL(`../tasks/${task}/model.xml`, import.meta.url), "utf8");
+  const xml = readFileSync(new URL(`../course_resources/tasks/course_team/${task}/model.xml`, import.meta.url), "utf8");
   const viewer = await createViewer(xml, { onSample() { samples++; } });
   try {
     const joints = viewer.getInteractiveControls().joints;

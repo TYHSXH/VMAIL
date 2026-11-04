@@ -24,7 +24,9 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
   const libraryButton = document.getElementById('togglePreviewLibrary');
   const compactPreview = window.matchMedia('(max-width: 700px)');
   let savedModels = [];
-  try { const value = JSON.parse(localStorage.getItem('vmail.preview-models') || '[]'); if (Array.isArray(value)) savedModels = value.filter(item => typeof item.model_id === 'string' && typeof item.entry === 'string').slice(0, 200); } catch {}
+  let legacySelections = [];
+  try { const value = JSON.parse(localStorage.getItem('vmail.preview-models') || '[]'); if (Array.isArray(value)) legacySelections = value.filter(item => typeof item.model_id === 'string' && typeof item.entry === 'string').slice(0, 200); } catch {}
+  let libraryVersion = 0, migration = null;
   let selectedModel = '';
   const playButton = overlay.querySelector('[data-preview-action="play"]');
   const jointsPanel = document.getElementById("previewJoints");
@@ -58,8 +60,8 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     onReset: () => { viewer?.reset(); updatePlayback(); },
   });
 
-  async function request(url, body) {
-    const response = await fetch(url, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : undefined);
+  async function request(url, body, method = body ? 'POST' : 'GET') {
+    const response = await fetch(url, method === 'GET' ? undefined : { method, headers: { "Content-Type": "application/json", 'X-VMAIL-Assistant': '1' }, body: body ? JSON.stringify(body) : undefined });
     if (response.ok && response.headers.get("Content-Type")?.includes("application/octet-stream")) return decodePreviewBundle(await response.arrayBuffer());
     const result = await response.json();
     if (!response.ok) throw new Error(typeof result.detail === "string" ? result.detail : "模型导入失败，请检查输入文件。");
@@ -69,7 +71,7 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     playButton.textContent = viewer && !viewer.paused ? "暂停仿真" : "运行仿真";
     playButton.classList.toggle("active", Boolean(viewer && !viewer.paused));
   }
-  function refreshLibrary() {
+  function renderLibrary() {
     libraryList.replaceChildren();
     document.getElementById('previewModelCount').textContent = savedModels.length;
     if (!savedModels.length) { const p = document.createElement('p'); p.className = 'empty-state'; p.textContent = '模型库还是空的。从课程空间添加感兴趣的模型，或打开本地 XML。'; libraryList.append(p); }
@@ -78,16 +80,45 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
       const row = document.createElement('div'); row.className = `task-entry ${selectedModel === key ? 'active' : ''}`;
       const button = document.createElement('button'); button.className = 'task-item'; button.type = 'button'; button.textContent = `${item.title || item.model_id} · ${item.entry}`;
       if (selectedModel === key) button.setAttribute('aria-current', 'true');
-      button.addEventListener('click', () => { selectedModel = key; refreshLibrary(); void load([], { model_id: item.model_id, entry: item.entry }); });
+      button.addEventListener('click', () => { selectedModel = key; renderLibrary(); void load([], { model_id: item.model_id, entry: item.entry }); });
       const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'delete-task'; remove.textContent = '×'; remove.setAttribute('aria-label', `从列表移除${item.title || item.model_id}`);
-      remove.addEventListener('click', () => { savedModels = savedModels.filter(model => model !== item); persistLibrary(); refreshLibrary(); });
+      remove.addEventListener('click', async () => {
+        remove.disabled = true;
+        try { await request(`/api/personal-models/${encodeURIComponent(item.model_id)}`, null, 'DELETE'); await refreshLibrary(); }
+        catch (error) { onError(error.message); remove.disabled = false; }
+      });
       row.append(button, remove); libraryList.append(row);
     }
   }
-  function persistLibrary() { try { localStorage.setItem('vmail.preview-models', JSON.stringify(savedModels)); } catch { onError('浏览器无法保存模型列表，本次仍可预览。'); } }
-  function addModel(item) {
-    if (!savedModels.some(model => model.model_id === item.model_id && model.entry === item.entry)) savedModels.push(item);
-    selectedModel = `${item.model_id}/${item.entry}`; persistLibrary(); refreshLibrary(); return load([], { model_id: item.model_id, entry: item.entry });
+  async function refreshLibrary() {
+    const ticket = ++libraryVersion;
+    migration ||= (async () => {
+      const remaining = [];
+      for (const item of legacySelections) {
+        try { await request('/api/personal-models', item); }
+        catch { remaining.push(item); }
+      }
+      try {
+        if (remaining.length) localStorage.setItem('vmail.preview-models', JSON.stringify(remaining));
+        else localStorage.removeItem('vmail.preview-models');
+      } catch {}
+      legacySelections = remaining;
+      if (remaining.length) onError('部分旧模型无法迁移，请从课程空间重新添加。');
+    })();
+    await migration;
+    const result = await request('/api/personal-models');
+    if (ticket !== libraryVersion) return;
+    savedModels = result.models || [];
+    renderLibrary();
+  }
+  async function addModel(item) {
+    open(); setStatus('正在复制到个人模型库…');
+    try {
+      const saved = await request('/api/personal-models', item);
+      selectedModel = `${saved.model_id}/${saved.entry}`;
+      await refreshLibrary();
+      return load([], saved);
+    } catch (error) { setStatus(error.message, true); onError(error.message); }
   }
 
   function setStatus(message, error = false) {
@@ -104,7 +135,7 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     overlay.classList.remove("hidden");
     setPanelVisible('library', !compactPreview.matches);
     closeButton.focus();
-    void refreshLibrary();
+    void refreshLibrary().catch(error => setStatus(error.message, true));
   }
   function close() {
     if (!active) return;
@@ -139,7 +170,13 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     setStatus(`正在加载 ${file?.name || "模型及配套资源"}…`);
     tools.forEach(button => { button.disabled = true; });
     try {
-      const payload = await request("/api/preview-model?binary=true", libraryRequest || { xml: validatePreviewXml(await file.text()), filename: file.name });
+      if (!libraryRequest) {
+        libraryRequest = await request('/api/personal-models', { xml: validatePreviewXml(await file.text()), filename: file.name });
+        if (ticket !== version || !active) return;
+        selectedModel = `${libraryRequest.model_id}/${libraryRequest.entry}`;
+        await refreshLibrary();
+      }
+      const payload = await request("/api/preview-model?binary=true", { model_id: libraryRequest.model_id, entry: libraryRequest.entry });
       const engine = await getEngine();
       if (ticket !== version || !active) return;
       if (!viewer) {

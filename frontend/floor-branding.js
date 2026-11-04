@@ -17,6 +17,8 @@ export class FloorBranding {
     if (mesh.userData.floorLogo) mesh.userData.floorLogo.visible = floor;
     if (!floor) return;
     mesh.material.color.setRGB(.035, .045, .06);
+    mesh.material.opacity = 1;
+    mesh.material.transparent = false;
     if (!mesh.userData.floorLogo) {
       const logo = new THREE.Mesh(this.geometry, this.material);
       logo.position.z = .001;

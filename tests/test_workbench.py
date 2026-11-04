@@ -24,7 +24,7 @@ class WorkbenchTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.tasks = Path(self.temporary.name) / "tasks"
         self.tasks.mkdir()
-        shutil.copytree(ROOT / "tasks" / "example_mass_spring", self.tasks / "example_mass_spring", ignore=shutil.ignore_patterns("results", "__pycache__"))
+        shutil.copytree(ROOT / "course_resources/tasks/course_team" / "example_mass_spring", self.tasks / "example_mass_spring", ignore=shutil.ignore_patterns("results", "__pycache__"))
         (self.tasks / "manifest.yaml").write_text("tasks:\n  - id: example_mass_spring\n    title: Original\n", encoding="utf-8")
         self.task = load_task(self.tasks, "example_mass_spring")
 
@@ -159,7 +159,7 @@ class WorkbenchTests(unittest.TestCase):
         main.RUNS.pop(token, None)
 
     def test_default_actuator_matches_initial_disk_motion(self):
-        task = load_task(ROOT / "tasks", "rolling_disk_points_bc")
+        task = load_task(ROOT / "course_resources/tasks/course_team", "rolling_disk_points_bc")
         result = run_mujoco_task(task, {}, .01, .001)
         self.assertEqual(result["controls"]["crank_speed"], -2)
         self.assertLess(abs(result["series"]["joint.crank_hinge.acceleration"][0]), 10)

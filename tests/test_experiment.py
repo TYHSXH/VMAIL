@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ExperimentReplayTests(unittest.TestCase):
     def setUp(self):
-        self.task = load_task(ROOT / "tasks", "example_mass_spring")
+        self.task = load_task(ROOT / "course_resources/tasks/course_team", "example_mass_spring")
         self.parameters = {"mass": 2}
         payload = prepare_browser_model(self.task, self.parameters, .005, .02)
         model = mujoco.MjModel.from_xml_string(payload["xml"])

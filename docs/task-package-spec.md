@@ -8,7 +8,7 @@ VMAIL 的核心不是预置很多模型，而是定义一种稳定的“学习�
 
 - [目录结构](#目录结构)
 - [默认 XML 模板](#默认-xml-模板)
-- [tasks/manifest.yaml](#tasksmanifestyaml)
+- [.local/tasks/manifest.yaml](#tasksmanifestyaml)
 - [task.yaml](#taskyaml)
 - [model.xml](#modelxml)
 - [parameters.yaml](#parametersyaml)
@@ -23,7 +23,7 @@ VMAIL 的核心不是预置很多模型，而是定义一种稳定的“学习�
 ## 目录结构
 
 ```text
-tasks/
+.local/tasks/
   manifest.yaml
   task_id/
     task.yaml
@@ -49,11 +49,13 @@ AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的�
 
 ## 默认 XML 模板
 
-从零创建或重写 XML 时，将下面代码保存为 `tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-black.png` 复制为该任务的 `assets/logo-black.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使黑色标志居中，保持 `texrepeat="1 1"`，不平铺为小图标。网页统一以低透明度贴花呈现 Logo，使其隐约可见并融入地面；不通过降低地面本身的透明度实现。原生 MuJoCo 查看器按 XML 材质渲染，外观可能不同。
+从零创建或重写 XML 时，将下面代码保存为 `.local/tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-black.png` 复制为该任务的 `assets/logo-black.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使黑色标志居中，保持 `texrepeat="1 1"`，不平铺为小图标。网页统一以低透明度贴花呈现 Logo，使其隐约可见并融入地面；不通过降低地面本身的透明度实现。原生 MuJoCo 查看器按 XML 材质渲染，外观可能不同。
 
 该模板与本规范整合维护，不另设模板文件夹。它只是模型起点，还需按 `tasks/AGENTS.md` 补齐任务配置、参数、观测、界面和学习说明，再登记任务索引并验证。帮助中的下载入口使用本段代码和现有 logo 自动打包。
 
 网页中的任务仿真和模型预览共用 `FloorBranding`：黑色 Logo、透明度 `0.1`、单个居中贴花，地面保持不透明。新建任务、AI 创建任务和模板下载均使用黑色 Logo；已有灰色 Logo 任务仍可加载，网页显示也统一使用黑色水印。
+
+AI 创建时会检查 `floor` 是 `worldbody` 下的静态 `plane`，地面及 `buaa_floor` 材质的 alpha 为 `1`，Logo 不平铺。`0.1` 仅用于网页水印材质，不能写成地面或 XML 材质的 alpha；不要额外建立贴花或重复地板。校验失败会将具体原因返回助手自动修复。
 
 <!-- VMAIL_BUAA_DEFAULT_XML_BEGIN -->
 ```xml
@@ -82,7 +84,7 @@ AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的�
 ```
 <!-- VMAIL_BUAA_DEFAULT_XML_END -->
 
-## tasks/manifest.yaml
+## .local/tasks/manifest.yaml
 
 网页通过这个文件发现任务。
 
@@ -97,7 +99,7 @@ tasks:
 
 AI 每创建一个任务，都应当把它加入 `manifest.yaml`。
 
-`manifest.yaml` 是所有任务共用的全局索引，所以位于 `tasks/` 根目录。它不属于 `example_mass_spring` 或其他单个任务，也不应复制到任务子目录中。
+`manifest.yaml` 是所有任务共用的全局索引，所以位于 `.local/tasks/` 根目录。它不属于 `example_mass_spring` 或其他单个任务，也不应复制到任务子目录中。
 
 ## task.yaml
 
@@ -336,7 +338,7 @@ MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能
 
 ## 可选 Python 脚本
 
-网页中需要时变外力／力矩、分段输入、表格插值或关节反馈时，优先使用可选的 **loads.yaml**，详见 [载荷与控制规范](#任务载荷与控制规律)。网页实时、单步和后台批量计算使用相同定义；载荷输出自动记录并生成曲线。参考完整任务 `tasks/rotating_load_demo/`。
+网页中需要时变外力／力矩、分段输入、表格插值或关节反馈时，优先使用可选的 **loads.yaml**，详见 [载荷与控制规范](#任务载荷与控制规律)。网页实时、单步和后台批量计算使用相同定义；载荷输出自动记录并生成曲线。参考完整任务 `.local/tasks/rotating_load_demo/`。
 
 超出标准载荷配置能力的算法、扫参或数据处理可增加 `scripts/`。脚本不是任务加载的必需文件，网页不会自动执行它。推荐：
 
@@ -383,7 +385,7 @@ observe.yaml 还可以通过 equalities 列表读取 MJCF 闭环 equality 约束
 
 在任务文件夹中新建可选文件 `loads.yaml`。网页实时仿真、单步与后台批量计算均读取它。只需修改任务文件，不需要为每个任务编写网页或后端。
 
-可直接复制 `tasks/rotating_load_demo/` 作为起点，并更新任务 id、标题和 manifest 索引。
+可直接复制 `.local/tasks/rotating_load_demo/` 作为起点，并更新任务 id、标题和 manifest 索引。
 
 ### 给 AI 的创建提示
 
