@@ -15,13 +15,78 @@
     <light name="key_light" pos="1 -2.5 4" dir="0 0 -1"/>
     <geom name="ground" type="plane" size="1.7 1.35 0.02" pos="1 0.75 -0.13" rgba="0.12 0.15 0.18 1"/>
 
-    <geom name="track_1" type="capsule" fromto="0.060307 1.157980 -0.055 0.233956 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_2" type="capsule" fromto="0.233956 0.857212 -0.055 0.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_3" type="capsule" fromto="0.500000 0.633975 -0.055 0.826352 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_4" type="capsule" fromto="0.826352 0.515192 -0.055 1.173648 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_5" type="capsule" fromto="1.173648 0.515192 -0.055 1.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_6" type="capsule" fromto="1.500000 0.633975 -0.055 1.766044 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
-    <geom name="track_7" type="capsule" fromto="1.766044 0.857212 -0.055 1.939693 1.157980 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <!-- 圆弧导轨：圆心 O1=(1,1.5)，R=1 m，theta 从 200 deg 到 340 deg，共 70 段，每段 2 deg。
+         仅为可视化导轨（contype=0 conaffinity=0），不参与接触与受力。 -->
+    <geom name="track_01" type="capsule" fromto="0.060307 1.157980 -0.055 0.072816 1.125393 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_02" type="capsule" fromto="0.072816 1.125393 -0.055 0.086455 1.093263 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_03" type="capsule" fromto="0.086455 1.093263 -0.055 0.101206 1.061629 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_04" type="capsule" fromto="0.101206 1.061629 -0.055 0.117052 1.030528 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_05" type="capsule" fromto="0.117052 1.030528 -0.055 0.133975 1.000000 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_06" type="capsule" fromto="0.133975 1.000000 -0.055 0.151952 0.970081 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_07" type="capsule" fromto="0.151952 0.970081 -0.055 0.170962 0.940807 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_08" type="capsule" fromto="0.170962 0.940807 -0.055 0.190983 0.912215 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_09" type="capsule" fromto="0.190983 0.912215 -0.055 0.211989 0.884339 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_10" type="capsule" fromto="0.211989 0.884339 -0.055 0.233956 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_11" type="capsule" fromto="0.233956 0.857212 -0.055 0.256855 0.830869 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_12" type="capsule" fromto="0.256855 0.830869 -0.055 0.280660 0.805342 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_13" type="capsule" fromto="0.280660 0.805342 -0.055 0.305342 0.780660 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_14" type="capsule" fromto="0.305342 0.780660 -0.055 0.330869 0.756855 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_15" type="capsule" fromto="0.330869 0.756855 -0.055 0.357212 0.733956 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_16" type="capsule" fromto="0.357212 0.733956 -0.055 0.384339 0.711989 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_17" type="capsule" fromto="0.384339 0.711989 -0.055 0.412215 0.690983 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_18" type="capsule" fromto="0.412215 0.690983 -0.055 0.440807 0.670962 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_19" type="capsule" fromto="0.440807 0.670962 -0.055 0.470081 0.651952 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_20" type="capsule" fromto="0.470081 0.651952 -0.055 0.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_21" type="capsule" fromto="0.500000 0.633975 -0.055 0.530528 0.617052 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_22" type="capsule" fromto="0.530528 0.617052 -0.055 0.561629 0.601206 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_23" type="capsule" fromto="0.561629 0.601206 -0.055 0.593263 0.586455 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_24" type="capsule" fromto="0.593263 0.586455 -0.055 0.625393 0.572816 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_25" type="capsule" fromto="0.625393 0.572816 -0.055 0.657980 0.560307 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_26" type="capsule" fromto="0.657980 0.560307 -0.055 0.690983 0.548943 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_27" type="capsule" fromto="0.690983 0.548943 -0.055 0.724363 0.538738 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_28" type="capsule" fromto="0.724363 0.538738 -0.055 0.758078 0.529704 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_29" type="capsule" fromto="0.758078 0.529704 -0.055 0.792088 0.521852 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_30" type="capsule" fromto="0.792088 0.521852 -0.055 0.826352 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_31" type="capsule" fromto="0.826352 0.515192 -0.055 0.860827 0.509732 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_32" type="capsule" fromto="0.860827 0.509732 -0.055 0.895472 0.505478 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_33" type="capsule" fromto="0.895472 0.505478 -0.055 0.930244 0.502436 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_34" type="capsule" fromto="0.930244 0.502436 -0.055 0.965101 0.500609 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_35" type="capsule" fromto="0.965101 0.500609 -0.055 1.000000 0.500000 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_36" type="capsule" fromto="1.000000 0.500000 -0.055 1.034899 0.500609 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_37" type="capsule" fromto="1.034899 0.500609 -0.055 1.069756 0.502436 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_38" type="capsule" fromto="1.069756 0.502436 -0.055 1.104528 0.505478 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_39" type="capsule" fromto="1.104528 0.505478 -0.055 1.139173 0.509732 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_40" type="capsule" fromto="1.139173 0.509732 -0.055 1.173648 0.515192 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_41" type="capsule" fromto="1.173648 0.515192 -0.055 1.207912 0.521852 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_42" type="capsule" fromto="1.207912 0.521852 -0.055 1.241922 0.529704 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_43" type="capsule" fromto="1.241922 0.529704 -0.055 1.275637 0.538738 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_44" type="capsule" fromto="1.275637 0.538738 -0.055 1.309017 0.548943 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_45" type="capsule" fromto="1.309017 0.548943 -0.055 1.342020 0.560307 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_46" type="capsule" fromto="1.342020 0.560307 -0.055 1.374607 0.572816 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_47" type="capsule" fromto="1.374607 0.572816 -0.055 1.406737 0.586455 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_48" type="capsule" fromto="1.406737 0.586455 -0.055 1.438371 0.601206 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_49" type="capsule" fromto="1.438371 0.601206 -0.055 1.469472 0.617052 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_50" type="capsule" fromto="1.469472 0.617052 -0.055 1.500000 0.633975 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_51" type="capsule" fromto="1.500000 0.633975 -0.055 1.529919 0.651952 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_52" type="capsule" fromto="1.529919 0.651952 -0.055 1.559193 0.670962 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_53" type="capsule" fromto="1.559193 0.670962 -0.055 1.587785 0.690983 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_54" type="capsule" fromto="1.587785 0.690983 -0.055 1.615661 0.711989 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_55" type="capsule" fromto="1.615661 0.711989 -0.055 1.642788 0.733956 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_56" type="capsule" fromto="1.642788 0.733956 -0.055 1.669131 0.756855 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_57" type="capsule" fromto="1.669131 0.756855 -0.055 1.694658 0.780660 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_58" type="capsule" fromto="1.694658 0.780660 -0.055 1.719340 0.805342 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_59" type="capsule" fromto="1.719340 0.805342 -0.055 1.743145 0.830869 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_60" type="capsule" fromto="1.743145 0.830869 -0.055 1.766044 0.857212 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_61" type="capsule" fromto="1.766044 0.857212 -0.055 1.788011 0.884339 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_62" type="capsule" fromto="1.788011 0.884339 -0.055 1.809017 0.912215 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_63" type="capsule" fromto="1.809017 0.912215 -0.055 1.829038 0.940807 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_64" type="capsule" fromto="1.829038 0.940807 -0.055 1.848048 0.970081 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_65" type="capsule" fromto="1.848048 0.970081 -0.055 1.866025 1.000000 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_66" type="capsule" fromto="1.866025 1.000000 -0.055 1.882948 1.030528 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_67" type="capsule" fromto="1.882948 1.030528 -0.055 1.898794 1.061629 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_68" type="capsule" fromto="1.898794 1.061629 -0.055 1.913545 1.093263 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_69" type="capsule" fromto="1.913545 1.093263 -0.055 1.927184 1.125393 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
+    <geom name="track_70" type="capsule" fromto="1.927184 1.125393 -0.055 1.939693 1.157980 -0.055" size="0.025" rgba="0.42 0.46 0.52 1"/>
     <site name="arc_center_o1" pos="1 1.5 0" size="0.04" rgba="0.75 0.78 0.82 1"/>
     <geom name="pivot_o" type="cylinder" size="0.075 0.04" pos="0 0 0" rgba="0.25 0.28 0.32 1"/>
 

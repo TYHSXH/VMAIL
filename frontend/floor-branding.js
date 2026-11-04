@@ -7,7 +7,7 @@ export class FloorBranding {
     this.texture.colorSpace = THREE.SRGBColorSpace;
     this.geometry = new THREE.PlaneGeometry(1, 1);
     // Blend the original gray artwork into the floor as a faint watermark.
-    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, opacity: .035, alphaTest: .001, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
+    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, opacity: .100, alphaTest: .001, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
   }
 
   update(mesh, geom, model, mujoco) {
