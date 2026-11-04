@@ -1,0 +1,7 @@
+title: Skydio X2 四旋翼无人机
+description: 旋翼推力分配；负载与惯量对俯仰、横滚响应的影响
+category: 四旋翼无人机
+author: 课程组
+model_id: skydio_x2
+entries:
+- scene.xml

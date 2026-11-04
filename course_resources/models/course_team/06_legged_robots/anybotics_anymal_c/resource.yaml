@@ -1,0 +1,7 @@
+title: ANYmal C 四足巡检机器人
+description: 巡检机器人的越障与重心控制；多点接触力分配
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: anybotics_anymal_c
+entries:
+- scene.xml

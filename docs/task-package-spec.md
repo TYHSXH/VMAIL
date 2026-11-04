@@ -1,6 +1,6 @@
 # 任务包规范与载荷参考
 
-从零创建或重写模型时，使用本文“默认 XML 模板”中的代码；经课程组许可的课程任务将 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`，再替换示例物体并保留居中 Logo 地面。不要跨任务目录引用资源。
+从零创建或重写模型时，使用本文“默认 XML 模板”中的代码；经课程组许可的课程任务将 `assets/logos/logo-black.png` 复制为任务内的 `assets/logo-black.png`，再替换示例物体并保留居中 Logo 地面。不要跨任务目录引用资源。
 
 **模板 XML 代码采用 [Apache-2.0](../LICENSE)，Logo 图像不在该许可内：保留全部权利，不予公开授权，禁止商用。** 未取得 Logo 的单独书面许可时，应改用自有素材或移除 Logo 纹理／材质引用，保留普通地面；本规范中的保留 Logo 要求只适用于已获许可的课程任务。分发可授权的独立模板时保留 `LICENSE`、`NOTICE` 和 `COPYRIGHT.md`；网页下载同时附带 `assets/LOGO_RIGHTS.txt`，可下载不构成 Logo 使用授权。学生作品不适用平台 Apache-2.0，第三方模型保持原许可，完整范围见 [COPYRIGHT.md](../COPYRIGHT.md)。
 
@@ -49,9 +49,11 @@ AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的�
 
 ## 默认 XML 模板
 
-从零创建或重写 XML 时，将下面代码保存为 `tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-gray.png` 复制为该任务的 `assets/logo-gray.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使灰色标志居中，保持 `texrepeat="1 1"`，不平铺为小图标。网页统一以低透明度贴花呈现 Logo，使其隐约可见并融入地面；不通过降低地面本身的透明度实现。原生 MuJoCo 查看器按 XML 材质渲染，外观可能不同。
+从零创建或重写 XML 时，将下面代码保存为 `tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-black.png` 复制为该任务的 `assets/logo-black.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使黑色标志居中，保持 `texrepeat="1 1"`，不平铺为小图标。网页统一以低透明度贴花呈现 Logo，使其隐约可见并融入地面；不通过降低地面本身的透明度实现。原生 MuJoCo 查看器按 XML 材质渲染，外观可能不同。
 
 该模板与本规范整合维护，不另设模板文件夹。它只是模型起点，还需按 `tasks/AGENTS.md` 补齐任务配置、参数、观测、界面和学习说明，再登记任务索引并验证。帮助中的下载入口使用本段代码和现有 logo 自动打包。
+
+网页中的任务仿真和模型预览共用 `FloorBranding`：黑色 Logo、透明度 `0.1`、单个居中贴花，地面保持不透明。新建任务、AI 创建任务和模板下载均使用黑色 Logo；已有灰色 Logo 任务仍可加载，网页显示也统一使用黑色水印。
 
 <!-- VMAIL_BUAA_DEFAULT_XML_BEGIN -->
 ```xml
@@ -61,7 +63,7 @@ AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的�
   <option timestep="0.002" gravity="0 0 -9.81"/>
   <asset>
     <!-- Keep this relative asset path when copying the template into a task. -->
-    <texture name="buaa_logo" type="2d" file="assets/logo-gray.png"/>
+    <texture name="buaa_logo" type="2d" file="assets/logo-black.png"/>
     <material name="buaa_floor" texture="buaa_logo" texuniform="false"
               texrepeat="1 1" rgba="1 1 1 1" specular="0" reflectance="0"/>
   </asset>

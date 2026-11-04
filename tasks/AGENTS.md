@@ -43,7 +43,7 @@ results/                运行结果，不能作为模型输入
 
 ## 模型与参数
 
-- 从零创建或重写 XML 时，以 `docs/task-package-spec.md` 中“默认 XML 模板”的代码为起点，将项目 `assets/logos/logo-gray.png` 复制为任务内的 `assets/logo-gray.png`；保留 floor、logo 纹理和材质。地面使用居中、单个、大尺寸的灰色标志，不平铺为小图标。模型尺度变化时相应调整地面与 logo 尺寸。
+- 从零创建或重写 XML 时，以 `docs/task-package-spec.md` 中“默认 XML 模板”的代码为起点，将项目 `assets/logos/logo-black.png` 复制为任务内的 `assets/logo-black.png`；保留 floor、logo 纹理和材质。地面使用居中、单个、大尺寸的黑色标志，不平铺为小图标。模型尺度变化时相应调整地面与 logo 尺寸。
 - 模板中的示例球体可替换为目标机构。不要让任务引用任务目录外的模板资源；保留第三方模型原本的来源与许可证。
 
 - `model.xml` 必须是可由 MuJoCo 编译的 MJCF。

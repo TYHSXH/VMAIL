@@ -1,0 +1,87 @@
+parameters:
+  radius_1:
+    label: 定齿轮Ⅰ半径
+    value: 0.6
+    unit: m
+    min: 0.2
+    max: 0.8
+    step: 0.05
+    description: 定齿轮Ⅰ的半径，固定齿轮不转动。
+    mjcf:
+      - tag: geom
+        name: gear1_geom
+        attribute: size
+        value: ["radius_1", 0.05]
+  radius_2:
+    label: 动齿轮Ⅱ半径
+    value: 0.4
+    unit: m
+    min: 0.1
+    max: 0.5
+    step: 0.05
+    description: 动齿轮Ⅱ的半径，同时决定中心距 |OA|=r1+r2、M 点到 A 的距离 AM=r2、啮合点位置与杆的视觉长度。
+    mjcf:
+      - tag: geom
+        name: gear2_geom
+        attribute: size
+        value: ["radius_2", 0.05]
+      - tag: body
+        name: gear2
+        attribute: pos
+        value: [0, "radius_1 + radius_2", 0]
+      - tag: site
+        name: point_m
+        attribute: pos
+        value: [0, "radius_2", 0]
+      - tag: site
+        name: point_p
+        attribute: pos
+        value: [0, "-radius_2", 0]
+      - tag: geom
+        name: crank_geom
+        attribute: fromto
+        value: [0, 0, 0, 0, "radius_1 + radius_2", 0]
+  omega_0:
+    label: 杆 OA 角速度 ω0
+    value: 2.0
+    unit: rad/s
+    min: -10.0
+    max: 10.0
+    step: 0.5
+    description: 图示位置杆 OA 的角速度，逆时针为正（绕 +z）。
+  alpha_0:
+    label: 杆 OA 角加速度 α0
+    value: 1.0
+    unit: rad/s²
+    min: -10.0
+    max: 10.0
+    step: 0.5
+    description: 杆 OA 的角加速度，逆时针为正（绕 +z）。
+  crank_kv:
+    label: 杆速度伺服增益 kv
+    value: 15
+    unit: "1"
+    min: 5
+    max: 200
+    step: 5
+    description: 杆 OA 速度执行器增益，越大角加速度跟踪越精确、越易出现高频纹波。过大会导致数值不稳定。
+    mjcf:
+      tag: velocity
+      name: crank_speed
+      attribute: kv
+  gear_kv:
+    label: 齿轮Ⅱ速度伺服增益 kv
+    value: 15
+    unit: "1"
+    min: 5
+    max: 200
+    step: 5
+    description: 动齿轮Ⅱ速度执行器增益，用于与杆增益做对照实验。过大会导致数值不稳定。
+    mjcf:
+      tag: velocity
+      name: gear_speed
+      attribute: kv
+initial_state:
+  joint: crank_hinge
+  field: qvel
+  value: 2.0

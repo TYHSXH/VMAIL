@@ -1,0 +1,8 @@
+title: Unitree G1 人形机器人
+description: 多刚体平衡；下蹲与起身的质心轨迹和地面反力
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: unitree_g1
+entries:
+- scene.xml
+- scene_with_hands.xml

@@ -1,0 +1,33 @@
+observe:
+  joints:
+    - name: slide_x
+      label: 楔块水平运动
+      fields:
+        - position
+        - velocity
+        - acceleration
+    - name: slide_z
+      label: 杆 AB 竖直运动
+      fields:
+        - position
+        - velocity
+        - acceleration
+  sites:
+    - name: rod_point
+      label: 杆端 A
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+        - z
+      frame: world
+    - name: wedge_ref
+      label: 楔块参考点
+      fields:
+        - position
+        - velocity
+      components:
+        - x
+      frame: world

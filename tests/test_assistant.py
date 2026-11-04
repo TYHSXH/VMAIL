@@ -31,7 +31,7 @@ def example_bundle(task_id="ai_test_spring"):
     files["task.yaml"] = yaml.safe_dump(metadata, allow_unicode=True)
     root = ET.fromstring(files["model.xml"])
     asset = ET.SubElement(root, "asset")
-    ET.SubElement(asset, "texture", name="buaa_logo", type="2d", file="assets/logo-gray.png")
+    ET.SubElement(asset, "texture", name="buaa_logo", type="2d", file="assets/logo-black.png")
     ET.SubElement(asset, "material", name="buaa_floor", texture="buaa_logo", texrepeat="1 1", texuniform="false")
     ET.SubElement(root.find("worldbody"), "geom", name="floor", type="plane", size="4 4 .1", pos="0 0 -.5", material="buaa_floor")
     files["model.xml"] = ET.tostring(root, encoding="unicode")
@@ -89,7 +89,7 @@ class AssistantTests(unittest.TestCase):
 
     def test_images_are_converted_for_chat_tools(self):
         self.store.save(self.key, "deepseek-flash", False)
-        image = {"name": "diagram.png", "data_url": "data:image/png;base64," + base64.b64encode((ROOT / "assets/logos/logo-gray.png").read_bytes()).decode()}
+        image = {"name": "diagram.png", "data_url": "data:image/png;base64," + base64.b64encode((ROOT / "assets/logos/logo-black.png").read_bytes()).decode()}
         request = assistant.ConversationRequest(messages=[{"role": "user", "content": "根据图建立模型", "images": [image]}, {"role": "assistant", "content": "请确认约束"}, {"role": "user", "content": "使用铰接"}])
         with patch.object(assistant, "STORE", self.store):
             _, payload = assistant.payload_for(request)
@@ -185,7 +185,7 @@ class AssistantTests(unittest.TestCase):
         publish_bundle(self.folder, "ai_test_spring", files)
         self.assertEqual(list_tasks(self.folder)[0]["id"], "ai_test_spring")
         self.assertEqual(load_task(self.folder, "ai_test_spring")["id"], "ai_test_spring")
-        self.assertTrue((self.folder / "ai_test_spring/assets/logo-gray.png").is_file())
+        self.assertTrue((self.folder / "ai_test_spring/assets/logo-black.png").is_file())
         before = (self.folder / "manifest.yaml").read_bytes()
         with self.assertRaises(TaskValidationError): publish_bundle(self.folder, "ai_test_spring", files)
         self.assertEqual(before, (self.folder / "manifest.yaml").read_bytes())

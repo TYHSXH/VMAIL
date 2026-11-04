@@ -1,0 +1,8 @@
+title: Stanford TidyBot 移动机械臂
+description: 移动底盘与机械臂耦合；搬运时的稳定性与载荷
+category: 无人车与移动操作平台
+author: 课程组
+model_id: stanford_tidybot
+entries:
+- scene.xml
+- scene_base.xml

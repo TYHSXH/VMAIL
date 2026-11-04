@@ -1,0 +1,25 @@
+observe:
+  joints:
+    - name: slide_x
+      label: 滑块水平运动
+      fields:
+        - position
+        - velocity
+        - acceleration
+        - force
+  bodies:
+    - name: slider
+      label: 滑块刚体
+      fields:
+        - position
+        - velocity
+  sites:
+    - name: slider_center
+      label: 滑块中心点
+      fields:
+        - position
+        - velocity
+        - acceleration
+      components:
+        - x
+      frame: world

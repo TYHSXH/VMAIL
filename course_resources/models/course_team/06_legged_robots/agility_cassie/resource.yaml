@@ -1,0 +1,7 @@
+title: Agility Cassie 双足机器人
+description: 腿部闭环连杆与弹性结构；步行能量与触地冲击
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: agility_cassie
+entries:
+- scene.xml

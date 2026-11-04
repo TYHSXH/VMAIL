@@ -1,0 +1,7 @@
+title: Robotiq 2F-85 自适应夹爪
+description: 欠驱动夹持机构；接触顺序、夹紧力与物体稳定性
+category: 夹爪与灵巧手
+author: 课程组
+model_id: robotiq_2f85
+entries:
+- scene.xml

@@ -1,0 +1,33 @@
+layout:
+  parameter_groups: []
+  charts:
+  - title: 曲柄运动状态
+    series:
+    - joint.crank_hinge.position
+    - joint.crank_hinge.velocity
+    - joint.crank_hinge.acceleration
+  - title: B、C点速度大小
+    series:
+    - site.point_b.velocity.magnitude
+    - site.point_c.velocity.magnitude
+  - title: B、C点加速度大小
+    series:
+    - site.point_b.acceleration.magnitude
+    - site.point_c.acceleration.magnitude
+controls:
+  joint_note: 教材原尺寸不能完整回转；曲柄默认以 2 rad/s 顺时针经过题图姿态，闭环与纯滚约束自动联动。
+  actuators:
+    crank_speed:
+      show_load: false
+      label: 曲柄角速度
+      unit: rad/s
+      value: -2
+camera:
+  position:
+  - 1
+  - -0.15
+  - 3.7
+  target:
+  - 1
+  - 0.75
+  - 0

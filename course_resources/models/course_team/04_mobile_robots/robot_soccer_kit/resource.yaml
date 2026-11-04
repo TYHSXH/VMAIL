@@ -1,0 +1,7 @@
+title: Robot Soccer Kit 全向移动平台
+description: 全向轮速度合成；接触摩擦与转向；机器人碰撞
+category: 无人车与移动操作平台
+author: 课程组
+model_id: robot_soccer_kit
+entries:
+- scene.xml

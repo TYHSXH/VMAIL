@@ -10,8 +10,12 @@ LIBRARY_ROOT = Path(__file__).resolve().parents[1] / "model_library"
 
 
 def library_models():
+    from .course_resources import contributed_models
     path = LIBRARY_ROOT / "catalog.json"
-    return json.loads(path.read_text(encoding="utf-8"))["models"] if path.is_file() else []
+    catalog = json.loads(path.read_text(encoding="utf-8"))["models"] if path.is_file() else []
+    # Deleted local resource folders must not break unrelated XML imports.
+    available = [model for model in catalog if (LIBRARY_ROOT / model['folder']).is_dir()]
+    return available + contributed_models()
 
 
 def preview_choices():
@@ -47,12 +51,12 @@ def prepare_preview(xml=None, filename="", model_id=None, entry=None, binary_ass
                 if Path(item["path"]).name != Path(filename).name:
                     continue
                 path = LIBRARY_ROOT / model["folder"] / item["path"]
-                if path.read_text(encoding="utf-8-sig").strip() == normalized:
+                if path.is_file() and path.read_text(encoding="utf-8-sig").strip() == normalized:
                     matches.append((model, item["path"]))
         if len(matches) == 1:
             selected, entry = matches[0]
         elif len(matches) > 1:
-            raise SimulationError("此 XML 在多个库目录中相同，请使用“从模型库选择”指定完整模型。")
+            raise SimulationError("此 XML 在多个库目录中相同，请进入课程空间，选择对应模型及 XML 入口。")
         else:
             import xml.etree.ElementTree as ET
             try:
@@ -63,12 +67,13 @@ def prepare_preview(xml=None, filename="", model_id=None, entry=None, binary_ass
                 raise SimulationError("请选择以 <mujoco> 为根节点的模型。")
             missing = list(dict.fromkeys(node.get("file") for node in document.iter() if "file" in node.attrib))
             if missing:
-                raise SimulationError("未匹配到库内原始 XML，无法自动定位配套文件：" + "、".join(missing[:8]) + "。请从模型库选择完整模型；库外模型请按任务包方式加载配套文件。")
+                raise SimulationError("未匹配到库内原始 XML，无法自动定位配套文件：" + "、".join(missing[:8]) + "。请从课程空间添加完整模型；库外模型请按任务包方式加载配套文件。")
             return with_joint_limits({"xml": xml, "assets": {}, "name": filename or "模型预览"})
 
     folder = (LIBRARY_ROOT / selected["folder"]).resolve()
     path = (folder / entry).resolve()
-    if not folder.is_relative_to(LIBRARY_ROOT.resolve()) or not path.is_relative_to(folder):
+    from .course_resources import COURSE_ROOT
+    if not (folder.is_relative_to(LIBRARY_ROOT.resolve()) or folder.is_relative_to((COURSE_ROOT / "models").resolve())) or not path.is_relative_to(folder):
         raise SimulationError("模型路径超出资料库。")
     prepared, assets = _model_source({"path": str(folder), "model_xml": path.read_text(encoding="utf-8")})
     return with_joint_limits({"xml": prepared, "assets": assets if binary_assets else {name: base64.b64encode(blob).decode("ascii") for name, blob in assets.items()}, "name": f"{selected['title']} · {entry}"})

@@ -18,6 +18,7 @@
           <button id="collapseTasks" class="icon-button" data-icon="panel-left" type="button" title="收起任务栏" aria-label="收起任务"></button>
         </header>
         <div class="task-list-heading"><h2>学习任务 <span id="taskCount">0</span></h2><button id="refreshTasks" class="icon-button" data-icon="refresh" type="button" title="刷新任务" aria-label="刷新任务"></button></div>
+        <button class="quiet-button course-entry" data-open-course type="button">＋ 从课程空间复现任务</button>
         <nav id="taskList" class="task-list" aria-label="学习任务"></nav>
         <footer class="sidebar-footer">
           <div class="course-credit"><span>BUAA 5系</span><strong>理论力学课程组</strong></div>
@@ -34,6 +35,7 @@
             <h1 id="taskTitle">选择一个学习任务</h1>
           </div>
           <div class="topbar-actions">
+            <button class="quiet-button" data-open-course type="button">课程空间</button>
             <button id="toggleInspector" class="quiet-button" data-icon="sliders" type="button">参数与数据</button>
             <button id="openPreview" class="quiet-button" data-icon="cube" type="button">模型预览</button>
             <button id="openAssistant" class="quiet-button" type="button" aria-controls="panel-assistant">我是菜鸟·AI</button>
@@ -165,16 +167,23 @@
         <div class="preview-brand"><img class="brand-logo" src="../assets/logos/logo-black.png" alt="VMAIL-BUAA 标志" /><div class="brand-copy"><strong>VMAIL-BUAA</strong><span>理论力学虚拟仿真实验平台</span></div></div>
         <h1 id="previewTitle">模型预览</h1>
         <div class="preview-actions">
-          <select id="previewLibrary" class="quiet-button" aria-label="从模型库选择"><option value="">从模型库选择…</option></select>
+          <button id="togglePreviewLibrary" class="quiet-button" data-icon="panel-left" type="button" aria-controls="previewLibraryPanel" aria-expanded="true">模型库</button>
           <input id="previewFile" class="hidden" type="file" accept=".xml" />
           <button id="choosePreviewFile" class="quiet-button" data-icon="upload" type="button">打开 XML</button>
           <a class="quiet-button help-link" href="/help" target="_blank" rel="noopener noreferrer">帮助</a>
           <button id="closePreview" class="quiet-button" data-icon="back" type="button">返回任务</button>
         </div>
       </header>
+      <div class="preview-workspace">
+      <aside id="previewLibraryPanel" class="preview-library" aria-label="我的模型库">
+        <header class="preview-panel-header"><h2>我的模型库 <span id="previewModelCount">0</span></h2><button id="collapsePreviewLibrary" class="icon-button" data-icon="panel-left" type="button" aria-label="收起模型库" title="收起模型库"></button></header>
+        <button class="quiet-button" data-open-course type="button">＋ 从课程空间添加模型</button>
+        <p class="field-help">选择模型后载入预览。列表保存在此浏览器。</p>
+        <nav id="previewModelList" class="task-list" aria-label="模型列表"></nav>
+      </aside>
       <div class="preview-stage">
         <div id="previewViewport" class="mujoco-viewport"></div>
-        <p id="previewStatus" class="preview-status" role="status">拖入 XML 开始预览，也可从上方模型库选择。预览仿真不记录数据。</p>
+        <p id="previewStatus" class="preview-status" role="status">从左侧选择模型，或拖入 XML 开始预览。预览仿真不记录数据。</p>
         <div class="viewer-toolbar" role="toolbar" aria-label="预览控制">
           <button data-preview-action="play" type="button" disabled>运行仿真</button>
           <button data-preview-action="reset" data-icon="reset" type="button" disabled>重置</button>
@@ -192,10 +201,25 @@
           <button data-preview-action="home" type="button" disabled>复位视角</button>
           <button id="togglePreviewJoints" data-preview-action="joints" type="button" aria-controls="previewJoints" aria-expanded="true" disabled>关节</button>
         </div>
-        <aside id="previewJoints" class="preview-joints hidden" aria-label="预览关节调整"><div id="previewJointControls" class="joint-panel"></div></aside>
+        <aside id="previewJoints" class="preview-joints hidden" aria-label="预览关节调整"><header class="preview-panel-header"><h2>模型关节</h2><button id="collapsePreviewJoints" class="icon-button" data-icon="panel-right" type="button" aria-label="收起模型关节" title="收起模型关节"></button></header><div id="previewJointControls" class="joint-panel"></div></aside>
+      </div>
       </div>
       <footer class="preview-credit">© 2026 VMAIL-BUAA · BUAA 5系 理论力学课程组 · 版权所有</footer>
     </section>
+    <dialog id="courseSpace" class="course-space" aria-labelledby="courseTitle">
+      <header class="course-header"><div><span class="panel-kicker">VMAIL-BUAA · 课程共建</span><h1 id="courseTitle">课程空间</h1></div><button id="closeCourse" class="quiet-button" type="button">返回工作区</button></header>
+      <div class="course-body">
+        <aside class="course-filters"><h2>课程资源</h2><div class="course-types" role="group" aria-label="资源类型"><button class="active" data-course-type="models" type="button" aria-pressed="true">模型库 <span id="courseModelCount">0</span></button><button data-course-type="tasks" type="button" aria-pressed="false">任务库 <span id="courseTaskCount">0</span></button></div><label class="course-label" for="courseGroup">资源来源</label><select id="courseGroup"><option value="">全部来源</option></select><label class="course-label" for="courseCategory">分类</label><select id="courseCategory"><option value="">全部分类</option></select>
+          <section class="course-contribute" aria-labelledby="contributeTitle"><span class="contribute-kicker">课程共建</span><h3 id="contributeTitle">让好作品成为<br />下一位同学的起点</h3><p>分享你的模型或完整任务，<br />经课程组审核后收录。</p><ol class="contribute-steps"><li>准备作品</li><li>提交 PR</li><li>审核收录</li></ol><a class="contribute-guide" href="/help#course-resources" target="_blank" rel="noopener noreferrer">第一次提交？从这里开始 <span aria-hidden="true">↗</span></a></section>
+        </aside>
+        <main class="course-content"><div class="course-intro"><div><h2 id="courseLibraryTitle">发现优秀模型</h2><p id="courseLibraryIntro">从课程组与同学的作品出发，探索更多力学模型。</p></div><label class="course-search"><span class="sr-only">搜索课程资源</span><input id="courseSearch" type="search" placeholder="搜索名称、介绍或作者" /></label></div><div class="course-results"><span id="courseResultCount" role="status">正在读取课程资源…</span><button id="refreshCourse" class="quiet-button" type="button">刷新资源</button></div><div id="courseGrid" class="course-grid"></div></main>
+      </div>
+    </dialog>
+    <dialog id="courseDetail" class="course-detail" aria-labelledby="courseDetailTitle">
+      <header><span id="courseDetailSource" class="panel-kicker"></span><button id="closeCourseDetail" class="quiet-button" type="button">关闭</button></header>
+      <div id="courseDetailImage" class="course-detail-image"></div>
+      <div class="course-detail-copy"><div class="course-detail-title-row"><h2 id="courseDetailTitle"></h2><button id="reproduceCourse" class="primary-button" type="button">复现到工作区</button></div><p id="courseDetailAuthor" class="field-help"></p><p id="courseDetailDescription"></p><label id="courseEntryLabel" class="course-label">模型入口<select id="courseDetailEntry"></select></label><p id="courseDetailHint" class="field-help"></p><p id="courseDetailStatus" role="status"></p></div>
+    </dialog>
     <script type="module" src="/main.js"></script>
   </body>
 </html>

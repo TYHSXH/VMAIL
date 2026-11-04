@@ -1,0 +1,7 @@
+title: UR5e 工业机械臂
+description: 串联机构运动学；不同姿态下的重力力矩与负载能力
+category: 工业机械臂与双臂系统
+author: 课程组
+model_id: universal_robots_ur5e
+entries:
+- scene.xml

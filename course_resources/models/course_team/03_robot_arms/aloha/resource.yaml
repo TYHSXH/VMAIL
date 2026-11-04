@@ -1,0 +1,7 @@
+title: ALOHA 双臂操作系统
+description: 双臂协同搬运；载荷分配与闭链约束
+category: 工业机械臂与双臂系统
+author: 课程组
+model_id: aloha
+entries:
+- scene.xml

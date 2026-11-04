@@ -1,0 +1,7 @@
+title: 柔性绳与滑轮系统
+description: 绳轮接触；张力传递；柔性绳的几何约束与运动关系
+category: 柔性结构、缆索与仿生传动
+author: 课程组
+model_id: flex_pulley
+entries:
+- pulley.xml

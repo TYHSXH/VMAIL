@@ -1,0 +1,8 @@
+title: Shadow 灵巧手
+description: 多指关节与肌腱传动；抓取接触力和摩擦锥
+category: 夹爪与灵巧手
+author: 课程组
+model_id: shadow_hand
+entries:
+- scene_left.xml
+- scene_right.xml

@@ -3,11 +3,11 @@ import * as THREE from "three";
 // A visual decal only: collision geometry, friction and model files are untouched.
 export class FloorBranding {
   constructor({ texture, onLoad = () => {} } = {}) {
-    this.texture = texture || new THREE.TextureLoader().load(new URL("../assets/logos/logo-gray.png", import.meta.url).href, onLoad);
+    this.texture = texture || new THREE.TextureLoader().load(new URL("../assets/logos/logo-black.png", import.meta.url).href, onLoad);
     this.texture.colorSpace = THREE.SRGBColorSpace;
     this.geometry = new THREE.PlaneGeometry(1, 1);
-    // Blend the original gray artwork into the floor as a faint watermark.
-    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, opacity: .100, alphaTest: .001, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
+    // Blend the black artwork into the floor as a faint watermark.
+    this.material = new THREE.MeshBasicMaterial({ map: this.texture, transparent: true, opacity: .1, alphaTest: .001, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false });
   }
 
   update(mesh, geom, model, mujoco) {

@@ -70,7 +70,7 @@ Both engines currently use MuJoCo 3.13.0. Browser frame rate affects visual smoo
 
 One replay uses one completed experiment; automated parameter sweeps still require a separate script. The edit button beside a task name renames it; the trash button deletes the task and its results. Back up anything you need before deleting it.
 
-Use **模型预览** (Model preview) in the top bar to browse the included model library or preview a single XML file. A complete task package is needed for task instructions, parameter settings, and chart configuration. **帮助** (Help) opens the user manual and AI prompts.
+Use **课程空间** (Course space) to discover shared models and complete tasks, filter by cohort and category, and inspect image previews. Add models to the **模型预览** (Model preview) sidebar or reproduce independent task copies in the workspace. Resources are discovered from cohort and category folders under `course_resources/models/` and `course_resources/tasks/`. Contributions via GitHub PR are welcome; see the [contribution guide](docs/course-resources.md). Model preview also accepts a single XML file. A complete task package provides instructions, parameters, and charts. **帮助** (Help) opens the manuals.
 
 ## 3. AI assistance: use the DeepSeek API inside VMAIL
 
@@ -87,7 +87,7 @@ Create a simple pendulum learning task with length 1 m and mass 1 kg.
 Ignore drag, make the initial angle adjustable, and observe the angle and
 angular velocity. Explain how to compare the results with the small-angle
 period formula. Clarify any ambiguous conditions first, and retain the
-default floor with the gray logo.
+default floor with the black logo.
 ```
 
 Conversation text, images, and drafts are saved automatically in `.local/assistant-history.sqlite3` inside the project. They can be restored after a page refresh or server restart. Switch conversations using **历史对话** (Conversation history). **新对话** (New conversation) preserves previous records. **删除此对话** (Delete this conversation) deletes only that conversation, not tasks already created. Save failures are reported; wait for **已保存到本机** (Saved locally) before closing the page. Interrupted responses are marked incomplete and are not automatically resent or used to save task changes as though they had completed. After restoring an old conversation, the target task is still determined by the current sidebar selection or the task ID you explicitly specify.
@@ -116,7 +116,7 @@ frontend or backend.
 My research object is ...; the known conditions are ...;
 I want to vary ... and observe ... .
 Explain the simplifying assumptions and units, reuse the default floor
-with the gray logo, complete the task configuration, register the task
+with the black logo, complete the task configuration, register the task
 in tasks/manifest.yaml, and validate it with backend.validate_task.
 ```
 

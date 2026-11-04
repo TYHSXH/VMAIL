@@ -1,0 +1,7 @@
+title: 官方简化人形机构
+description: 多刚体质心；关节力矩；平衡和落地冲击
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: humanoid
+entries:
+- humanoid.xml

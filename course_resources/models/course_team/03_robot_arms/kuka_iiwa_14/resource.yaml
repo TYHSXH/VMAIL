@@ -1,0 +1,7 @@
+title: KUKA iiwa 14 冗余机械臂
+description: 七自由度冗余；同一末端位置的不同关节姿态与能量
+category: 工业机械臂与双臂系统
+author: 课程组
+model_id: kuka_iiwa_14
+entries:
+- scene.xml

@@ -14,7 +14,7 @@ from backend.main import help_documents
 class InstallationTests(unittest.TestCase):
     def test_student_help_contains_consolidated_manual_and_task_guide(self):
         documents = help_documents()["documents"]
-        self.assertEqual([item["path"] for item in documents], ["docs/user-guide.md", "docs/task-guide.md"])
+        self.assertEqual([item["path"] for item in documents], ["docs/user-guide.md", "docs/task-guide.md", "docs/course-resources.md"])
         self.assertTrue(all(item["source"].strip() for item in documents))
         self.assertIn("## 课程教学路径", documents[0]["source"])
         self.assertIn("## 网页计算、后台重算与实验导出", documents[0]["source"])
@@ -24,7 +24,7 @@ class InstallationTests(unittest.TestCase):
     def test_missing_built_asset_is_reported_before_startup(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            for name in ["requirements.txt", "tasks/manifest.yaml", "docs/user-guide.md", "docs/task-guide.md", "model_library/catalog.json", "docs/task-package-spec.md", "assets/logos/logo-gray.png", "assets/logos/LICENSE.txt", "constraints.txt", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE"]:
+            for name in ["requirements.txt", "tasks/manifest.yaml", "docs/user-guide.md", "docs/task-guide.md", "docs/course-resources.md", "model_library/catalog.json", "docs/task-package-spec.md", "assets/logos/logo-black.png", "assets/logos/logo-gray.png", "assets/logos/LICENSE.txt", "constraints.txt", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE"]:
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, path)
@@ -48,9 +48,10 @@ class InstallationTests(unittest.TestCase):
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(ROOT / name, target)
             manifest = json.loads((root / "app/.vite/manifest.json").read_text(encoding="utf-8"))
-            resource = next(entry["file"] for key, entry in manifest.items() if "logo-gray" in key)
+            # Fonts are referenced through built CSS, rather than the HTML entry.
+            resource = next(entry["file"] for entry in manifest.values() if entry["file"].endswith('.woff2'))
             (root / "app" / resource).unlink()
-            with self.assertRaisesRegex(RuntimeError, "logo-gray"):
+            with self.assertRaisesRegex(RuntimeError, "Missing built asset"):
                 check_project(root)
 
     def test_copied_environment_is_rejected_without_running_it(self):

@@ -1,0 +1,7 @@
+title: Bitcraze Crazyflie 2 微型四旋翼
+description: 四旋翼升力和力矩合成；悬停平衡；姿态惯性响应
+category: 四旋翼无人机
+author: 课程组
+model_id: bitcraze_crazyflie_2
+entries:
+- scene.xml

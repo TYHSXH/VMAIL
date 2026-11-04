@@ -1,0 +1,7 @@
+title: 多摆碰撞与牛顿摆
+description: 碰撞冲量、动量与能量传递；接触参数的影响
+category: 工程传动与接触机构
+author: 课程组
+model_id: newton_cradle
+entries:
+- newton_cradle.xml

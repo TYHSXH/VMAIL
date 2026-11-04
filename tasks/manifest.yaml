@@ -20,6 +20,11 @@ tasks:
   status: ready
   description: 将机构修改为 OA=0.4 m、AB=1.8 m，同时保持 R=1 m、r=0.5 m 和固定点 O、O1 不变，使曲柄能够完整回转；观察圆盘上
     B、C 两点的速度与加速度。
+- id: rolling_disk_points_bc_textbook
+  title: 例7-10 教材原型纯滚圆盘
+  path: rolling_disk_points_bc_textbook
+  status: ready
+  description: 按 OA=AB=R=1 m、r=0.5 m 的教材原尺寸复现题图附近运动，观察 B、C 两点的速度与加速度；该机构不能完整回转。
 - id: wedge_rod_acceleration_v4
   title: 铅垂杆推动楔块（题 6-14）
   path: wedge_rod_acceleration_v4

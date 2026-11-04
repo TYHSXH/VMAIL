@@ -92,7 +92,7 @@ cd VMAIL
 
 以后仍双击 `start.bat`，环境正常时不会重新安装。学生无需安装 Node.js，也无需单独下载 MuJoCo：实时仿真在浏览器运行，批量计算使用同时安装的 Python 原生 MuJoCo。
 
-**换电脑：** 复制项目文件，不复制 `.local`、`.venv`、`node_modules`、`.npm-cache` 和 `.git`。新电脑先安装 Python，再双击 `start.bat`。必须保留 `app`、`backend`、`docs`、`tasks`、`model_library`、`assets`、`licenses`、版权文件、`requirements.txt`、`constraints.txt` 及三个启动/安装 BAT 文件；已保存的实验结果可按需要一起复制。
+**换电脑：** 复制项目文件，不复制 `.local`、`.venv`、`node_modules`、`.npm-cache` 和 `.git`。新电脑先安装 Python，再双击 `start.bat`。必须保留 `app`、`backend`、`docs`、`tasks`、`course_resources`、`model_library`、`assets`、`licenses`、版权文件、`requirements.txt`、`constraints.txt` 及三个启动/安装 BAT 文件；已保存的实验结果可按需要一起复制。模型侧边库的选择保存在原浏览器，换电脑后从课程空间重新添加。
 
 如果已经使用 Conda，在目标环境安装 `requirements.txt` 后运行 `start-current-python.bat`；这种方式使用当前环境，不使用项目 `.venv`。
 
@@ -216,15 +216,17 @@ cd VMAIL
 
 ## 模型预览
 
-点击顶部“模型预览”，可从模型库选择模型及入口，也可拖入一个 MuJoCo XML 文件。模型库优先选 `scene.xml` 等场景入口，并保留配套网格、纹理和 XML 文件。
+点击顶部“模型预览”，左侧为“我的模型库”。首次使用可点击“从课程空间添加模型”，在卡片详情中查看图片和介绍，选择 XML 入口，再添加到侧边库。优先选 `scene.xml` 等场景入口；配套网格、纹理和 XML 从课程原件读取。也可拖入一个 MuJoCo XML 文件。模型列表保存在当前浏览器；移除条目不会删除课程文件。
 
-预览支持视角操作、关节姿态调整、拖动和运行/暂停；不采集任务曲线、不保存实验结果。点击“退出预览”或按 Esc 返回实验台，原任务保持暂停。
+顶部“课程空间”还提供任务库，可以将完整课程任务复现到学习任务栏。副本可独立修改、重命名、保存实验或删除，课程原件不受影响。资源按课程组、年届和分类目录自动归档，支持搜索与筛选。欢迎通过 GitHub PR 共建，详见[课程空间与资源共建](course-resources.md)。
+
+预览支持视角操作、关节姿态调整、拖动和运行/暂停；不采集任务曲线、不保存实验结果。点击“返回任务”或按 Esc 返回实验台，原任务保持暂停。
 
 库外 XML 如果依赖外部文件，单独拖入可能无法读取全部资源，需要将模型及依赖整理为完整任务。机器人模型未必带有平衡控制器，运行后倾倒不一定是软件故障。复杂模型运行较慢时，可关闭阴影、光照等显示效果。
 
 ## 让 AI 创建学习任务
 
-需要从零编写 XML 时，可[下载默认 XML 模板（含灰色 logo）](/api/task-template)，模板已整合在现有的 `docs/task-package-spec.md` 中。让 AI 复制其中的默认 XML，并把 `assets/logos/logo-gray.png` 复制到任务的 `assets/logo-gray.png`，替换示例研究对象，保留地面中央的 logo，再补齐任务配置。网页中的 Logo 以低透明度水印呈现，隐约可见并融入地面。
+需要从零编写 XML 时，可[下载默认 XML 模板（含黑色 Logo）](/api/task-template)，模板已整合在现有的 `docs/task-package-spec.md` 中。让 AI 复制其中的默认 XML，并把 `assets/logos/logo-black.png` 复制到任务的 `assets/logo-black.png`，替换示例研究对象，保留地面中央的 logo，再补齐任务配置。网页中的 Logo 以低透明度水印呈现，隐约可见并融入地面。
 
 向 AI 描述研究对象、简化假设、希望改变的参数和观察量，让它按项目的任务目录规则创建或修改学习任务。完成后在实验台刷新任务列表，再选择任务开展实验。
 

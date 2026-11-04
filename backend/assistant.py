@@ -180,7 +180,7 @@ update_task 只提交要改动文件的完整文本，省略的文件保持原�
 create_task 不覆盖现有任务；update_task 在原任务中保存修改。两者都不能删除任务。不要声称只具备新建能力。
 不要在正文倾倒完整文件或声称已保存；网页会报告真实结果。
 create_task 的 files 必须包含六个必需文件，可选 loads.yaml、README.md；update_task 的 files 只包含改动文件，每个值都是完整文本。
-程序自动提供 assets/logo-gray.png 并登记索引，不生成二进制资源或 manifest.yaml。
+程序自动提供 assets/logo-black.png 并登记索引，不生成二进制资源或 manifest.yaml。
 失败不意味着对话结束；结合错误和当前文件继续修复。原任务已经存在时始终使用 update_task；尚未成功新建才继续 create_task。
 """
     instructions += "\n已有任务（可读取和修改）：" + json.dumps([{"id": t["id"], "title": t.get("title", t["id"])} for t in list_tasks(TASKS_DIR)], ensure_ascii=False)

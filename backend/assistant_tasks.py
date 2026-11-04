@@ -18,6 +18,7 @@ import yaml
 
 from .task_io import REQUIRED_FILES, TITLE_LOCK, TASK_STATE_LOCK, ACTIVE_SIMULATIONS, TaskValidationError, _read_yaml, list_tasks
 from .simulator import MAX_STEPS
+from .branding import DEFAULT_LOGO, referenced_logos, copy_brand_assets
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_FILES = set(REQUIRED_FILES) | {"loads.yaml", "README.md"}
@@ -62,12 +63,12 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
             raise TaskValidationError("网页 AI 创建暂不支持 include、插件或外部模型，使用基础几何体建模。")
         if node.tag in {"replicate", "composite", "flexcomp", "deformable", "hfield", "skin", "size"}:
             raise TaskValidationError("网页 AI 创建暂不支持批量展开、柔性体或自定义内存分配，请使用基础刚体建模。")
-        if existing_dir is None and node.tag == "texture" and (node.get("name") != "buaa_logo" or node.get("file") != "assets/logo-gray.png"):
+        if existing_dir is None and node.tag == "texture" and (node.get("name") != "buaa_logo" or node.get("file") != DEFAULT_LOGO):
             raise TaskValidationError("网页 AI 创建仅支持内置 logo 纹理，其他物体请使用 rgba 颜色。")
         if existing_dir is None and any(key in node.attrib for key in ("assetdir", "meshdir", "texturedir")):
             raise TaskValidationError("模型不可设置外部资源目录。")
         for attribute, value in node.attrib.items():
-            if existing_dir is None and attribute.startswith("file") and not (attribute == "file" and node.tag == "texture" and value == "assets/logo-gray.png"):
+            if existing_dir is None and attribute.startswith("file") and not (attribute == "file" and node.tag == "texture" and value == DEFAULT_LOGO):
                 raise TaskValidationError("网页 AI 创建仅允许内置 logo 资源，不读取其他文件。")
             if existing_dir is not None and attribute.startswith("file") and value:
                 # The simulator also resolves compiler directories and includes strictly inside the snapshot.
@@ -78,16 +79,15 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
     floor = root.find(".//geom[@name='floor']")
     logo = root.find(".//texture[@name='buaa_logo']")
     material = root.find(".//material[@name='buaa_floor']")
-    if floor is None or logo is None or material is None or logo.get("file") != "assets/logo-gray.png" or material.get("texture") != "buaa_logo" or floor.get("material") != "buaa_floor":
-        raise TaskValidationError("请保留默认模板的 floor、buaa_logo 纹理与 buaa_floor 材质。")
+    if floor is None or logo is None or material is None or logo.get("file") != DEFAULT_LOGO or material.get("texture") != "buaa_logo" or floor.get("material") != "buaa_floor":
+        raise TaskValidationError("请使用新模板的黑色 Logo，保留 floor、buaa_logo 纹理与 buaa_floor 材质。")
 
 
 def write_bundle(folder: Path, files: dict[str, str]):
     folder.mkdir()
     for name, content in files.items():
         (folder / name).write_text(content, encoding="utf-8")
-    (folder / "assets").mkdir()
-    shutil.copyfile(ROOT / "assets/logos/logo-gray.png", folder / "assets" / "logo-gray.png")
+    copy_brand_assets(folder, files['model.xml'])
 
 
 def validate_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None = None) -> dict:
@@ -101,9 +101,7 @@ def validate_bundle(task_id: str, files: dict[str, str], existing_dir: Path | No
                 copy_task_inputs(existing_dir, folder)
                 for name, content in files.items():
                     (folder / name).write_text(content, encoding="utf-8")
-                if 'assets/logo-gray.png' in files["model.xml"] and not (folder / "assets/logo-gray.png").exists():
-                    (folder / "assets").mkdir(exist_ok=True)
-                    shutil.copyfile(ROOT / "assets/logos/logo-gray.png", folder / "assets/logo-gray.png")
+                copy_brand_assets(folder, files['model.xml'])
             process = subprocess.run(
                 [sys.executable, "-m", "backend.assistant_validate", temporary, task_id],
                 cwd=ROOT, capture_output=True, timeout=40, encoding="utf-8", errors="replace",
@@ -229,11 +227,12 @@ def update_bundle(tasks_dir: Path, task_id: str, changes: dict[str, str], base_r
         entry = next(item for item in manifest["tasks"] if item["id"] == task_id)
         entry.update(title=metadata["title"], description=str(metadata.get("question", ""))[:500])
         targets = {folder / name: content.encode("utf-8") for name, content in changes.items()}
-        logo = folder / "assets/logo-gray.png"
-        if 'assets/logo-gray.png' in files["model.xml"] and not logo.exists():
-            if logo.parent.exists() and is_link(logo.parent):
-                raise TaskValidationError("资源目录不能是链接。")
-            targets[logo] = (ROOT / "assets/logos/logo-gray.png").read_bytes()
+        for name, source in referenced_logos(files['model.xml']).items():
+            logo = folder / name
+            if not logo.exists():
+                if logo.parent.exists() and is_link(logo.parent):
+                    raise TaskValidationError("资源目录不能是链接。")
+                targets[logo] = source.read_bytes()
         targets[manifest_path] = yaml.safe_dump(manifest, allow_unicode=True, sort_keys=False).encode("utf-8")
         originals = {path: path.read_bytes() if path.exists() else None for path in targets}
         backup = ROOT / ".local" / "task-history" / task_id / uuid4().hex

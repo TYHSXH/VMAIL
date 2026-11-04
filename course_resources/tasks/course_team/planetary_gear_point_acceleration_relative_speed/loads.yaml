@@ -1,0 +1,14 @@
+version: 1
+loads:
+  - id: crank_drive
+    label: 杆 OA 角速度驱动
+    type: actuator
+    actuator: crank_speed
+    unit: rad/s
+    value: "omega_0 + alpha_0*t"
+  - id: gear_drive
+    label: 动齿轮Ⅱ角速度驱动（外啮合无滑移）
+    type: actuator
+    actuator: gear_speed
+    unit: rad/s
+    value: "radius_1/radius_2*(omega_0 + alpha_0*t)"

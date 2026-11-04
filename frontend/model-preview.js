@@ -1,6 +1,7 @@
 import { MujocoBrowserViewer } from "./mujoco-viewer.js";
 import { decodePreviewBundle } from "./preview-bundle.js";
 import { JointPanel } from "./joint-panel.js";
+import './model-preview.css';
 
 const XML_LIMIT = 16 * 1024 * 1024;
 
@@ -18,13 +19,37 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
   const title = document.getElementById("previewTitle");
   const input = document.getElementById("previewFile");
   const closeButton = document.getElementById("closePreview");
-  const librarySelect = document.getElementById("previewLibrary");
+  const libraryList = document.getElementById("previewModelList");
+  const libraryPanel = document.getElementById('previewLibraryPanel');
+  const libraryButton = document.getElementById('togglePreviewLibrary');
+  const compactPreview = window.matchMedia('(max-width: 700px)');
+  let savedModels = [];
+  try { const value = JSON.parse(localStorage.getItem('vmail.preview-models') || '[]'); if (Array.isArray(value)) savedModels = value.filter(item => typeof item.model_id === 'string' && typeof item.entry === 'string').slice(0, 200); } catch {}
+  let selectedModel = '';
   const playButton = overlay.querySelector('[data-preview-action="play"]');
   const jointsPanel = document.getElementById("previewJoints");
   const jointsButton = document.getElementById("togglePreviewJoints");
+  function setPanelVisible(name, visible, restoreFocus = false) {
+    const panel = name === 'library' ? libraryPanel : jointsPanel;
+    const button = name === 'library' ? libraryButton : jointsButton;
+    if (visible && compactPreview.matches) setPanelVisible(name === 'library' ? 'joints' : 'library', false);
+    panel.classList.toggle('hidden', !visible);
+    button.setAttribute('aria-expanded', String(visible));
+    button.classList.toggle('active', visible);
+    if (restoreFocus) button.focus();
+  }
+  compactPreview.addEventListener('change', event => {
+    if (!event.matches) return;
+    setPanelVisible('library', false);
+    setPanelVisible('joints', false);
+  });
+  const toolbarObserver = new ResizeObserver(entries => {
+    const height = entries[0].target.getBoundingClientRect().height;
+    if (height > 0) overlay.querySelector('.preview-workspace').style.setProperty('--preview-toolbar-height', `${height}px`);
+  });
+  toolbarObserver.observe(overlay.querySelector('.viewer-toolbar'));
   const tools = [...overlay.querySelectorAll("[data-preview-action]")];
   let viewer = null, version = 0, active = false, previousFocus = null;
-  let libraryLoaded = false;
   let loading = false;
   const jointPanel = new JointPanel(document.getElementById("previewJointControls"), {
     getViewer: () => viewer,
@@ -44,18 +69,25 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     playButton.textContent = viewer && !viewer.paused ? "暂停仿真" : "运行仿真";
     playButton.classList.toggle("active", Boolean(viewer && !viewer.paused));
   }
-  async function refreshLibrary() {
-    if (libraryLoaded) return;
-    try {
-      const { models } = await request("/api/preview-models");
-      librarySelect.replaceChildren(new Option("从模型库选择…", ""));
-      for (const model of models) {
-        const group = document.createElement("optgroup"); group.label = model.title;
-        for (const entry of model.entries) group.append(new Option(entry, JSON.stringify({ model_id: model.id, entry })));
-        librarySelect.append(group);
-      }
-      libraryLoaded = true;
-    } catch { setStatus("无法读取模型库，请重启 VMAIL 服务后刷新网页。", true); }
+  function refreshLibrary() {
+    libraryList.replaceChildren();
+    document.getElementById('previewModelCount').textContent = savedModels.length;
+    if (!savedModels.length) { const p = document.createElement('p'); p.className = 'empty-state'; p.textContent = '模型库还是空的。从课程空间添加感兴趣的模型，或打开本地 XML。'; libraryList.append(p); }
+    for (const item of savedModels) {
+      const key = `${item.model_id}/${item.entry}`;
+      const row = document.createElement('div'); row.className = `task-entry ${selectedModel === key ? 'active' : ''}`;
+      const button = document.createElement('button'); button.className = 'task-item'; button.type = 'button'; button.textContent = `${item.title || item.model_id} · ${item.entry}`;
+      if (selectedModel === key) button.setAttribute('aria-current', 'true');
+      button.addEventListener('click', () => { selectedModel = key; refreshLibrary(); void load([], { model_id: item.model_id, entry: item.entry }); });
+      const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'delete-task'; remove.textContent = '×'; remove.setAttribute('aria-label', `从列表移除${item.title || item.model_id}`);
+      remove.addEventListener('click', () => { savedModels = savedModels.filter(model => model !== item); persistLibrary(); refreshLibrary(); });
+      row.append(button, remove); libraryList.append(row);
+    }
+  }
+  function persistLibrary() { try { localStorage.setItem('vmail.preview-models', JSON.stringify(savedModels)); } catch { onError('浏览器无法保存模型列表，本次仍可预览。'); } }
+  function addModel(item) {
+    if (!savedModels.some(model => model.model_id === item.model_id && model.entry === item.entry)) savedModels.push(item);
+    selectedModel = `${item.model_id}/${item.entry}`; persistLibrary(); refreshLibrary(); return load([], { model_id: item.model_id, entry: item.entry });
   }
 
   function setStatus(message, error = false) {
@@ -70,6 +102,7 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     onEnter();
     document.getElementById("app").inert = true;
     overlay.classList.remove("hidden");
+    setPanelVisible('library', !compactPreview.matches);
     closeButton.focus();
     void refreshLibrary();
   }
@@ -83,10 +116,10 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
     jointPanel.render([]); jointsPanel.classList.add("hidden");
     viewport.replaceChildren();
     title.textContent = "模型预览";
-    librarySelect.value = "";
+    selectedModel = '';
     updatePlayback();
     tools.forEach(button => { button.disabled = true; });
-    setStatus("拖入 XML 开始预览，也可从上方模型库选择。预览仿真不记录数据。");
+    setStatus("从左侧选择模型，或拖入 XML 开始预览。预览仿真不记录数据。");
     overlay.classList.add("hidden");
     document.getElementById("app").inert = false;
     onExit();
@@ -121,6 +154,7 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
       }
       if (ticket !== version || !active) return;
       await viewer.loadModel(payload.xml, [], {}, payload.assets, null, payload.joint_limits);
+      if (ticket !== version || !active) return;
       viewer.setMode("camera");
       viewer.setDuration(Infinity);
       title.textContent = payload.name;
@@ -136,8 +170,8 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
         button.classList.toggle("active",enabled);button.setAttribute("aria-pressed",String(enabled));
       }
       loading = false;
-      jointPanel.render(); jointsPanel.classList.remove("hidden");
-      jointsButton.classList.add("active"); jointsButton.setAttribute("aria-expanded", "true");
+      jointPanel.render();
+      setPanelVisible('joints', !compactPreview.matches);
       setStatus("");
       updatePlayback();
     } catch (error) {
@@ -150,9 +184,13 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
   }
   openButton.addEventListener("click", open);
   closeButton.addEventListener("click", close);
+  libraryButton.addEventListener('click', () => {
+    setPanelVisible('library', libraryPanel.classList.contains('hidden'));
+  });
+  document.getElementById('collapsePreviewLibrary').addEventListener('click', () => setPanelVisible('library', false, true));
+  document.getElementById('collapsePreviewJoints').addEventListener('click', () => setPanelVisible('joints', false, true));
   document.getElementById("choosePreviewFile").addEventListener("click", () => input.click());
   input.addEventListener("change", () => { if (input.files.length) void load([...input.files]); input.value = ""; });
-  librarySelect.addEventListener("change", () => { if (librarySelect.value) void load([], JSON.parse(librarySelect.value)); });
   for (const button of tools) button.addEventListener("click", () => {
     if (!viewer?.model) return;
     const action = button.dataset.previewAction;
@@ -173,21 +211,22 @@ export function setupModelPreview({ openButton, getEngine, onEnter, onExit, onEr
       const enabled = action === "shadows" ? viewer.setShadows(!viewer.shadowsEnabled) : viewer.setLighting(!viewer.lightingEnabled);
       button.classList.toggle("active", enabled); button.setAttribute("aria-pressed", String(enabled));
     }
-    else if (action === "joints") { const hidden = jointsPanel.classList.toggle("hidden"); button.classList.toggle("active", !hidden); button.setAttribute("aria-expanded", String(!hidden)); jointPanel.sync(true); }
+    else if (action === "joints") { setPanelVisible('joints', jointsPanel.classList.contains('hidden')); jointPanel.sync(true); }
   });
   window.addEventListener("keydown", event => {
     if (!active) return;
+    if (document.querySelector('#courseSpace[open], #courseDetail[open]')) return;
     if (event.key === "Escape") { event.preventDefault(); close(); }
     if (event.code === "Space" && !event.target.matches("input,select,button")) { event.preventDefault(); playButton.click(); }
     // Keep background task shortcuts, including Space, inactive in preview.
     if (event.code === "Space") event.stopImmediatePropagation();
     if (event.key === "Tab") {
-      const buttons = [...overlay.querySelectorAll("button:not(:disabled),select:not(:disabled),input:not(:disabled)")].filter(element=>element.getClientRects().length);
+      const buttons = [...overlay.querySelectorAll("button:not(:disabled),a[href],select:not(:disabled),input:not(:disabled)")].filter(element=>element.getClientRects().length);
       const first = buttons[0], last = buttons.at(-1);
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
     }
   }, { capture: true });
-  window.addEventListener("beforeunload", () => viewer?.dispose());
-  return { isActive: () => active, loadFiles: files => load(files), close };
+  window.addEventListener("beforeunload", () => { toolbarObserver.disconnect(); viewer?.dispose(); });
+  return { isActive: () => active, loadFiles: files => load(files), addModel, pause: () => viewer?.setPaused(true), close };
 }

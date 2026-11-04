@@ -1,0 +1,7 @@
+title: 带接触与吸附的冰箱门机构
+description: 门铰链力矩；吸附与接触；开门过程的约束和外力
+category: 工程传动与接触机构
+author: 课程组
+model_id: fridge_door
+entries:
+- fridge_door.xml

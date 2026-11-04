@@ -1,0 +1,60 @@
+layout:
+  parameter_groups:
+    - title: 几何尺寸
+      parameters:
+        - radius_1
+        - radius_2
+    - title: 运动输入
+      parameters:
+        - omega_0
+        - alpha_0
+    - title: 速度伺服增益（对照实验）
+      parameters:
+        - crank_kv
+        - gear_kv
+  charts:
+    - title: 曲柄转角 θ（杆 OA 相对初始位置转过的角度）
+      series:
+        - joint.crank_hinge.position
+    - title: M 点加速度分量
+      series:
+        - site.point_m.acceleration.ax
+        - site.point_m.acceleration.ay
+    - title: M 点加速度大小
+      series:
+        - site.point_m.acceleration.magnitude
+    - title: A 点加速度分量（轮心）
+      series:
+        - site.point_a.acceleration.ax
+        - site.point_a.acceleration.ay
+    - title: M 点速度分量与合速度
+      series:
+        - site.point_m.velocity.vx
+        - site.point_m.velocity.vy
+        - site.point_m.velocity.magnitude
+    - title: 啮合点 P 速度（纯滚动约束检验，应为 0）
+      series:
+        - site.point_p.velocity.magnitude
+    - title: 动齿轮Ⅱ角速度与角加速度
+      series:
+        - joint.gear_hinge.velocity
+        - joint.gear_hinge.acceleration
+    - title: 杆 OA 角速度与角加速度
+      series:
+        - joint.crank_hinge.velocity
+        - joint.crank_hinge.acceleration
+controls:
+  actuators:
+    crank_speed:
+      label: 杆 OA 目标角速度
+      unit: rad/s
+      value: 2
+      show_load: false
+    gear_speed:
+      label: 动齿轮Ⅱ目标角速度
+      unit: rad/s
+      value: 5
+      show_load: false
+camera:
+  position: [0, -0.6, 3.6]
+  target: [0, 0.5, 0]

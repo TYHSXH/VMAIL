@@ -17,6 +17,8 @@ from .task_io import TaskValidationError, load_task, list_tasks, save_run_result
 from .simulator import MAX_STEPS, SimulationError, prepare_browser_model, run_mujoco_task
 from .preview import preview_choices, prepare_preview, pack_preview
 from .assistant import router as assistant_router, local_request, local_origin
+from .course_resources import course_resources, public_resource, find_resource, reproduce_task
+from .branding import referenced_logos
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -97,6 +99,35 @@ def api_list_tasks() -> dict[str, Any]:
 @app.get("/api/preview-models")
 def api_preview_models():
     return {"models": preview_choices()}
+
+
+@app.get("/api/course-resources")
+def api_course_resources():
+    return {"resources": [public_resource(item) for item in course_resources()]}
+
+
+@app.get("/api/course-resources/{resource_id}/image")
+def api_course_image(resource_id: str):
+    try:
+        item = find_resource(resource_id)
+        if not item["_preview"]:
+            raise TaskValidationError("该资源尚未提供预览图。")
+        path = (item["_folder"] / item["_preview"]).resolve()
+        if not path.is_relative_to(item["_folder"].resolve()):
+            raise TaskValidationError("预览图路径无效。")
+        return FileResponse(path)
+    except TaskValidationError as exc:
+        raise HTTPException(404, str(exc)) from None
+
+
+@app.post("/api/course-resources/{resource_id}/reproduce", dependencies=[Depends(local_request)])
+def api_reproduce_resource(resource_id: str):
+    try:
+        return reproduce_task(resource_id, TASKS_DIR)
+    except TaskValidationError as exc:
+        raise HTTPException(400, str(exc)) from None
+    except OSError:
+        raise HTTPException(500, "复现失败，请检查任务目录的写入权限。") from None
 
 
 @app.post("/api/preview-model")
@@ -266,7 +297,7 @@ def model_library_readme() -> FileResponse:
 @app.get("/api/help-documents")
 def help_documents() -> dict[str, Any]:
     documents = []
-    for path, title in [("docs/user-guide.md", "学生使用手册"), ("docs/task-guide.md", "任务创建指南：AI 提示词与 STL 建模")]:
+    for path, title in [("docs/user-guide.md", "学生使用手册"), ("docs/task-guide.md", "任务创建指南：AI 提示词与 STL 建模"), ("docs/course-resources.md", "课程空间与资源共建")]:
         documents.append({"path": path, "title": title, "source": (ROOT / path).read_text(encoding="utf-8-sig")})
     return {"documents": documents}
 
@@ -280,7 +311,8 @@ def task_template() -> Response:
     archive = io.BytesIO()
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as package:
         package.writestr("model.xml", model.group(1) + "\n")
-        package.write(ROOT / "assets/logos/logo-gray.png", "assets/logo-gray.png")
+        for name, source in referenced_logos(model.group(1)).items():
+            package.write(source, name)
         package.write(ROOT / "LICENSE", "LICENSE")
         package.write(ROOT / "NOTICE", "NOTICE")
         package.write(ROOT / "COPYRIGHT.md", "COPYRIGHT.md")

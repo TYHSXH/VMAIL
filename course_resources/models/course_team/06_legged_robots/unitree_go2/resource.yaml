@@ -1,0 +1,7 @@
+title: Unitree Go2 四足机器人
+description: 站立支撑多边形；腿部关节力矩与落地冲击
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: unitree_go2
+entries:
+- scene.xml

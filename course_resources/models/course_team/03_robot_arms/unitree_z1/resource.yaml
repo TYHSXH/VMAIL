@@ -1,0 +1,7 @@
+title: Unitree Z1 轻型机械臂
+description: 轻型机械臂惯性耦合；伸展和折叠姿态的驱动力矩
+category: 工业机械臂与双臂系统
+author: 课程组
+model_id: unitree_z1
+entries:
+- scene.xml

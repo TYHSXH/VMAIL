@@ -1,0 +1,16 @@
+<mujoco model="rotating_load_demo">
+  <compiler angle="radian"/>
+  <option gravity="0 0 0" timestep="0.002" integrator="implicitfast"/>
+  <default><geom contype="0" conaffinity="0"/></default>
+  <worldbody>
+    <geom name="reference_plane" type="plane" size="5 5 .1" pos="0 0 -.12" rgba=".22 .25 .27 1"/>
+    <body name="bar">
+      <joint name="move_x" type="slide" axis="1 0 0" damping="2"/>
+      <joint name="move_y" type="slide" axis="0 1 0" damping="2"/>
+      <joint name="turn" type="hinge" axis="0 0 1" damping=".6"/>
+      <geom name="bar_geom" type="capsule" fromto="-.5 0 0 .5 0 0" size=".055" mass="2" rgba=".78 .38 .22 1"/>
+      <site name="point_b" pos=".5 0 0" size=".035" rgba=".95 .8 .45 1"/>
+      <site name="center" size=".025" rgba=".75 .83 .85 1"/>
+    </body>
+  </worldbody>
+</mujoco>

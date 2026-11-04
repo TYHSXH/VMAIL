@@ -1,0 +1,7 @@
+title: Unitree H1 人形机器人
+description: 人形机器人支撑平衡；腿部动力学与外力扰动
+category: 四足、双足与人形机器人
+author: 课程组
+model_id: unitree_h1
+entries:
+- scene.xml

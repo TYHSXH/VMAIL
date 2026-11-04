@@ -59,7 +59,7 @@ try {
     }
   }
   content.replaceChildren(fragment);
-  if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
+  if (location.hash) document.getElementById(location.hash === '#course-resources' ? 'doc-2' : decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
 } catch (error) {
   content.textContent = `使用手册加载失败（${error.message}）。请确认后台服务已重启后刷新页面。`;
 }

@@ -11,6 +11,7 @@ import { setupAssistant } from "./assistant.js";
 import { setupFileDrop } from "./file-drop.js";
 import { confirmTaskDeletion } from "./task-delete.js";
 import { ExperimentRecorder, compareExperiments } from "./experiment.js";
+import { setupCourseSpace } from "./course-space.js";
 
 decorateIcons();
 
@@ -611,6 +612,7 @@ el.expandTasks.addEventListener("click",()=>{el.taskSidebar.classList.remove("co
 el.toggleInspector.addEventListener("click",()=>el.inspector.classList.toggle("collapsed"));
 el.closeInspector.addEventListener("click",()=>el.inspector.classList.add("collapsed"));
 window.addEventListener("keydown",(event)=>{
+  if(document.querySelector('#courseSpace[open], #courseDetail[open]'))return;
   if(event.target.matches("input,textarea,select,[contenteditable]") || event.code!=="Space")return;
   event.preventDefault();el.playButton.click();
 });
@@ -633,6 +635,11 @@ const modelPreview = setupModelPreview({
   onEnter: () => { state.viewer?.clearDrag(); state.viewer?.setPaused(true); state.viewer?.setSuspended(true); },
   onExit: () => { state.viewer?.setSuspended(false); state.viewer?.resize(); },
   onError: message => showMessage(message, true),
+});
+setupCourseSpace({
+  onEnter: () => { state.viewer?.setPaused(true); modelPreview.pause(); },
+  onModel: item => modelPreview.addModel(item),
+  onTask: async task => { modelPreview.close(); await loadTasks(); await selectTask(task.id); showMessage(task.existing ? '已打开此前复现的任务。' : '任务已复现，可以独立调整参数并保存实验。'); },
 });
 setupFileDrop({
   onXml: files => modelPreview.loadFiles(files),

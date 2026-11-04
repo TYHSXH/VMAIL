@@ -1,0 +1,7 @@
+title: 柔性夹持器
+description: 柔性结构变形；接触抓取；刚度与夹持稳定性
+category: 柔性结构、缆索与仿生传动
+author: 课程组
+model_id: soft_gripper
+entries:
+- gripper.xml

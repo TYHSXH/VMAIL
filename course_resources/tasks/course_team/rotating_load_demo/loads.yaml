@@ -1,0 +1,12 @@
+version: 1
+loads:
+  - id: tip_force
+    label: 杆端变方向载荷
+    type: wrench
+    site: point_b
+    frame: world
+    force:
+      - "amplitude * (1 + 0.3*sin(2*pi*frequency*t)) * cos(direction_speed*t)"
+      - "amplitude * (1 + 0.3*sin(2*pi*frequency*t)) * sin(direction_speed*t)"
+      - 0
+    torque: [0, 0, "moment*sin(2*pi*frequency*t)"]

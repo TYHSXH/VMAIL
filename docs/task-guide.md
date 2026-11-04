@@ -111,7 +111,7 @@ AI 应先说明：
 请先说明简化假设、自由度和单位；缺少必要条件时先问我。
 先阅读 tasks/AGENTS.md 和 docs/task-package-spec.md；需要载荷时查阅其中的“任务载荷与控制规律”章节。
 只在 tasks/ 下新建独立任务，登记 tasks/manifest.yaml，不为单个任务修改公共前后端。
-如果需要新写或重写 XML，使用 docs/task-package-spec.md 中“默认 XML 模板”的代码，并把项目的 assets/logos/logo-gray.png 复制为任务内 assets/logo-gray.png；保留深色地面中央的灰色 logo，按模型尺度调整，不平铺；网页以低透明度水印呈现，使其隐约可见并融入地面。
+如果需要新写或重写 XML，使用 docs/task-package-spec.md 中“默认 XML 模板”的代码，并把项目的 assets/logos/logo-black.png 复制为任务内 assets/logo-black.png；保留深色地面中央的黑色 Logo，按模型尺度调整，不平铺；网页以低透明度水印呈现，使其隐约可见并融入地面。
 参数提供中文名称、单位与范围，观测量对应实际模型；固定研究点用具名 site。
 完成后运行 backend.validate_task 和完整默认时长的计算，检查数值稳定性。
 在 notes.md 中写清假设和结果解读，并告诉我网页里应调什么参数、看什么曲线。
@@ -158,7 +158,7 @@ AI 可以辅助分析、写 MJCF 和检查错误，但无法仅凭一张题图�
 2. 学生用自己熟悉的 CAD 工具建模，每个独立运动的刚体分别导出三角网格，保留原始 CAD 文件以便修改。
 3. 导出**二进制 STL**；MuJoCo 也支持 OBJ。STL 不记录单位，必须说明导出坐标是米还是毫米。毫米模型通过 `scale="0.001 0.001 0.001"` 转为米。`body`、`joint`、`site` 的位置仍应使用米，不会跟着 mesh scale 自动换算。
 4. 将资源放到 `tasks/<task_id>/assets/`，路径使用任务内相对路径，保持大小写一致，不引用其他任务、桌面或绝对路径。尽量减少无关细节和面数。
-5. 学生与 AI 共同编写 `model.xml`：定义刚体层级、关节轴、质量／惯量、接触、驱动和观测点，补齐六个任务文件并更新 `tasks/manifest.yaml`。新建时复用[默认灰色 logo 模板](task-package-spec.md#默认-xml-模板)。
+5. 学生与 AI 共同编写 `model.xml`：定义刚体层级、关节轴、质量／惯量、接触、驱动和观测点，补齐六个任务文件并更新 `tasks/manifest.yaml`。新建时复用[默认黑色 Logo 模板](task-package-spec.md#默认-xml-模板)。
 6. 编译、预览、短时仿真，再比较理论、实验或极限工况。每次只改一类内容，保留能运行的版本。
 
 STL 只提供表面三角形，不包含关节、载荷、密度、质量、惯量或控制器。装配 CAD 直接导出一个 STL，通常也不会保留可运动的装配关系。
@@ -208,7 +208,7 @@ tasks/my_mesh_task/
   ui.yaml
   notes.md
   assets/
-    logo-gray.png
+    logo-black.png
     part_mm.stl
     collision_01.stl      # 按需添加，多个凸块分别引用
   SOURCE.md              # 外部资源的作者、来源、许可与修改情况
@@ -229,7 +229,7 @@ tasks/my_mesh_task/
 零件原点、朝向、关节位置、质量与惯量分别为……。
 研究重点是……，必须保留的接触面／孔槽是……。
 请先检查条件是否足够，区分视觉 mesh 与凸碰撞体，协助编写 MJCF
-和六个任务文件，保留默认灰色 logo 地面，登记索引并运行任务校验。
+和六个任务文件，保留默认黑色 Logo 地面，登记索引并运行任务校验。
 不要凭空编造二进制 STL、惯量或闭环约束；需要重新建 CAD 时请明确说明。
 ```
 

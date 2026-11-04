@@ -1,0 +1,7 @@
+title: xArm7 机械臂及夹爪
+description: 抓取运动与接触力；末端质量对动态响应的影响
+category: 工业机械臂与双臂系统
+author: 课程组
+model_id: ufactory_xarm7
+entries:
+- scene.xml

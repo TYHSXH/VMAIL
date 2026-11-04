@@ -1,0 +1,7 @@
+title: 差速驱动小车
+description: 差速转向、轮速合成；轮地摩擦与运动约束
+category: 无人车与移动操作平台
+author: 课程组
+model_id: car
+entries:
+- car.xml

@@ -66,7 +66,7 @@ uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error'
             content = json.loads(raw) if "json" in response.headers.get("content-type", "") else raw
             return content, response.headers
 
-    def test_all_built_resources_and_gray_template_are_served(self):
+    def test_all_built_resources_and_black_template_are_served(self):
         self.assertIn(b"VMAIL", self.request("/")[0])
         manifest = json.loads((ROOT / "app/.vite/manifest.json").read_text(encoding="utf-8"))
         for entry in manifest.values():
@@ -76,16 +76,16 @@ uvicorn.run(main.app, host='127.0.0.1', port=int(sys.argv[2]), log_level='error'
                 if resource.endswith(".wasm"):
                     self.assertEqual(headers.get_content_type(), "application/wasm")
         archive = zipfile.ZipFile(io.BytesIO(self.request("/api/task-template")[0]))
-        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-gray.png", "LICENSE", "NOTICE", "COPYRIGHT.md", "assets/LOGO_RIGHTS.txt"})
+        self.assertEqual(set(archive.namelist()), {"model.xml", "assets/logo-black.png", "LICENSE", "NOTICE", "COPYRIGHT.md", "assets/LOGO_RIGHTS.txt"})
         for document in ("LICENSE", "NOTICE", "COPYRIGHT.md"):
             self.assertEqual(self.request("/" + document)[0], (ROOT / document).read_bytes())
         self.assertEqual(archive.read("LICENSE"), self.request("/LICENSE")[0])
         self.assertEqual(archive.read("NOTICE"), self.request("/NOTICE")[0])
         self.assertEqual(archive.read("COPYRIGHT.md"), self.request("/COPYRIGHT.md")[0])
         self.assertEqual(archive.read("assets/LOGO_RIGHTS.txt"), (ROOT / "assets/logos/LICENSE.txt").read_bytes())
-        self.assertEqual(archive.read("assets/logo-gray.png"), (ROOT / "assets/logos/logo-gray.png").read_bytes())
+        self.assertEqual(archive.read("assets/logo-black.png"), (ROOT / "assets/logos/logo-black.png").read_bytes())
         documents = self.request("/api/help-documents")[0]["documents"]
-        self.assertEqual([doc["path"] for doc in documents], ["docs/user-guide.md", "docs/task-guide.md"])
+        self.assertEqual([doc["path"] for doc in documents], ["docs/user-guide.md", "docs/task-guide.md", "docs/course-resources.md"])
         for doc in documents:
             self.assertEqual(self.request("/" + doc["path"])[0].decode("utf-8-sig").replace("\r\n", "\n"), doc["source"])
 
