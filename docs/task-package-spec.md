@@ -205,6 +205,18 @@ initial_state:
 
 这会设置关节初始广义坐标。`field` 也可以是 `qvel`，表示初始广义速度。
 
+`initial_state` 也支持 1–128 个目标组成的非空列表。每个目标可填写标量 `value` 数字或静态数学表达式，引用任一参数的新值；省略 `value` 时使用所属参数值。表达式采用与 MJCF 参数映射相同的数学白名单，不支持时间、状态或脚本。网页和后台先统一求值，再设置初态；同一关节同一字段不可重复设置。例如单个转速参数同时初始化多个相容关节：
+
+```yaml
+initial_state:
+  - {joint: crank_hinge, field: qvel, value: crank_speed}
+  - {joint: rod_hinge, field: qvel, value: "-crank_speed"}
+  - {joint: orbit_hinge, field: qvel, value: "-2 * crank_speed"}
+  - {joint: roll_hinge, field: qvel, value: "4 * crank_speed"}
+```
+
+以上系数仅适用于对应拓扑和图示初态，须由实际机构运动学推导；改变初始姿态后不能直接沿用这些系数。
+
 每个参数必须包含 `unit`；无量纲参数写 `unit: "1"`。同时建议包含：
 
 - `value`

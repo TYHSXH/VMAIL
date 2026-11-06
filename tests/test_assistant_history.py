@@ -43,6 +43,17 @@ class HistoryTests(unittest.TestCase):
             self.store.read("one")
         self.assertEqual(raised.exception.status_code, 404)
 
+    def test_thinking_and_turn_files_survive_restart_without_becoming_prompt_fields(self):
+        message = {"role": "assistant", "content": "已完成", "thinking_text": "上游思考", "thinking_truncated": True,
+                   "turn_files": [{"task_id": "test", "path": "notes.md", "action": "modified", "status": "saved"}]}
+        state = assistant.ConversationState(messages=[message])
+        with patch.object(assistant, "HISTORY", self.store):
+            assistant.save_conversation("thinking", state)
+        restored = ConversationStore(self.path).read("thinking")["messages"][0]
+        self.assertEqual(restored, assistant.HistoryMessage.model_validate(message).model_dump())
+        self.assertEqual(assistant.Message.model_validate(restored).model_dump(), {"role": "assistant", "content": "已完成", "images": []})
+        self.assertEqual(assistant.HistoryMessage(role="assistant", content="旧记录").thinking_text, "")
+
     def test_save_overwrites_atomically_and_parallel_sessions_remain_readable(self):
         self.store.save("one", self.state())
         with ThreadPoolExecutor(max_workers=4) as pool:

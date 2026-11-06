@@ -12,8 +12,12 @@ import { setupFileDrop } from "./file-drop.js";
 import { confirmTaskDeletion } from "./task-delete.js";
 import { ExperimentRecorder, compareExperiments } from "./experiment.js";
 import { setupCourseSpace } from "./course-space.js";
+import { renderWorkbenchWelcome, setupWorkbenchUI } from "./workbench-ui.js";
+import "./refinements.css";
+import "./assistant-workspace.css";
 
 decorateIcons();
+setupWorkbenchUI();
 
 const state = {
   tasks: [],
@@ -152,7 +156,7 @@ async function initViewer() {
     });
     await state.viewer.init();state.viewerReady=true;
     el.engineBadge.textContent="MuJoCo 3.13";el.engineBadge.classList.remove("loading");el.engineBadge.classList.add("ready");
-    if(state.task)await loadBrowserModel();else el.viewerLoading.innerHTML="<strong>选择任务，开始实验</strong><span>从课程空间复现任务，或在 AI 助手中创建个人任务。</span>";
+    if(state.task)await loadBrowserModel();else renderWorkbenchWelcome(el.viewerLoading);
   }catch(error){el.viewerLoading.innerHTML=`<strong>物理引擎启动失败</strong><span>${escapeHtml(error.message)}</span>`;el.engineBadge.textContent="启动失败";showMessage(error.message,true);}
 }
 async function loadTasks(){state.tasks=(await requestJson("/api/tasks")).tasks || [];renderTaskList();}
@@ -202,7 +206,7 @@ async function removeTask(task) {
         loadPreview.clear();state.viewer?.clearDrag();state.viewer?.setPaused(true);state.viewer?.setSuspended(true);
         state.task=null;state.viewerTaskId=null;state.modelLoading=false;state.parametersDirty=false;state.runtimeRows=[];
         charts.rebuild();clearSeries();setPlaybackEnabled(false);
-        el.mujocoViewport.classList.add("hidden");el.viewerLoading.innerHTML="<strong>暂无学习任务</strong><span>可以在 AI 助手中创建新任务。</span>";el.viewerLoading.classList.remove("hidden");
+        el.mujocoViewport.classList.add("hidden");renderWorkbenchWelcome(el.viewerLoading);el.viewerLoading.classList.remove("hidden");
         el.taskTitle.textContent="选择一个学习任务";el.taskQuestion.textContent="从左侧选择任务，或与 AI 助手对话创建。";
         for(const target of [el.taskNotes,el.topicTags,el.parameterForm,el.actuatorControls,el.resultHistory])target.replaceChildren();
         taskJointPanel.render([]);el.applyParameters.disabled=true;el.runButton.disabled=true;

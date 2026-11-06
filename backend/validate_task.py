@@ -7,7 +7,7 @@ import math
 
 from .task_io import REQUIRED_FILES, TaskValidationError, load_task, list_tasks
 from .simulator import SimulationError, prepare_browser_model, run_mujoco_task
-from .parameter_mapping import mjcf_targets
+from .parameter_mapping import mjcf_targets, initial_targets
 from .workspace import TASKS_DIR
 
 
@@ -61,8 +61,7 @@ def validate_task(task_id: str, tasks_dir: Path | None = None) -> list[str]:
             if tag and name and name not in names.get(tag, set()):
                 errors.append(f"parameter {param_name} references missing {tag} named {name}")
 
-        initial = spec.get("initial_state") if isinstance(spec, dict) else None
-        if initial:
+        for initial in initial_targets(spec, param_name):
             joint = initial.get("joint")
             if joint and joint not in names.get("joint", set()):
                 errors.append(f"parameter {param_name} references missing joint {joint}")

@@ -46,6 +46,20 @@ def tool_stream(name, arguments, number=1, finish="tool_calls"):
     return io.BytesIO(("data: " + json.dumps(chunk) + "\n\ndata: [DONE]\n").encode())
 
 
+def final_stream(content="验证完毕，任务已保存。", reasoning=""):
+    return io.BytesIO(("data: " + json.dumps({"choices": [{"delta": {"content": content, "reasoning_content": reasoning}, "finish_reason": "stop"}]}) + "\n\ndata: [DONE]\n").encode())
+
+
+async def approved_events(response):
+    events = []
+    async for raw in response.body_iterator:
+        item = json.loads(raw)
+        events.append(item)
+        if item["type"] == "approval_required":
+            assistant.decide(item["run_id"], item["approval_id"], "once")
+    return events
+
+
 class AssistantTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -131,14 +145,15 @@ class AssistantTests(unittest.TestCase):
 
     def test_streaming_chat_uses_server_instructions_and_reports_usage(self):
         self.store.save(self.key, "deepseek-flash", False)
-        stream = 'data: {"choices":[{"delta":{"content":"你好"},"finish_reason":null}]}\n\ndata: {"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"total_tokens":10}}\n\ndata: [DONE]\n'
+        stream = 'data: {"choices":[{"delta":{"content":"你好"},"finish_reason":null}]}\n\ndata: {"created":1793952000,"choices":[{"delta":{},"finish_reason":"stop"}],"usage":{"total_tokens":10,"prompt_tokens":8,"completion_tokens":2,"prompt_cache_hit_tokens":0,"prompt_cache_miss_tokens":8}}\n\ndata: [DONE]\n'
         async def collect(response):
             return [json.loads(item) async for item in response.body_iterator]
         with patch.object(assistant, "STORE", self.store), patch.object(assistant, "open_upstream", return_value=io.BytesIO(stream.encode())) as upstream:
             response = assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建单摆"}]))
             output = asyncio.run(collect(response))
-        self.assertEqual(output[0]["content"], "你好")
+        self.assertEqual(next(e for e in output if e["type"] == "delta")["content"], "你好")
         self.assertEqual(output[-1]["usage"]["total_tokens"], 10)
+        self.assertEqual(output[-1]["usage"]["estimated_cost_cny"], "0.000032")
         payload = upstream.call_args.args[2]
         self.assertIn("默认 XML", payload["messages"][0]["content"])
         self.assertEqual(payload["messages"][0]["role"], "system")
@@ -155,8 +170,8 @@ class AssistantTests(unittest.TestCase):
         raw = "\n\n".join("data: " + json.dumps(chunk) for chunk in chunks) + "\n\ndata: [DONE]\n"
         async def collect(response):
             return [json.loads(item) async for item in response.body_iterator]
-        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", return_value=io.BytesIO(raw.encode())):
-            events = asyncio.run(collect(assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "直接创建弹簧任务"}]))))
+        with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", side_effect=[io.BytesIO(raw.encode()), final_stream()]):
+            events = asyncio.run(approved_events(assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "直接创建弹簧任务"}]))))
             self.assertTrue((self.folder / "ai_test_spring").exists())
             task = next(event for event in events if event["type"] == "task_saved")
             self.assertTrue(task["validation"]["valid"], task)
@@ -167,14 +182,14 @@ class AssistantTests(unittest.TestCase):
     def run_tool_sequence(self, responses, current_task_id=None):
         self.store.save(self.key, "deepseek-flash", False)
         calls = []
-        sequence = iter(responses)
+        sequence = iter([*responses, final_stream()])
         def upstream(path, key, payload):
             calls.append(copy.deepcopy(payload))
             response = next(sequence)
             return response() if callable(response) else response
         async def collect():
             response = assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建或修复任务直到成功"}], current_task_id=current_task_id))
-            return [json.loads(item) async for item in response.body_iterator]
+            return await approved_events(response)
         with patch.object(assistant, "STORE", self.store), patch.object(assistant, "TASKS_DIR", self.folder), patch.object(assistant, "open_upstream", side_effect=upstream):
             events = asyncio.run(collect())
         return events, calls
@@ -194,7 +209,9 @@ class AssistantTests(unittest.TestCase):
         self.assertEqual(calls[1]["messages"][-2]["tool_calls"][0]["id"], "call_1")
         self.assertEqual(len(list_tasks(self.folder)), 1)
         self.assertTrue(load_task(self.folder, "ai_test_spring"))
-        self.assertEqual([item["type"] for item in events][-2:], ["task_saved", "done"])
+        self.assertTrue(any(item["type"] == "task_saved" for item in events))
+        self.assertEqual(events[-1]["type"], "done")
+        self.assertEqual(calls[-1]["messages"][-1]["role"], "tool")
         self.assertEqual(events[-1]["usage"]["total_tokens"], 20)
 
     def test_bad_tool_arguments_are_returned_to_model_for_automatic_repair(self):
@@ -203,7 +220,7 @@ class AssistantTests(unittest.TestCase):
             tool_stream("create_task", {"task_id": "ai_test_spring", "files": example_bundle()}, 2),
         ])
         self.assertEqual(json.loads(calls[1]["messages"][-1]["content"])["type"], "task_error")
-        self.assertEqual(events[-2]["type"], "task_saved")
+        self.assertTrue(any(item["type"] == "task_saved" for item in events))
 
     def test_length_limited_tool_output_is_not_executed_and_can_be_repaired(self):
         events, calls = self.run_tool_sequence([
@@ -212,7 +229,7 @@ class AssistantTests(unittest.TestCase):
         ])
         self.assertIn("长度上限", calls[1]["messages"][-1]["content"])
         self.assertFalse(any(item["type"] == "draft" for item in events))
-        self.assertEqual(events[-2]["type"], "task_saved")
+        self.assertTrue(any(item["type"] == "task_saved" for item in events))
 
     def test_save_failure_is_reported_to_model_before_retrying_same_task(self):
         real_publish = assistant.publish_bundle
@@ -228,7 +245,7 @@ class AssistantTests(unittest.TestCase):
             events, calls = self.run_tool_sequence([tool_stream("create_task", args), tool_stream("create_task", args, 2)])
         self.assertIn("保存失败", calls[1]["messages"][-1]["content"])
         self.assertEqual(len(list_tasks(self.folder)), 1)
-        self.assertEqual(events[-2]["type"], "task_saved")
+        self.assertTrue(any(item["type"] == "task_saved" for item in events))
 
     def test_conflicting_update_rereads_and_saves_without_recreating_task(self):
         publish_bundle(self.folder, "ai_test_spring", example_bundle())
@@ -254,9 +271,9 @@ class AssistantTests(unittest.TestCase):
                 lambda: edit(3, assistant.read_task_snapshot(self.folder, "ai_test_spring")["base_revision"]),
             ], current_task_id="ai_test_spring")
         self.assertIn("其他操作修改", calls[1]["messages"][-1]["content"])
-        self.assertNotEqual(json.loads(calls[2]["messages"][-1]["content"])["base_revision"], revision)
-        self.assertEqual(events[-2]["type"], "task_saved")
-        self.assertTrue(events[-2]["task"]["updated"])
+        self.assertNotEqual(json.loads(calls[2]["messages"][-1]["content"])["snapshot"]["base_revision"], revision)
+        self.assertTrue(any(item["type"] == "task_saved" for item in events))
+        self.assertTrue(next(item for item in events if item["type"] == "task_saved")["task"]["updated"])
         self.assertEqual(len(list_tasks(self.folder)), 1)
         self.assertEqual((folder / "notes.md").read_text(), "# Repaired explanation\n")
         self.assertEqual((folder / "results/keep.csv").read_text(), "retained")
@@ -271,8 +288,8 @@ class AssistantTests(unittest.TestCase):
         self.assertEqual(events[-1]["type"], "done")
         self.assertFalse((self.folder / "ai_test_spring").exists())
         self.assertEqual([item for item in events if item["type"] == "draft"][-1]["draft"]["files"], bad)
-        # Tool history is compacted, with intact call/result pairs.
-        self.assertEqual(len(calls[2]["messages"]), len(calls[1]["messages"]))
+        # Reasoning mode requires keeping every tool/result pair.
+        self.assertEqual(len(calls[2]["messages"]), len(calls[1]["messages"]) + 2)
 
     def test_stopping_after_validation_does_not_start_saving(self):
         self.store.save(self.key, "deepseek-flash", False)
@@ -280,6 +297,8 @@ class AssistantTests(unittest.TestCase):
             response = assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建任务"}]))
             async for raw in response.body_iterator:
                 item = json.loads(raw)
+                if item["type"] == "approval_required":
+                    assistant.decide(item["run_id"], item["approval_id"], "once")
                 if item.get("message") == "校验通过，正在保存任务…":
                     await response.body_iterator.aclose()
                     return
@@ -336,7 +355,7 @@ class AssistantTests(unittest.TestCase):
             return [json.loads(item) async for item in response.body_iterator]
         with patch.object(assistant, "STORE", self.store), patch.object(assistant, "open_upstream", return_value=io.BytesIO(raw.encode())):
             events = asyncio.run(collect(assistant.chat(assistant.ConversationRequest(messages=[{"role": "user", "content": "创建任务"}]))))
-        self.assertEqual(events[-1]["type"], "error")
+        self.assertEqual(events[-1]["type"], "done")
         self.assertFalse(any(event["type"] == "draft" for event in events))
 
     def test_complete_duration_is_checked_before_publication(self):
@@ -377,7 +396,7 @@ class AssistantTests(unittest.TestCase):
         self.assertFalse(list(self.folder.glob(".ai-*")))
 
     def test_path_traversal_scripts_and_external_resources_are_rejected(self):
-        for name in ("../outside.py", "scripts/control.py", "manifest.yaml"):
+        for name in ("../outside.py", "backend/assistant.py", "manifest.yaml"):
             files = example_bundle(); files[name] = "bad"
             self.assertFalse(validate_bundle("ai_test_spring", files)["valid"])
         for task_id in ("../outside", "A", "x/y"):

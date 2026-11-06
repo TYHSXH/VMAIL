@@ -23,6 +23,8 @@ class ConversationStore:
                 with database:
                     database.execute("CREATE TABLE IF NOT EXISTS conversations "
                                      "(id TEXT PRIMARY KEY, title TEXT NOT NULL, updated TEXT NOT NULL, state TEXT NOT NULL)")
+                    database.execute("CREATE TABLE IF NOT EXISTS agent_context "
+                                     "(id TEXT PRIMARY KEY, messages TEXT NOT NULL)")
                     yield database
         except (OSError, sqlite3.Error):
             raise HTTPException(500, "对话记录读写失败，请检查 .local 目录的权限和磁盘空间；当前页面内容仍保留。") from None
@@ -67,4 +69,20 @@ class ConversationStore:
         with self.database() as database:
             database.execute("PRAGMA secure_delete=ON")
             database.execute("DELETE FROM conversations WHERE id=?", (conversation_id,))
+            database.execute("DELETE FROM agent_context WHERE id=?", (conversation_id,))
         return {"deleted": True}
+
+    def agent_read(self, conversation_id):
+        self.check_id(conversation_id)
+        with self.database() as database:
+            row = database.execute("SELECT messages FROM agent_context WHERE id=?", (conversation_id,)).fetchone()
+        return json.loads(row[0]) if row else []
+
+    def agent_save(self, conversation_id, messages):
+        """Keep provider reasoning and complete tool/result pairs off the visible transcript."""
+        self.check_id(conversation_id)
+        payload = json.dumps([m for m in messages if m["role"] != "system"], ensure_ascii=False, allow_nan=False)
+        if len(payload.encode()) > 32 * 1024 * 1024:
+            raise HTTPException(413, "工具上下文超过 32 MiB；任务已保存的部分不受影响，请新建对话继续。")
+        with self.database() as database:
+            database.execute("INSERT INTO agent_context VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET messages=excluded.messages", (conversation_id, payload))

@@ -4,6 +4,7 @@ const paths = {
   refresh: '<path d="M20 10a8 8 0 0 0-14-4L3 9m0-5v5h5m-4 5a8 8 0 0 0 14 4l3-3m0 5v-5h-5"/>',
   reset: '<path d="M4 9a8 8 0 1 1 0 6m0-11v5h5"/>',
   cube: '<path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm0 9 9-4m-9 4L3 8m9 4v10m-5-17 9 5"/>',
+  library: '<path d="M12 6c-2-2-5-2-9-1v15c4-1 7-1 9 1 2-2 5-2 9-1V5c-4-1-7-1-9 1Zm0 0v15M6 9h3m-3 4h3m6-4h3m-3 4h3"/>',
   sliders: '<path d="M5 3v7m0 4v7m7-18v2m0 4v12m7-18v10m0 4v4M2 10h6m1-5h6m1 8h6"/>',
   orbit: '<ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-35 12 12)"/><path d="M7 6c-1-4 1-5 4-2s7 12 6 16-5 0-7-4"/>',
   move: '<path d="M12 3v18M3 12h18M9 6l3-3 3 3m-6 12 3 3 3-3M6 9l-3 3 3 3m12-6 3 3-3 3"/>',

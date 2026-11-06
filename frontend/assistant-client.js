@@ -1,27 +1,45 @@
 import {CONVERSATION_IMAGE_LIMIT, CONVERSATION_BYTE_LIMIT} from "./assistant-images.js";
 
+export function usageText(usage) {
+  if (!usage?.total_tokens) return "";
+  const cost = usage.estimated_cost_cny;
+  const amount = cost !== null && cost !== undefined && cost !== "" ? Number(cost) : NaN;
+  const fee = Number.isFinite(amount) && amount >= 0
+    ? amount > 0 && amount < .000001 ? "估算费用不足 0.000001 元" : `估算费用 ${amount.toFixed(6)} 元`
+    : "估算费用暂不可用";
+  return `本次消耗 ${usage.total_tokens.toLocaleString()} tokens · ${fee}`;
+}
+
 // Transport helpers are independent of the DOM so stream failures are testable.
 export async function readAssistantStream(response, onDelta, onEvent = () => {}) {
   if (!response.body) throw new Error("浏览器无法读取流式回答，请更换浏览器后重试。");
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "", done = false, usage = null;
+  let batchStarted = performance.now(), consumed = 0;
   function consume(line) {
     if (!line.trim()) return;
     const item = JSON.parse(line);
     if (item.type === "error") throw new Error(item.message);
     if (item.type === "delta") onDelta(item.content);
     if (item.type === "done") { done = true; usage = item.usage; }
-    if (["status", "draft", "task_saved", "task_error"].includes(item.type)) onEvent(item);
+    if (!["delta", "done", "error"].includes(item.type)) onEvent(item);
   }
   try {
     while (true) {
       const item = await reader.read();
       buffer += decoder.decode(item.value, {stream: !item.done});
-      let newline;
-      while ((newline = buffer.indexOf("\n")) >= 0) {
-        consume(buffer.slice(0, newline)); buffer = buffer.slice(newline + 1);
+      let newline, offset = 0;
+      while ((newline = buffer.indexOf("\n", offset)) >= 0) {
+        consume(buffer.slice(offset, newline)); offset = newline + 1;
+        // A buffered response can contain thousands of tokens. Give rendering
+        // and the Stop button a turn even when reader.read() resolves at once.
+        if (++consumed % 128 === 0 && performance.now() - batchStarted >= 8) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+          batchStarted = performance.now();
+        }
       }
+      buffer = buffer.slice(offset);
       if (item.done) break;
     }
     if (buffer.trim()) consume(buffer);

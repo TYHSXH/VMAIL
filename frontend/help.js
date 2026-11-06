@@ -1,6 +1,7 @@
 import "./styles.css";
 import { renderTaskNotes } from "./task-notes.js";
 import { headingSlug, resolveHelpLink } from "./help-navigation.js";
+import "./refinements.css";
 
 const content = document.getElementById("helpContent");
 const navigation = document.getElementById("helpNavigation");

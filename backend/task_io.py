@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .parameter_mapping import ParameterMappingError, mjcf_targets
+from .parameter_mapping import ParameterMappingError, mjcf_targets, initial_targets
 
 from datetime import datetime
 from pathlib import Path
@@ -188,11 +188,9 @@ def _load_task(tasks_dir: Path, task_id: str) -> dict[str, Any]:
             raise TaskValidationError(f"参数 {name} 必须是对象。")
         try:
             mjcf_targets(spec, name)
+            initial_targets(spec, name)
         except ParameterMappingError as exc:
             raise TaskValidationError(str(exc)) from exc
-        for field in ("initial_state",):
-            if field in spec and not isinstance(spec[field], dict):
-                raise TaskValidationError(f"参数 {name} 的 {field} 必须是对象。")
         for bound in ("min", "max", "value"):
             if bound in spec:
                 try:

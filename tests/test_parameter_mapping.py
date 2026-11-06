@@ -18,6 +18,33 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ParameterMappingTests(unittest.TestCase):
+    def test_one_speed_initializes_multiple_joints_and_native_browser_values_agree(self):
+        task = copy.deepcopy(self.task)
+        for spec in task["parameters"]["parameters"].values():
+            spec.pop("initial_state", None)
+        root = ET.fromstring(task["model_xml"])
+        body = root.find(".//body[@name='slider']")
+        ET.SubElement(body, "joint", {"name": "lateral", "type": "slide", "axis": "0 1 0"})
+        task["model_xml"] = ET.tostring(root, encoding="unicode")
+        task["parameters"]["parameters"]["speed"] = {"value": 2, "unit": "m/s", "initial_state": [
+            {"joint": "slide_x", "field": "qvel", "value": "speed"},
+            {"joint": "lateral", "field": "qvel", "value": "-2 * speed"},
+        ]}
+        task["observe"] = {"observe": {"sites": [{"name": "slider_center", "fields": ["velocity"], "components": ["x", "y"]}]}}
+        for speed in [.2, 1, 2, 3]:
+            payload = prepare_browser_model(task, {"speed": speed})
+            self.assertEqual([v["value"] for v in payload["initial_state"]], [speed, -2*speed])
+            result = run_mujoco_task(task, {"speed": speed}, duration_override=.01, timestep_override=.001)
+            self.assertAlmostEqual(result["series"]["site.slider_center.velocity.vx"][0], speed)
+            self.assertAlmostEqual(result["series"]["site.slider_center.velocity.vy"][0], -2*speed)
+        from backend.parameter_mapping import resolved_initial_state, initial_targets
+        for bad in [[], [{"joint": "slide_x", "field": "qacc"}], [{"joint": "slide_x", "value": [1]}]]:
+            with self.assertRaises(ParameterMappingError):
+                initial_targets({"initial_state": bad}, "speed")
+        for expression in ["t", "missing", "1/0", "__import__('os')", "1e309"]:
+            with self.assertRaises(ParameterMappingError):
+                resolved_initial_state({"speed": {"initial_state": {"joint": "slide_x", "value": expression}}}, {"speed": 2})
+
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory(prefix="vmail-linked-parameters-")
         self.addCleanup(self.temporary.cleanup)

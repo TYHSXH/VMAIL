@@ -3,12 +3,11 @@ import shutil
 import tempfile
 import unittest
 from unittest.mock import patch
-import yaml
 
 from backend import personal_models, main
 from backend.preview import prepare_preview
 from backend.task_io import list_tasks
-from backend.workspace import ensure_tasks, migrate_legacy_tasks
+from backend.workspace import migrate_legacy_tasks
 
 ROOT = Path(__file__).resolve().parents[1]
 XML = '<mujoco><worldbody><geom type="sphere" size=".1"/></worldbody></mujoco>'

@@ -11,7 +11,7 @@ import numpy as np
 from .loads import LoadError, compile_loads, apply_loads
 from .load_math import signal_math
 from .experiment import model_revision, restore_experiment
-from .parameter_mapping import ParameterMappingError, mjcf_targets, target_value
+from .parameter_mapping import ParameterMappingError, mjcf_targets, target_value, resolved_initial_state
 
 
 class SimulationError(Exception):
@@ -154,17 +154,7 @@ def prepare_browser_model(
     except Exception as exc:
         raise SimulationError(f"模型无法编译：{exc}") from exc
 
-    initial_state: list[dict[str, Any]] = []
-    for name, spec in _parameter_entries(task).items():
-        initial = spec.get("initial_state") if isinstance(spec, dict) else None
-        if initial and initial.get("joint"):
-            initial_state.append(
-                {
-                    "joint": initial["joint"],
-                    "field": initial.get("field", "qpos"),
-                    "value": values[name],
-                }
-            )
+    initial_state = resolved_initial_state(_parameter_entries(task), values)
 
     return {
         "xml": ET.tostring(root, encoding="unicode"),
@@ -223,26 +213,21 @@ def _apply_mjcf_overrides(model_xml: str, task: dict[str, Any], values: dict[str
 
 
 def _set_initial_state(model: Any, data: Any, task: dict[str, Any], values: dict[str, float], mujoco: Any) -> None:
-    params = _parameter_entries(task)
-    for param_name, spec in params.items():
-        initial = spec.get("initial_state") if isinstance(spec, dict) else None
-        if not initial:
-            continue
-        joint_name = initial.get("joint")
-        field = initial.get("field", "qpos")
-        if not joint_name:
-            continue
+    try:
+        entries = resolved_initial_state(_parameter_entries(task), values)
+    except ParameterMappingError as exc:
+        raise SimulationError(str(exc)) from exc
+    for initial in entries:
+        joint_name, field = initial["joint"], initial["field"]
         joint_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
         if joint_id < 0:
             raise SimulationError(f"Initial-state joint not found: {joint_name}")
         if int(model.jnt_type[joint_id]) not in {int(mujoco.mjtJoint.mjJNT_HINGE), int(mujoco.mjtJoint.mjJNT_SLIDE)}:
-            raise SimulationError(f"初始状态参数 {param_name} 只支持一维转动或滑动关节。")
-        if field == "qpos":
-            data.qpos[model.jnt_qposadr[joint_id]] = values[param_name]
-        elif field == "qvel":
-            data.qvel[model.jnt_dofadr[joint_id]] = values[param_name]
+            raise SimulationError(f"初始状态 {joint_name} 只支持一维转动或滑动关节。")
+        if field == "qvel":
+            data.qvel[model.jnt_dofadr[joint_id]] = initial["value"]
         else:
-            raise SimulationError(f"Unsupported initial state field: {field}")
+            data.qpos[model.jnt_qposadr[joint_id]] = initial["value"]
 
 
 def _validate_observations(model: Any, observe: dict[str, Any], mujoco: Any) -> None:

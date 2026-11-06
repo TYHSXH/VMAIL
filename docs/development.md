@@ -75,15 +75,29 @@ npm run build
 
 ## 本地 DeepSeek 助手
 
-当前统一通过 `/api/assistant/chat` 流式对话及 `create_task`、`read_task`、`update_task` 工具处理任务。旧的 `/api/assistant/generate` 独立生成接口已移除；维护或接入时使用现有聊天流程。
+助手通过 `/api/assistant/chat` 连续执行任务操作，默认开启 DeepSeek `thinking.enabled`、`reasoning_effort=max`，单次输出预算 64000 tokens。模型响应中的 `reasoning_content` 与完整工具调用/结果对保留在本机 SQLite 的 `agent_context` 表中，在后续请求中原样回传。上游实际返回的思考片段通过 `reasoning_delta` 实时展示；生成时展开，正式回复、审批及完成时自动折叠，学生可重新展开。单条消息思考预览上限为一百万字符，不影响后台完整推理上下文。`read_task_docs` 按需读取规范，避免每次注入整份格式文档。每轮最多 64 次模型请求，单次响应最多 16 个工具调用，按序执行；保存成功后继续把结果交给模型验证和总结。
 
-`frontend/assistant.js` 在现有右栏提供连接、流式自由对话和任务文件查看；普通聊天无需创建任务。模型可调用 `create_task` 新建、`read_task` 读取、`update_task` 修改原任务。每轮请求携带网页选中任务编号，后端提供最新文件与内容版本号；读取工具结果会继续交给模型，允许在同一次请求内读取后修改。后端在临时目录中校验并流式回传结果；浏览器收到完整成功消息后分别请求 POST 新建或 PATCH 修改，再刷新列表。工具输出不完整或校验失败时将错误和当前文件保留给下一轮修正，不强制新开对话。修改只提交变动文件，合并当前配置后校验；保留原任务编号、资源及 results。提交时再次核对版本号，使用共享任务状态锁阻止在批量计算期间修改；修改前在 `.local/task-history/<task_id>/` 备份原文件，写入失败时回滚已替换文件。模型没有删除工具。`assistant-client.js` 处理流式协议与近期上下文选择，不以 40 条消息终止聊天；每次最多发送 200 条和受控体积，超过时提示省略早期上下文，页面历史不删。`backend/assistant.py` 仅代理固定 DeepSeek 官方地址，端点要求本机来源与专用请求头。此模块面向单用户 loopback 运行，不能直接作为公网多人服务使用。
+`assistant-turn.js` 管理单轮思考和文件摘要，`assistant-workspace.js` 保留整段对话的文件内容、差异及审批记录。每条助手消息保存 `thinking_text`、`thinking_truncated` 和仅含元数据的 `turn_files`，刷新后思考默认折叠；这些展示字段不会拼入普通提示词，也不会重复复制文件正文。停止及断线后，等待工作区清理状态再记录本轮最终文件状态。
 
-密钥默认只存 Python 进程内存；选用记住功能时由 `assistant_credentials.py` 使用 Windows DPAPI 当前用户加密到 `.local/deepseek.key`。接口不会返回原始密钥。`.local/` 不进入版本控制，也不要随项目分发。
+`deep_thinking` 默认 true，随对话保存；关闭时上游使用 `thinking.type=disabled` 且不发送 reasoning_effort。`POST /api/assistant/runs/{run_id}/messages` 接收带幂等 id 的文字修正，每次最多 12000 字符、每轮最多 32 条。RUNS_LOCK 保护队列及结束时关闭接收的边界；审批中收到修正会以 revised 结束旧审批并清除本轮同类授权。旧工具调用仍补齐 skipped 工具结果以保持上下文成对，下一次模型请求前再追加真正的 user 消息并发送 steering_applied。客户端按原回复、修正消息、新回复保存历史；未应用消息保留 incomplete，不能在下一轮伪装成已处理上下文。正在执行的工具不强制中断。
 
-`assistant_tasks.py` 只接受六个必需任务文件及可选 loads.yaml、README.md，拒绝路径、脚本、插件、外部资源与 YAML 别名，自动复制官方 logo。草稿在临时目录中由 `assistant_validate.py` 独立子进程完成标准校验和完整默认时长计算，超时 40 秒。保存时重新校验，使用共享任务写锁、目录重命名及原子索引替换发布，失败回滚新任务，不覆盖已有任务。`validate_task` 的可选 `tasks_dir` 允许使用相同规则验证临时草稿。
+思考渲染按 100ms 合并更新，只保留一个最多 12000 字符的 DOM 文本节点。长记录通过上一段/下一段/最新内容查看；折叠历史在展开前不写入正文。禁止在 token 回调中读取滚动高度等布局数据，以免每个片段都强制重新排版。流读取对已缓冲的大量事件按时间预算让出主线程，避免阻塞动画和停止按钮。回归测试覆盖四万个片段、DOM 大小上限、历史分段、折叠及结束取消待刷新任务。
 
-对话、图片、输入草稿、任务草稿与校验结果经本机专用 API 存入 `.local/assistant-history.sqlite3`（SQLite 事务，单条对话上限 64 MiB），不保存连接密钥。历史列表可恢复、切换与单独删除对话；删除对话不删除任务。请求中断的轮次保留但标记 incomplete，不进入后续模型上下文；恢复不会重放任务写入。前端串行保存，切换前等待落盘；错误明确提示，不自动丢弃旧记录。该数据库是明文个人数据，不能随发布包分发。流式响应不完整或学生停止等待时，浏览器不调用保存端点；保存阶段不再提供取消等待。停止等待不能保证上游取消或免除 API 费用。真实模型质量与账户可用性需要持有 API Key 的使用者验证；离线自动测试使用模拟上游响应，但任务编译与计算使用真实 MuJoCo。
+用量后附“估算费用 ×× 元”。`assistant_pricing.py` 按每次模型请求的创建时间（北京时间）、缓存命中/未命中输入和包含思考的输出分别计价，再累计整个工具循环，以 Decimal 计算并在显示时保留六位小数。价表与 2026 年节假日日历于 2026-11-06 核对；价格或年度变化时需更新。缺少用量明细、未知模型或未知年度显示“估算费用暂不可用”，不将缺失费用记为零。该数值不是账户实际扣费，不额外查询余额。
+
+`assistant_agent.py` 为每轮创建 `.local/ai-workspaces/<run_id>/<task_id>/` 工作区。工具支持列出任务/文件、分段读取、批量写入、精确文本补丁、参数实验、任务数值 Python、校验、保存和临时文件清理。`create_task`、`read_task`、`update_task` 保留兼容。既有任务保留编号、资源和实验结果；使用内容版本号检查并发修改，保存前备份到 `.local/task-history/<task_id>/`，写入失败回滚。只能写任务配置、模型资源、任务脚本与实验报告，不能写平台代码或由 AI 直接维护全局索引。
+
+写文件、运行命令前，服务端自动检查任务范围，再发送 `approval_required`。学生通过本机审批接口选择 `once`、`turn` 或 `deny`；未明确同意不会执行。文件授权限定该任务；命令授权限定任务及操作种类，Python 脚本另外绑定源代码 SHA-256，改代码后重新审批。授权仅在当前模型执行轮有效。审批展示实际文件内容/差异、命令及脚本源代码；审查通过不代表物理正确或绝对安全。参数实验支持多工况，返回单位、初末值、极值、非有限值计数及最多 101 点曲线；完整数据可在任务分析脚本中用 `simulate()` 分析。数值脚本生成的正式报告仍需文件授权后才能保存。
+
+任务终端支持 `python -m backend.validate_task TASK_ID` 和 `python scripts/analysis.py` / `python .tmp/check.py`。它是任务数值执行环境，**不是任意主机 Shell，也不等同于 VS Code 的完整 Python 环境**。`assistant_compute.py` 在执行前检查 AST，仅开放 math、NumPy 的显式数值函数、statistics、JSON，以及任务范围的 `simulate`、`read_text`、`write_text`、`read_csv`、`write_csv`；不暴露原始模块、反射、系统 I/O、联网、子进程或安装工具。不能依靠 cwd 限定任意 Python/PowerShell 的权限，后续若开放完整终端，应接入真正的操作系统隔离容器，不可直接移除此执行边界。`assistant_worker.py` 在独立子进程运行计算，使用无 Shell 参数、精简环境变量、超时、Windows Job Object 内存上限与终止清理；它的资源限制不应被称为完整 OS 安全沙箱。
+
+任务文件遍历、文本读取、路径边界检查和预检统一由 `assistant_tasks.py` 提供，快照、工作区和计算进程复用同一实现。遍历前排除临时目录、缓存和实验历史；正式 `scripts/` 随任务输入复制，使保存的研究脚本能在后续对话中继续使用。数值脚本只通过 `assistant_worker.py` 执行，审批后传入已核准的源码快照，避免重复命令行入口和计算模块对工作进程的反向导入。
+
+`assistant_tasks.py` 接受六个必需文件，可添加 loads.yaml、任务内 XML/OBJ/STL、scripts/*.py、docs 和 results 中的报告。任务输入最多 1000 个文本文件、4 MiB；仿真与网页保持一致，最多 3600 秒、1000000 步、最小步长 1e-5 秒。允许内建 MJCF 功能和任务内 include；保留原生插件、越界资源、YAML 别名及过量展开的检查。当前写文件工具接收 UTF-8 文本，新建二进制 STL/纹理仍需外部资源准备；既有二进制资源保留。平台自动补齐官方 Logo。校验与默认工况由统一 `assistant_worker.py` 执行，通常超时 40 秒；任务命令/参数实验上限 90 秒、Windows 单进程内存 1 GiB。
+
+一次性脚本和中间结果放 `.tmp/`，助手结束前调用清理工具，服务端在正常结束、停止或断线后的 finally 中兜底移除整个本轮工作区。只有已通过校验并成功保存的任务文件留下；临时文件永不发布。网页的“本次对话文件”累计显示创建/修改文件、内容、差异及保存/清理状态，“操作记录”保留审批决定与命令结果。恢复历史不会重放操作。审批默认等待最多 15 分钟，超时视为未同意。停止不能取消已进入的原子保存，也不保证取消已发出的上游费用。
+
+连接密钥默认只存进程内存；选择记住时使用 Windows DPAPI 当前用户加密到 `.local/deepseek.key`，不在状态接口、任务、对话或工作区中返回原始密钥。对话、文件变更、操作记录和推理工具上下文存入本机 `.local/assistant-history.sqlite3`，属于明文个人数据，不随项目发布。对话上限 64 MiB，工具上下文上限 32 MiB。端点限定 loopback 来源与专用请求头，适用于单用户本机服务，不可直接部署为公网多人服务。
 
 任务删除由学生在名称旁点击垃圾桶并在原生 dialog 中二次确认，DELETE 请求必须携带相同任务编号和本机请求头。后端与批量计算共用运行锁，计算未结束时拒绝删除；验证真实路径和目录树，拒绝符号链接及目录联接。先暂存目录、原子替换索引，再移除全部文件；索引更新失败会还原目录，文件占用导致清理不完整会明确返回残留路径。
 
@@ -223,7 +237,7 @@ npm audit
 
 GitHub 发布时提交本次新增源文件、品牌资源、文档、测试和最新 `app/`（包括 `app/.vite/manifest.json`）。仅复制已有被跟踪文件会漏掉尚未提交的新功能，请发布前检查 `git status`。
 
-分发至少保留：`app/`、`backend/`、`assets/`、`docs/`、`.local/tasks/`、`model_library/`、`licenses/`、两个 README、`LICENSE`、`NOTICE`、`COPYRIGHT.md`、`THIRD_PARTY_NOTICES.md`、`requirements.txt`、`constraints.txt` 与全部安装／启动／卸载 BAT。模型 `SOURCE.md`、`LICENSE` 随资源一起分发；源码仓库另保留前端源码、测试与 npm 锁文件。学生作品公开范围按贡献说明确认。
+分发至少保留：`app/`、`backend/`、`assets/`、`docs/`、`tasks/`、`course_resources/`、`model_library/`、`licenses/`、两个 README、`LICENSE`、`NOTICE`、`COPYRIGHT.md`、`THIRD_PARTY_NOTICES.md`、`requirements.txt`、`constraints.txt` 与全部安装／启动／卸载 BAT。`tasks/manifest.yaml` 应为空的个人任务初始化索引；公共课程任务由 `course_resources/` 提供。模型 `SOURCE.md`、`LICENSE` 随资源一起分发；源码仓库另保留前端源码、测试与 npm 锁文件。学生作品公开范围按贡献说明确认。
 
 不要分发 `.local/`、`.venv`、`.venv.backup-*`、`node_modules`、缓存、个人 API Key 或个人实验结果。`.local/` 含加密密钥、明文对话／图片及任务修改备份，Git 忽略规则不能代替人工压缩包排除。学生原有任务与结果在更新前自行备份；不要用教师的任务目录无条件覆盖学生的自建任务。
 

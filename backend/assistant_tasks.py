@@ -4,11 +4,10 @@ from __future__ import annotations
 import json
 import hashlib
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 import shutil
-import subprocess
-import sys
+import threading
 import stat
 import tempfile
 import xml.etree.ElementTree as ET
@@ -20,18 +19,60 @@ from .task_io import REQUIRED_FILES, TITLE_LOCK, TASK_STATE_LOCK, ACTIVE_SIMULAT
 from .simulator import MAX_STEPS
 from .branding import DEFAULT_LOGO, referenced_logos, copy_brand_assets
 from .workspace import ensure_tasks
+from .assistant_process import run_worker
 
 ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_FILES = set(REQUIRED_FILES) | {"loads.yaml", "README.md"}
+MAX_BUNDLE_BYTES = 4 * 1024 * 1024
+WINDOWS_DEVICE_NAMES = {"CON", "CONIN$", "CONOUT$", "PRN", "AUX", "NUL"} | {
+    f"{prefix}{number}" for prefix in ("COM", "LPT") for number in range(1, 10)}
+
+
+def relative_task_path(name: str, *, temporary=False) -> PurePosixPath:
+    """Use one path policy for file tools, numerical scripts and task publication."""
+    if not isinstance(name, str) or not name or "\\" in name or ":" in name or "\x00" in name:
+        raise TaskValidationError("文件必须使用任务内的相对路径。")
+    path = PurePosixPath(name)
+    parts = path.parts[1:] if temporary and path.parts and path.parts[0] == ".tmp" else path.parts
+    if not parts or path.is_absolute() or str(path) != name or any(p.startswith(".") or p.endswith((".", " ")) for p in parts):
+        raise TaskValidationError("文件路径不能越出任务目录，也不能包含隐藏路径。")
+    if any(p.split(".")[0].rstrip().upper() in WINDOWS_DEVICE_NAMES for p in parts):
+        raise TaskValidationError("不能使用系统设备文件名。")
+    return path
+
+
+def checked_task_path(folder: Path, name: str) -> Path:
+    path = folder / relative_task_path(name, temporary=True)
+    if not path.resolve().is_relative_to(folder.resolve()) or any(
+        is_link(p) for p in (path, *path.parents) if (p.exists() or p.is_symlink()) and p != folder.parent
+    ):
+        raise TaskValidationError("文件路径不能越出任务目录或经过链接。")
+    return path
+
+
+def task_file_name(name: str) -> str:
+    """Only model/task inputs and reports; never platform files or executable launchers."""
+    path = relative_task_path(name)
+    allowed = name in ALLOWED_FILES or len(path.parts) > 1 and (
+        path.parts[0] in {"assets", "models"} and path.suffix.lower() in {".xml", ".obj", ".stl"}
+        or path.parts[0] == "scripts" and path.suffix.lower() == ".py"
+        or path.parts[0] in {"results", "docs"} and path.suffix.lower() in {".csv", ".json", ".md", ".txt"})
+    if not allowed:
+        raise TaskValidationError("只能创建任务配置、MJCF/模型资源、任务 Python 脚本或实验报告，不能修改平台代码。")
+    return name
 
 
 def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None = None) -> None:
     if not re.fullmatch(r"[a-z0-9_]{1,64}" if existing_dir is not None else r"[a-z][a-z0-9_]{0,63}", task_id):
         raise TaskValidationError("任务编号需以小写字母开头，只含小写字母、数字和下划线，最长 64 个字符。")
-    if set(files) - ALLOWED_FILES or not set(REQUIRED_FILES) <= set(files):
-        raise TaskValidationError("任务需包含六个必需文件，可选 loads.yaml、README.md；不接受其他文件或路径。")
-    if any(not isinstance(v, str) for v in files.values()) or sum(len(v.encode("utf-8")) for v in files.values()) > 256_000:
-        raise TaskValidationError("任务草稿过大，请简化模型（总大小不超过 256 KB）。")
+    if not set(REQUIRED_FILES) <= set(files):
+        raise TaskValidationError("任务需包含六个必需文件。")
+    for name in files:
+        task_file_name(name)
+    if len({name.casefold() for name in files}) != len(files):
+        raise TaskValidationError("文件名不能只靠大小写区分。")
+    if len(files) > 1000 or any(not isinstance(v, str) for v in files.values()) or sum(len(v.encode("utf-8")) for v in files.values()) > MAX_BUNDLE_BYTES:
+        raise TaskValidationError("单次任务输入最多 1000 个文件、4 MiB；大资源请分次添加。")
     for name in files:
         if name.endswith(".yaml"):
             # YAML aliases are unnecessary here and can produce recursive graphs.
@@ -48,8 +89,8 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
         raise TaskValidationError("请提供 1–80 字符的单行任务标题。")
     simulation = metadata.get("simulation", {})
     duration, timestep = float(simulation.get("duration", 6)), float(simulation.get("timestep", .005))
-    if not (math.isfinite(duration) and math.isfinite(timestep) and 0 < duration <= 60 and timestep >= .00001 and math.ceil(duration / timestep) <= MAX_STEPS):
-        raise TaskValidationError(f"AI 任务试运行限 60 秒仿真时长、{MAX_STEPS} 步，步长至少 0.00001 秒；请缩短时长或增大步长。")
+    if not (math.isfinite(duration) and math.isfinite(timestep) and 0 < duration <= 3600 and timestep >= .00001 and math.ceil(duration / timestep) <= MAX_STEPS):
+        raise TaskValidationError(f"任务仿真最多 3600 秒、{MAX_STEPS} 步，步长至少 0.00001 秒。")
     xml = files["model.xml"]
     if "<!" in xml:
         # Comments are harmless; declarations and entities are not accepted.
@@ -57,23 +98,34 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
         if "<!" in xml_without_comments:
             raise TaskValidationError("模型不支持 XML 声明实体或 DTD。")
     root = ET.fromstring(xml)
-    if root.tag != "mujoco" or len(list(root.iter())) > 800:
-        raise TaskValidationError("请生成不超过 800 个元素的 MJCF 模型。")
-    for node in root.iter():
-        if node.tag in {"extension", "plugin"} or (node.tag == "include" and existing_dir is None):
-            raise TaskValidationError("网页 AI 创建暂不支持 include、插件或外部模型，使用基础几何体建模。")
-        if node.tag in {"replicate", "composite", "flexcomp", "deformable", "hfield", "skin", "size"}:
-            raise TaskValidationError("网页 AI 创建暂不支持批量展开、柔性体或自定义内存分配，请使用基础刚体建模。")
-        if existing_dir is None and node.tag == "texture" and (node.get("name") != "buaa_logo" or node.get("file") != DEFAULT_LOGO):
-            raise TaskValidationError("网页 AI 创建仅支持内置 logo 纹理，其他物体请使用 rgba 颜色。")
-        if existing_dir is None and any(key in node.attrib for key in ("assetdir", "meshdir", "texturedir")):
-            raise TaskValidationError("模型不可设置外部资源目录。")
+    if root.tag != "mujoco" or len(list(root.iter())) > 10000:
+        raise TaskValidationError("MJCF 模型最多 10000 个 XML 元素。")
+    model_roots = [root]
+    for name, content in files.items():
+        if name != "model.xml" and name.endswith(".xml"):
+            if "<!" in re.sub(r"<!--[\s\S]*?-->", "", content):
+                raise TaskValidationError("模型资源不支持 XML 实体或 DTD。")
+            model_roots.append(ET.fromstring(content))
+    def expanded_count(node):
+        count = 1 + sum(expanded_count(child) for child in node)
+        if node.tag == "replicate":
+            count *= int(node.get("count", 1))
+        if count > 100000:
+            raise TaskValidationError("模型批量展开超过 100000 个元素；请减少重复数量。")
+        return count
+    for model_root in model_roots:
+        expanded_count(model_root)
+    for node in (n for model_root in model_roots for n in model_root.iter()):
+        if node.tag in {"extension", "plugin"}:
+            raise TaskValidationError("任务不能加载原生插件；可使用 MuJoCo 内建建模功能。")
+        if node.tag in {"texture", "hfield"} and int(node.get("width", node.get("ncol", 1))) * int(node.get("height", node.get("nrow", 1))) > 16_777_216:
+            raise TaskValidationError("单个纹理/高度场最多 16777216 个像素/格点。")
+        if node.tag == "flexcomp" and math.prod(int(v) for v in node.get("count", "1").split()) > 100000:
+            raise TaskValidationError("柔性体网格过大，请减少节点数量。")
         for attribute, value in node.attrib.items():
-            if existing_dir is None and attribute.startswith("file") and not (attribute == "file" and node.tag == "texture" and value == DEFAULT_LOGO):
-                raise TaskValidationError("网页 AI 创建仅允许内置 logo 资源，不读取其他文件。")
-            if existing_dir is not None and attribute.startswith("file") and value:
+            if (attribute.startswith("file") or attribute in {"assetdir", "meshdir", "texturedir"}) and value:
                 # The simulator also resolves compiler directories and includes strictly inside the snapshot.
-                if attribute != "file" or Path(value).is_absolute() or ".." in Path(value.replace("\\", "/")).parts:
+                if attribute.startswith("file") and attribute != "file" or ":" in value or Path(value).is_absolute() or ".." in Path(value.replace("\\", "/")).parts:
                     raise TaskValidationError("修改后的模型不能引用任务目录外的文件。")
     if existing_dir is not None:
         return
@@ -95,6 +147,7 @@ def check_bundle(task_id: str, files: dict[str, str], existing_dir: Path | None 
 def write_bundle(folder: Path, files: dict[str, str]):
     folder.mkdir()
     for name, content in files.items():
+        (folder / name).parent.mkdir(parents=True, exist_ok=True)
         (folder / name).write_text(content, encoding="utf-8")
     copy_brand_assets(folder, files['model.xml'])
 
@@ -109,20 +162,14 @@ def validate_bundle(task_id: str, files: dict[str, str], existing_dir: Path | No
             else:
                 copy_task_inputs(existing_dir, folder)
                 for name, content in files.items():
+                    (folder / name).parent.mkdir(parents=True, exist_ok=True)
                     (folder / name).write_text(content, encoding="utf-8")
                 copy_brand_assets(folder, files['model.xml'])
-            process = subprocess.run(
-                [sys.executable, "-m", "backend.assistant_validate", temporary, task_id],
-                cwd=ROOT, capture_output=True, timeout=40, encoding="utf-8", errors="replace",
-                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0,
-            )
-            # MuJoCo warnings can precede the JSON result on stdout.
-            if process.returncode or not process.stdout.strip():
-                return {"valid": False, "errors": ["模型校验进程未正常完成，请简化模型后重新生成。"]}
-            return json.loads(process.stdout.strip().splitlines()[-1])
-    except subprocess.TimeoutExpired:
-        return {"valid": False, "errors": ["模型校验超时，请简化机构或减少仿真步数。"]}
-    except (TaskValidationError, ValueError, TypeError, AttributeError, RecursionError, yaml.YAMLError, ET.ParseError) as exc:
+            report = run_worker(folder, "validate", {}, threading.Event(), timeout=40)
+            if not report.get("valid"):
+                return {"valid": False, "errors": report.get("errors") or [report.get("error", "任务试运行失败。修复后可重新提交。")]}
+            return {**report, **report.get("experiment", {})}
+    except (TaskValidationError, ValueError, TypeError, AttributeError, RecursionError, OSError, yaml.YAMLError, ET.ParseError) as exc:
         return {"valid": False, "errors": [str(exc)[:2000]]}
 
 
@@ -174,50 +221,86 @@ def is_link(path: Path) -> bool:
     return path.is_symlink() or bool(getattr(metadata, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
 
 
+def task_input_paths(folder: Path, *, include_results=False):
+    """Prune results and caches before descending; never follow a task input link."""
+    for path in sorted(folder.iterdir()):
+        if path.name.startswith(".") or path.name == "__pycache__" or path.name == "results" and not include_results:
+            continue
+        if is_link(path):
+            raise TaskValidationError("任务输入不能包含链接或目录联接。")
+        if path.is_dir():
+            yield from task_input_paths(path, include_results=include_results)
+        elif path.is_file():
+            yield path
+
+
+def read_task_files(folder: Path, *, include_results=False) -> dict[str, str]:
+    files, total = {}, 0
+    for name in ALLOWED_FILES:
+        path = folder / name
+        if path.exists() and not path.is_file():
+            raise TaskValidationError(f"{name} 必须是普通文件。")
+    for path in task_input_paths(folder, include_results=include_results):
+        name = path.relative_to(folder).as_posix()
+        try:
+            task_file_name(name)
+        except TaskValidationError:
+            continue
+        if path.stat().st_size > MAX_BUNDLE_BYTES:
+            raise TaskValidationError(f"{name} 文本输入超过 4 MiB，请拆分大型模型资源。")
+        try:
+            content = path.read_bytes().decode("utf-8-sig")
+        except UnicodeError:
+            if name in ALLOWED_FILES:
+                raise TaskValidationError(f"{name} 必须是 UTF-8 文本。")
+            continue  # Binary resources are copied intact, not sent as text.
+        total += len(content.encode("utf-8"))
+        if total > MAX_BUNDLE_BYTES:
+            raise TaskValidationError("任务文本输入超过 4 MiB，请分拆大型模型资源。")
+        files[name] = content
+    return files
+
+
+def preflight_task(folder: Path):
+    check_bundle(folder.name, read_task_files(folder), folder)
+
+
 def read_task_snapshot(tasks_dir: Path, task_id: str) -> dict:
     with TITLE_LOCK:
         folder = task_folder(tasks_dir, task_id)
         entry = next((item for item in list_tasks(tasks_dir) if item["id"] == task_id), None)
         if entry is None:
             raise TaskValidationError("任务未登记或已经删除，请重新选择任务。")
-        files = {}
+        files = read_task_files(folder)
         digest = hashlib.sha256(json.dumps(entry, sort_keys=True, ensure_ascii=False).encode("utf-8"))
-        for name in sorted(ALLOWED_FILES):
-            path = folder / name
+        present = set()
+        for path in task_input_paths(folder):
+            name = path.relative_to(folder).as_posix()
+            present.add(name)
             digest.update(name.encode())
-            if path.exists() or path.is_symlink():
-                if is_link(path) or not path.is_file() or path.stat().st_size > 256_000:
-                    raise TaskValidationError(f"{name} 是链接、不是普通文件或体积过大，无法通过 AI 读取。")
-                raw = path.read_bytes()
-                digest.update(raw)
-                files[name] = raw.decode("utf-8-sig")
-            else:
-                digest.update(b"<missing>")
-        if sum(len(content.encode("utf-8")) for content in files.values()) > 256_000:
-            raise TaskValidationError("任务配置超过 256 KB，请缩小配置后再通过网页修改。")
+            with path.open("rb") as handle:
+                digest.update(hashlib.file_digest(handle, "sha256").digest())
+        for name in sorted(ALLOWED_FILES - present):
+            digest.update(name.encode() + b"<missing>")
         return {"task_id": task_id, "title": entry.get("title", task_id), "base_revision": digest.hexdigest(),
                 "files": files, "missing_files": [name for name in REQUIRED_FILES if name not in files]}
 
 
 def copy_task_inputs(source: Path, destination: Path):
     destination.mkdir()
-    for path in source.iterdir():
-        if path.name in {"results", "scripts", ".git", "__pycache__"} or path.name.startswith("."):
-            continue
-        if is_link(path):
-            raise TaskValidationError("任务输入含链接或目录联接，无法安全校验修改。")
-        target = destination / path.name
-        if path.is_dir():
-            copy_task_inputs(path, target)
-        elif path.is_file():
-            shutil.copyfile(path, target)
+    for path in task_input_paths(source):
+        target = destination / path.relative_to(source)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(path, target)
 
 
 def prepare_update(tasks_dir: Path, task_id: str, changes: dict[str, str], base_revision: str):
-    if not changes or set(changes) - ALLOWED_FILES:
-        raise TaskValidationError("只能修改任务配置、模型、说明文件，不能修改其他路径或脚本。")
-    if sum(len(content.encode("utf-8")) for content in changes.values()) > 256_000:
-        raise TaskValidationError("本次修改内容超过 256 KB，请分次修改。")
+    if not changes:
+        raise TaskValidationError("请提供要修改的文件。")
+    for name in changes:
+        task_file_name(name)
+    if sum(len(content.encode("utf-8")) for content in changes.values()) > MAX_BUNDLE_BYTES:
+        raise TaskValidationError("本次修改内容超过 4 MiB，请分次修改。")
     snapshot = read_task_snapshot(tasks_dir, task_id)
     if snapshot["base_revision"] != base_revision:
         raise TaskValidationError("任务已被其他操作修改，请用 read_task 重新读取后再修改，避免覆盖新内容。")
@@ -237,6 +320,9 @@ def update_bundle(tasks_dir: Path, task_id: str, changes: dict[str, str], base_r
         entry = next(item for item in manifest["tasks"] if item["id"] == task_id)
         entry.update(title=metadata["title"], description=str(metadata.get("question", ""))[:500])
         targets = {folder / name: content.encode("utf-8") for name, content in changes.items()}
+        for path in targets:
+            if not path.resolve().is_relative_to(folder.resolve()) or any(is_link(parent) for parent in path.parents if parent.exists() and parent != folder.parent):
+                raise TaskValidationError("修改路径不能经过链接或越出任务目录。")
         for name, source in referenced_logos(files['model.xml']).items():
             logo = folder / name
             if not logo.exists():

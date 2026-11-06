@@ -1,11 +1,13 @@
 import {renderTaskNotes} from "./task-notes.js";
-import {prepareAssistantContext, readAssistantStream} from "./assistant-client.js";
+import {prepareAssistantContext, readAssistantStream, usageText} from "./assistant-client.js";
 import {readAssistantImage, validateImageFiles} from "./assistant-images.js";
+import {setupAssistantWorkspace} from "./assistant-workspace.js";
+import {setupAssistantTurn} from "./assistant-turn.js";
 
 export function setupAssistant({onOpen, onCreated, onError, getTask = () => null}) {
   const panel = document.getElementById("panel-assistant");
   panel.innerHTML = `
-    <div class="assistant-heading"><h2>我是菜鸟，需要辅助<span class="panel-kicker">DEEPSEEK</span></h2><button id="aiNew" class="quiet-button" type="button">新对话</button></div>
+    <div class="assistant-heading"><h2>我是菜鸟，需要辅助<span id="aiThinkingMode" class="panel-kicker">DEEPSEEK · 深度思考 MAX</span></h2><button id="aiNew" class="quiet-button" type="button">新对话</button></div>
     <details id="aiSettings" class="assistant-settings">
       <summary><span>历史与连接</span><span class="assistant-summary-state"><span id="aiConnectionState" class="ai-connection-state">读取中</span><span id="aiHistoryState" role="status"></span></span></summary>
       <div class="assistant-history"><label class="sr-only" for="aiHistory">历史对话</label><select id="aiHistory" aria-label="选择历史对话"><option value="">新对话</option></select><button id="aiDelete" class="quiet-button" type="button">删除此对话</button></div>
@@ -22,6 +24,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
       <div id="aiWelcome" class="assistant-welcome"><span class="assistant-orbit" aria-hidden="true">＋</span><h3>你想研究什么现象？</h3><button id="aiExample" type="button">试试：比较单摆在不同初始角度下的周期 ↗</button></div>
     </div>
     <div class="assistant-bottom">
+      <div id="aiWorkspace" class="assistant-workspace"></div>
       <details id="aiDraft" class="assistant-draft hidden">
         <summary class="assistant-draft-heading"><strong>任务文件 <span id="aiFileCount"></span></strong><span id="aiDraftId"></span></summary>
         <div class="assistant-draft-popover" role="region" aria-label="任务文件内容">
@@ -38,6 +41,14 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   let history = [], draft = null, validation = null, configured = false, busy = false, controller = null, savedTask = false;
   let attachments = [], readingImages = false, configuredModel = "deepseek-flash";
   let conversationId = crypto.randomUUID(), conversations = [], saveQueue = Promise.resolve(true), saveTimer;
+  let activeRunId = "", steeringSending = false;
+  const steeringMessages = new Map();
+  const thinkingToggle = document.createElement("label"); thinkingToggle.className = "assistant-thinking-toggle";
+  thinkingToggle.innerHTML = '<input id="aiThinking" type="checkbox" checked />深度思考';
+  panel.querySelector(".assistant-compose-actions").prepend(thinkingToggle);
+  el.Thinking = document.getElementById("aiThinking"); el.ThinkingMode = document.getElementById("aiThinkingMode");
+  const messageViews = new WeakMap();
+  const agentWorkspace = setupAssistantWorkspace(document.getElementById("aiWorkspace"), {api, changed: scheduleSave});
 
   async function api(path, {method = "GET", body, signal} = {}) {
     const response = await fetch("/api/assistant" + path, {method, signal, headers: {"Content-Type": "application/json", "X-VMAIL-Assistant": "1"}, body: body === undefined ? undefined : JSON.stringify(body)});
@@ -62,7 +73,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     clearTimeout(saveTimer);
     if (!history.length && !el.Input.value && !attachments.length && !draft && !conversations.some(item => item.id === conversationId)) return saveQueue;
     const id = conversationId;
-    const state = JSON.parse(JSON.stringify({messages: history, input: el.Input.value, attachments, draft, validation, saved_task: savedTask}));
+    const state = JSON.parse(JSON.stringify({messages: history, input: el.Input.value, attachments, draft, validation, saved_task: savedTask, deep_thinking: el.Thinking.checked, ...agentWorkspace.snapshot()}));
     el.HistoryState.textContent = "正在保存…";
     saveQueue = saveQueue.then(async () => {
       try {
@@ -81,10 +92,12 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   function showConversation(state = {}) {
     history = state.messages || []; draft = state.draft || null; validation = state.validation || {valid: false, errors: []};
     savedTask = !!state.saved_task; attachments = state.attachments || []; el.Input.value = state.input || "";
+    el.Thinking.checked = state.deep_thinking !== false; steeringMessages.clear();
+    agentWorkspace.restore(state);
     for (const item of el.Conversation.querySelectorAll(".assistant-message")) item.remove();
     el.Welcome.classList.toggle("hidden", !!history.length);
     for (const item of history) {
-      const body = message(item.role, item.content, false, item.images || []);
+      const body = message(item.role, item.content, false, item.images || [], item);
       if (item.incomplete) { body.classList.add("incomplete"); body.append(document.createTextNode("\n（本轮未完成；如需继续，请重新发送。）")); }
     }
     drawAttachments(); drawDraft(); drawHistory();
@@ -96,8 +109,13 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   }
   function sync() {
     const working = busy || readingImages;
-    el.Send.disabled = working || !configured;
-    el.Input.disabled = working;
+    const canSteer = !!controller && !!activeRunId;
+    el.Send.disabled = !configured || readingImages || steeringSending || busy && !canSteer;
+    el.Send.textContent = controller ? "发送修正" : "发送";
+    el.Input.disabled = readingImages || busy && !controller;
+    el.Input.placeholder = controller ? "可补充文字修正；在当前请求结束后优先处理…" : "描述机构、已知条件；也可以添加题目图或草图…";
+    el.Thinking.disabled = working;
+    el.ThinkingMode.textContent = el.Thinking.checked ? "DEEPSEEK · 深度思考 MAX" : "DEEPSEEK · 快速回复";
     el.ChooseImages.disabled = working;
     for (const item of [el.New, el.Save, el.Model, el.Key]) item.disabled = working;
     el.History.disabled = working;
@@ -121,7 +139,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     sync();
     if (data.notice) status(data.notice, true);
   }
-  function message(role, text, plain = false, images = []) {
+  function message(role, text, plain = false, images = [], detail = {}) {
     el.Welcome.classList.add("hidden");
     const article = document.createElement("article"); article.className = "assistant-message " + role;
     const label = document.createElement("span"); label.className = "assistant-message-role"; label.textContent = role === "user" ? "你" : "DeepSeek";
@@ -136,7 +154,10 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
       }
       article.append(gallery);
     }
-    article.append(body); el.Conversation.append(article);
+    article.append(body);
+    if (role === "assistant") messageViews.set(body, setupAssistantTurn(article, body, detail,
+      {onOpenFile: (taskId, path) => agentWorkspace.openFile(taskId, path)}));
+    el.Conversation.append(article);
     article.scrollIntoView({block: "nearest"});
     return body;
   }
@@ -168,12 +189,9 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     } catch (error) { status(error.message, true); }
     finally { readingImages = false; sync(); }
   }
-  function usageText(usage) {
-    return usage?.total_tokens ? `本次 ${usage.total_tokens.toLocaleString()} tokens` : "";
-  }
   function drawDraft() {
     el.Draft.open = false;
-    el.Draft.classList.toggle("hidden", !draft);
+    el.Draft.classList.toggle("hidden", !draft || agentWorkspace.snapshot().file_changes.length > 0);
     if (!draft) return;
     el.DraftId.textContent = draft.task_id;
     const updating = draft.operation === "update";
@@ -191,6 +209,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     const originalText = el.Input.value.trim();
     const text = originalText || (attachments.length ? "请分析图片中的题目或机构，帮助我明确建模条件和实验方案。" : "");
     if (!text || busy || readingImages || !configured) return;
+    steeringMessages.clear(); activeRunId = "";
     if (configuredModel !== "deepseek-flash" && (attachments.length || history.some(m => m.images?.length))) {
       el.Settings.open = true; status("图片理解需要 DeepSeek Flash，请切换模型并保存；或者新建纯文字对话。", true); return;
     }
@@ -201,65 +220,117 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     el.Input.value = "";
     busy = true; controller = new AbortController(); sync(); status("DeepSeek 正在思考…");
     void persist();
-    const body = message("assistant", "正在连接…", true);
-    let answer = "", taskEvent = null, savedShown = false;
-    async function showSavedTask() {
+    let body = message("assistant", "正在连接…", true);
+    let turnView = messageViews.get(body);
+    let reply = {role: "assistant", content: "正在处理…", incomplete: true}; history.push(reply);
+    const segments = [];
+    let answer = "", taskEvent = null, lastSavedEvent = null, savedShown = false;
+    function showSavedTask() {
       if (savedShown) return;
       savedShown = true;
-      const updating = taskEvent.operation === "update";
-      answer += `\n\n程序结果：已${updating ? "更新" : "创建"}任务「${taskEvent.task.title}」，校验与默认工况试运行通过，可以在左侧打开。`;
-      try { await onCreated(taskEvent.task); } catch (error) { onError("任务已保存，刷新列表后可打开。" + error.message); }
+      const saved = lastSavedEvent;
+      const updating = saved.operation === "update";
+      answer += `\n\n程序结果：已${updating ? "更新" : "创建"}任务「${saved.task.title}」，校验与默认工况试运行通过，可以在左侧打开。`;
+    }
+    function rememberAnswer(incomplete = false) {
+      Object.assign(reply, {content: answer || "（本阶段结束，继续处理补充消息。）", ...turnView.snapshot(), incomplete});
     }
     try {
       const context = history.map(item => item === turn ? {...item, incomplete: false} : item);
       const {messages, omitted} = prepareAssistantContext(context, savedTask && getTask() ? null : draft, savedTask ? [] : validation?.errors || []);
-      const response = await api("/chat", {method: "POST", body: {messages, current_task_id: getTask()}, signal: controller.signal});
+      const response = await api("/chat", {method: "POST", body: {messages, current_task_id: getTask(), conversation_id: conversationId, deep_thinking: el.Thinking.checked}, signal: controller.signal});
       const usage = await readAssistantStream(response, delta => {
         const nearBottom = el.Conversation.scrollHeight - el.Conversation.scrollTop - el.Conversation.clientHeight < 100;
+        if (delta.trim()) turnView.replyStarted();
         answer += delta; body.textContent = answer;
         if (nearBottom) el.Conversation.scrollTop = el.Conversation.scrollHeight;
       }, item => {
+        agentWorkspace.handle(item);
+        turnView.handle(item);
+        if (item.type === "run_started") { activeRunId = item.run_id; sync(); }
+        if (item.type === "steering_applied") {
+          turn.incomplete = false;
+          rememberAnswer(); turnView.finish(agentWorkspace.snapshot().file_changes); segments.push({view: turnView, reply});
+          for (const update of item.messages) {
+            const pending = steeringMessages.get(update.id);
+            if (pending) { pending.turn.incomplete = false; pending.body.textContent = update.content; pending.applied = true; }
+            else { const restored = {role: "user", content: update.content, incomplete: false}; history.push(restored); message("user", update.content); }
+          }
+          answer = ""; body = message("assistant", "正在根据修正继续…", true); turnView = messageViews.get(body);
+          turnView.handle({type: "run_started", run_id: activeRunId});
+          reply = {role: "assistant", content: "正在处理修正…", incomplete: true}; history.push(reply);
+          void persist();
+        }
         if (item.type === "status") status(item.message);
         if (item.type === "draft" || item.type === "task_saved") {
           taskEvent = item;
           draft = item.draft; validation = item.validation; savedTask = item.type === "task_saved";
           drawDraft();
+          if (item.type === "task_saved") {
+            lastSavedEvent = item;
+            void Promise.resolve().then(() => onCreated(item.task)).catch(error => onError("任务已保存，刷新列表后可打开。" + error.message));
+          }
         }
         if (item.type === "task_error") answer += "\n\n程序结果：" + item.message;
       });
       if (taskEvent) {
-        if (savedTask) await showSavedTask();
-        else if (!validation.valid) answer += "\n\n程序结果：" + (draft.operation === "update" ? "修改未保存，原任务保留。" : "任务尚未创建。") + "\n" + validation.errors.map(error => "- " + error).join("\n") + "\n草稿已保留，可以继续告诉我如何修改，或让我根据错误重试。";
+        if (lastSavedEvent) showSavedTask();
+        if (!savedTask && !validation.valid) answer += "\n\n程序结果：" + (draft.operation === "update" ? "修改未保存，原任务保留。" : "任务尚未创建。") + "\n" + validation.errors.map(error => "- " + error).join("\n") + "\n草稿已保留，可以继续告诉我如何修改，或让我根据错误重试。";
       }
       if (!answer.trim()) answer = "本次未保存任务变更，可以继续描述你的需求。";
       turn.incomplete = false;
-      renderTaskNotes(body, answer); history.push({role: "assistant", content: answer});
+      renderTaskNotes(body, answer); rememberAnswer();
       status([usageText(usage), omitted ? `本次使用近期上下文，较早 ${omitted} 条消息仍可在上方查看。` : ""].filter(Boolean).join(" · "));
     } catch (error) {
-      if (taskEvent?.type === "task_saved") {
-        await showSavedTask();
+      if (lastSavedEvent) {
+        showSavedTask();
         turn.incomplete = false;
-        history.push({role: "assistant", content: answer}); renderTaskNotes(body, answer);
+        rememberAnswer(); renderTaskNotes(body, answer);
         status("任务已保存；后续连接中断不影响保存结果。");
       } else {
         const reason = error.name === "AbortError" ? "已停止本轮自动处理；如已进入保存阶段，写入可能完成，请查看任务列表。已发出的请求仍可能计费。" : error.message;
         answer += "\n\n程序结果：" + reason;
-        history.push({role: "assistant", content: answer, incomplete: true});
+        rememberAnswer(true);
         if (!el.Input.value.trim()) el.Input.value = originalText;
         if (!attachments.length) { attachments = images; drawAttachments(); }
         body.textContent = answer; body.classList.add("incomplete");
         status(reason, true);
       }
-    } finally { busy = false; controller = null; drawDraft(); sync(); void persist(); el.Input.focus(); }
+    } finally {
+      activeRunId = ""; sync();
+      await agentWorkspace.finish(); turnView.finish(agentWorkspace.snapshot().file_changes);
+      if (reply) Object.assign(reply, turnView.snapshot());
+      for (const segment of segments) { segment.view.finish(agentWorkspace.snapshot().file_changes); Object.assign(segment.reply, segment.view.snapshot()); }
+      for (const pending of steeringMessages.values()) if (!pending.applied) {
+        pending.body.textContent = pending.turn.content + "\n（修正未处理，请重新发送。）";
+        if (!el.Input.value.trim()) el.Input.value = pending.turn.content;
+      }
+      busy = false; controller = null; drawDraft(); sync(); void persist(); el.Input.focus();
+    }
   }
-  el.ChatForm.addEventListener("submit", event => { event.preventDefault(); chat(); });
+  async function sendCorrection() {
+    const text = el.Input.value.trim(), runId = activeRunId;
+    if (!text || !runId || steeringSending) return;
+    const id = crypto.randomUUID(), turn = {role: "user", content: text, incomplete: true};
+    const body = message("user", text + "\n（修正消息排队中…）"); history.push(turn);
+    const pending = {turn, body, applied: false}; steeringMessages.set(id, pending);
+    el.Input.value = ""; steeringSending = true; sync();
+    try {
+      await api(`/runs/${runId}/messages`, {method: "POST", body: {id, content: text}});
+      if (!pending.applied) status("修正已排队；当前请求结束后优先处理，尚未执行的旧操作将取消。");
+    } catch (error) {
+      if (!pending.applied) { body.textContent = text + "\n（修正未送达，请重新发送。）"; if (!el.Input.value.trim()) el.Input.value = text; status(error.message, true); }
+    } finally { steeringSending = false; sync(); void persist(); }
+  }
+  el.ChatForm.addEventListener("submit", event => { event.preventDefault(); if (controller) void sendCorrection(); else void chat(); });
+  el.Thinking.addEventListener("change", () => { sync(); scheduleSave(); });
   el.ChooseImages.addEventListener("click", () => el.ImageFiles.click());
   el.ImageFiles.addEventListener("change", () => { void addImages(Array.from(el.ImageFiles.files)); el.ImageFiles.value = ""; });
   el.Input.addEventListener("paste", event => {
     const files = Array.from(event.clipboardData?.items || []).filter(item => item.kind === "file" && item.type.startsWith("image/")).map(item => item.getAsFile()).filter(Boolean);
     if (files.length) { event.preventDefault(); void addImages(files); }
   });
-  el.Input.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); chat(); } });
+  el.Input.addEventListener("keydown", event => { if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); if (controller) void sendCorrection(); else void chat(); } });
   el.Stop.addEventListener("click", () => controller?.abort());
   el.File.addEventListener("change", () => { el.FileContent.textContent = draft?.files[el.File.value] || ""; });
   document.addEventListener("pointerdown", event => { if (!el.Draft.contains(event.target)) el.Draft.open = false; });

@@ -5,14 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="在浏览器中用 MuJoCo 探究理论力学模型" />
     <title>VMAIL-BUAA 理论力学虚拟仿真实验平台</title>
-    <script type="module" crossorigin src="/static/assets/main-KSsAJgCW.js"></script>
+    <script type="module" crossorigin src="/static/assets/main-C2AuUwGb.js"></script>
     <link rel="modulepreload" crossorigin href="/static/assets/rolldown-runtime-WkwZ5CU-.js">
-    <link rel="modulepreload" crossorigin href="/static/assets/task-notes-pyQrSOLB.js">
-    <link rel="stylesheet" crossorigin href="/static/assets/task-notes-CxuvTo06.css">
-    <link rel="stylesheet" crossorigin href="/static/assets/main-DGlrnyXy.css">
+    <link rel="modulepreload" crossorigin href="/static/assets/refinements-EMErRwns.js">
+    <link rel="stylesheet" crossorigin href="/static/assets/refinements-BcpLf3hp.css">
+    <link rel="stylesheet" crossorigin href="/static/assets/main-BOaU6a2u.css">
   </head>
   <body>
+    <a class="skip-link" href="#taskTitle">跳到实验工作区</a>
     <div id="app">
+      <button id="mobileSidebarBackdrop" class="sidebar-backdrop" type="button" aria-label="关闭任务导航" tabindex="-1"></button>
       <aside id="taskSidebar" class="task-sidebar">
         <header class="brand-row">
           <img class="brand-logo" src="/static/assets/logo-black-DIwuPfK_.png" alt="VMAIL-BUAA 标志" />
@@ -37,13 +39,14 @@
         <header class="topbar">
           <button id="expandTasks" class="icon-button hidden" data-icon="panel-left" type="button" title="展开任务栏" aria-label="展开任务栏"></button>
           <div class="task-heading">
-            <h1 id="taskTitle">选择一个学习任务</h1>
+            <span class="workspace-kicker">理论力学 · 实验工作区</span>
+            <h1 id="taskTitle" tabindex="-1">选择一个学习任务</h1>
           </div>
           <div class="topbar-actions">
-            <button class="quiet-button" data-open-course type="button">课程空间</button>
-            <button id="toggleInspector" class="quiet-button" data-icon="sliders" type="button">参数与数据</button>
+            <button class="quiet-button" data-open-course data-icon="library" type="button">课程空间</button>
+            <button id="toggleInspector" class="quiet-button" data-icon="sliders" type="button" aria-controls="inspector" aria-expanded="false">参数与数据</button>
             <button id="openPreview" class="quiet-button" data-icon="cube" type="button">模型预览</button>
-            <button id="openAssistant" class="quiet-button" type="button" aria-controls="panel-assistant">我是菜鸟·AI</button>
+            <button id="openAssistant" class="quiet-button assistant-entry" type="button" aria-controls="panel-assistant"><span class="ai-spark" aria-hidden="true">✳</span>我是菜鸟·AI</button>
             <a class="quiet-button help-link" href="/help" target="_blank" rel="noopener noreferrer">帮助</a>
           </div>
         </header>
@@ -212,7 +215,7 @@
       <footer class="preview-credit">© 2026 VMAIL-BUAA · BUAA 5系 理论力学课程组 · 版权所有</footer>
     </section>
     <dialog id="courseSpace" class="course-space" aria-labelledby="courseTitle">
-      <header class="course-header"><div><span class="panel-kicker">VMAIL-BUAA · 课程共建</span><h1 id="courseTitle">课程空间</h1></div><button id="closeCourse" class="quiet-button" type="button">返回工作区</button></header>
+      <header class="course-header"><div><span class="panel-kicker">VMAIL-BUAA · 课程共建</span><h1 id="courseTitle"><span class="course-title-icon" data-icon="library" aria-hidden="true"></span>课程空间</h1></div><button id="closeCourse" class="quiet-button" type="button">返回工作区</button></header>
       <div class="course-body">
         <aside class="course-filters"><h2>课程资源</h2><div class="course-types" role="group" aria-label="资源类型"><button class="active" data-course-type="models" type="button" aria-pressed="true">模型库 <span id="courseModelCount">0</span></button><button data-course-type="tasks" type="button" aria-pressed="false">任务库 <span id="courseTaskCount">0</span></button></div><label class="course-label" for="courseGroup">资源来源</label><select id="courseGroup"><option value="">全部来源</option></select><label class="course-label" for="courseCategory">分类</label><select id="courseCategory"><option value="">全部分类</option></select>
           <section class="course-contribute" aria-labelledby="contributeTitle"><span class="contribute-kicker">课程共建</span><h3 id="contributeTitle">让好作品成为<br />下一位同学的起点</h3><p>分享你的模型或完整任务，<br />经课程组审核后收录。</p><ol class="contribute-steps"><li>准备作品</li><li>提交 PR</li><li>审核收录</li></ol><a class="contribute-guide" href="/help#course-resources" target="_blank" rel="noopener noreferrer">第一次提交？从这里开始 <span aria-hidden="true">↗</span></a></section>

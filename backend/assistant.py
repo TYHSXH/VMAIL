@@ -7,8 +7,10 @@ import binascii
 import json
 from pathlib import Path
 import socket
+import shutil
 import re
 import threading
+import time
 from typing import Literal
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -21,9 +23,11 @@ from pydantic import BaseModel, Field, SecretStr
 
 from .assistant_credentials import CredentialStore, MODELS
 from .assistant_history import ConversationStore
+from .assistant_pricing import accumulate_usage
 from .assistant_tasks import publish_bundle, validate_bundle, read_task_snapshot, prepare_update, update_bundle, task_folder
 from .task_io import TaskValidationError, list_tasks
 from .workspace import TASKS_DIR
+from .assistant_agent import TaskAgent, agent_tools, decide, steer, describe_change, RUNS, RUNS_LOCK
 
 ROOT = Path(__file__).resolve().parents[1]
 STORE = CredentialStore(ROOT / ".local" / "deepseek.key")
@@ -31,7 +35,7 @@ HISTORY = ConversationStore(ROOT / ".local" / "assistant-history.sqlite3")
 AI_SLOT = threading.BoundedSemaphore(1)
 VALIDATION_SLOT = threading.BoundedSemaphore(1)
 BASE_URL = "https://api.deepseek.com"
-MAX_TOOL_ROUNDS = 12
+MAX_TOOL_ROUNDS = 64
 
 
 async def local_origin(request: Request):
@@ -78,21 +82,26 @@ class Message(BaseModel):
 class ConversationRequest(BaseModel):
     messages: list[Message] = Field(min_length=1, max_length=200)
     current_task_id: str | None = Field(default=None, pattern=r"^[a-z0-9_]{1,64}$")
+    conversation_id: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,64}$")
+    deep_thinking: bool = True
 
 
 class BundleRequest(BaseModel):
     task_id: str = Field(min_length=1, max_length=64)
-    files: dict[str, str] = Field(min_length=6, max_length=8)
+    files: dict[str, str] = Field(min_length=6, max_length=1000)
 
 
 class UpdateTaskRequest(BaseModel):
     task_id: str = Field(min_length=1, max_length=64)
-    files: dict[str, str] = Field(min_length=1, max_length=8)
+    files: dict[str, str] = Field(min_length=1, max_length=1000)
     base_revision: str = Field(pattern=r"^[0-9a-f]{64}$")
 
 
 class HistoryMessage(Message):
     incomplete: bool = False
+    thinking_text: str = Field(default="", max_length=1_000_000)
+    thinking_truncated: bool = False
+    turn_files: list[dict] = Field(default_factory=list, max_length=2000)
 
 
 class HistoryDraft(BundleRequest):
@@ -107,6 +116,36 @@ class ConversationState(BaseModel):
     draft: HistoryDraft | None = None
     validation: dict | None = None
     saved_task: bool = False
+    file_changes: list[dict] = Field(default_factory=list, max_length=2000)
+    activity: list[dict] = Field(default_factory=list, max_length=500)
+    deep_thinking: bool = True
+
+
+class ApprovalDecision(BaseModel):
+    decision: Literal["once", "turn", "deny"]
+
+
+class SteeringMessage(BaseModel):
+    id: str = Field(pattern=r"^[a-zA-Z0-9_-]{1,64}$")
+    content: str = Field(min_length=1, max_length=12000)
+
+
+@router.post("/runs/{run_id}/messages")
+def send_steering_message(run_id: str, request: SteeringMessage):
+    if not request.content.strip():
+        raise HTTPException(400, "请输入修正内容。")
+    return steer(run_id, request.id, request.content.strip())
+
+
+@router.post("/runs/{run_id}/approvals/{approval_id}")
+def approve_operation(run_id: str, approval_id: str, request: ApprovalDecision):
+    return decide(run_id, approval_id, request.decision)
+
+
+@router.get("/runs/{run_id}")
+def run_status(run_id: str):
+    with RUNS_LOCK:
+        return {"active": run_id in RUNS}
 
 
 @router.get("/conversations")
@@ -152,44 +191,20 @@ def open_upstream(path: str, key: str, payload=None):
 
 
 def system_prompt():
-    instructions = """你是 VMAIL-BUAA 理论力学实验建模助教，使用中文辅导学生。
-先明确研究对象、自由度、可变参数、载荷与观测量。缺少影响拓扑或结论的条件时先提问；次要默认值写明假设。
-可结合学生上传的题目图、机构草图和截图分析。看不清的标注、尺寸与连接关系先询问，不凭图片臆造条件。
-网页中的模型参数、关节姿态、执行器与载荷统一位于“参数与控制”页；操作说明使用这个名称。
-parameters.yaml 的 mjcf 既支持单个对象，也支持目标列表：一个参数可以联动多个 MJCF 属性。每个目标可用 value 写数字、引用参数名的安全数学表达式或向量列表；省略 value 时使用该参数本身。几何尺寸、位置和惯量等联动直接通过这些映射实现，不要再声称每个参数只能对应一个属性，不需要生成 Python 脚本。历史对话中的单目标限制已过时，以当前规范为准。
-先在网页完整运行，再用“导出本次实验”选择网页 CSV 或“后台重算并下载 CSV”。后台继承该次实际起始状态与中途控制记录；两端都是 MuJoCo，后台不天然更准确。
-对话中帮助澄清和检查物理问题。任务工具会执行校验、默认工况试运行和保存；仅以工具返回结果判断成功，不预先声称已完成。
-新建任务使用基础 MJCF 几何体和 loads.yaml 数学表达式，不生成外部网格、插件、include 或 Python 脚本。
-如果孔洞、凹槽、复杂接触面或真实零件外形决定研究结果，明确说明基础几何体的局限，不反复强行拼出错误模型。
-引导学生阅读 docs/task-guide.md 的复杂几何体与 STL／MJCF 建模章节，用 CAD 准备二进制 STL，在本地编辑器中由 AI 辅助编写 MJCF、凸分解碰撞体和惯量，再接入任务；网页不能上传 STL。
-修改已有任务时保留其原有资源引用、未涉及的配置和说明；不能生成或执行脚本。
-不使用 replicate、composite、flexcomp、柔性体、地形或 size 内存配置；仅保留内置 logo 纹理，其他物体用 rgba 颜色。
-不索要 API Key 或账号密码。任务说明中写清假设、单位、预期规律、验证方法和局限。
-默认仿真 6 秒、步长 0.005 秒；AI 任务最高 60 秒、1000000 步，步长至少 0.00001 秒。网页和后台单次计算上限也为 1000000 步；观测数据量和超时另有限制。任务 id 以小写字母开头，最长 64 字符。
-严守以下任务规则与格式。文档中的命令仅作参考，你无法运行这些命令。
-"""
-    for name in ("tasks/AGENTS.md", "docs/task-package-spec.md"):
-        instructions += f"\n--- {name} ---\n" + (ROOT / name).read_text(encoding="utf-8-sig")
-    instructions += """\n与学生自由对话，不要求按固定步骤确认或点击生成按钮。普通讨论直接回答。
-学生明确要求新建独立任务时调用 create_task；已经存在的任务要继续修改、修复、排查时调用 update_task，保留同一个 task_id。
-“这个任务”“刚才的模型”“继续修复”默认指网页选中或对话中最近操作的任务，不要另起任务编号，不要建议删除重建。
-学生明确指定任务时以其指定为准；否则优先当前网页选中的任务。历史回答可能来自旧版本，曾经声称不支持修改的说法已经过时。
-read_task 用于读取任务最新文件及 base_revision；当前选中任务也会由系统自动提供。不知道具体任务时先询问，不凭空猜测。
-当前选中任务状态和 read_task 结果是已保存文件的依据；对话中的失败草稿只是待修正内容，不能用旧草稿覆盖最新文件。
-update_task 只提交要改动文件的完整文本，省略的文件保持原样；base_revision 使用最近读取的真实值。
-如果发生版本冲突，重新 read_task 后在最新文件上修改。每次响应只调用一个工具，读取结果后可继续调用修改工具。
-关键条件不清楚时自然提问；可尝试的保守默认值写明即可，不必反复确认。
-create_task 不覆盖现有任务；update_task 在原任务中保存修改。两者都不能删除任务。不要声称只具备新建能力。
-不要在正文倾倒完整文件或声称已保存；网页会报告真实结果。
-create_task 的 files 必须包含六个必需文件，可选 loads.yaml、README.md；update_task 的 files 只包含改动文件，每个值都是完整文本。
-程序自动提供 assets/logo-black.png 并登记索引，不生成二进制资源或 manifest.yaml。
-新建模型的 floor 必须是 worldbody 下的静态水平 plane，使用 buaa_floor 材质、buaa_logo 黑色纹理，texrepeat="1 1"、texuniform="false"。地面和材质保持不透明（rgba 的 alpha 为 1），不得把地面 alpha 设为 0.1。网页统一通过 FloorBranding 以 opacity=0.1 叠加单个居中的黑色 Logo 水印，XML 不另建贴花、透明叠层或重复地板；保留地面原本的碰撞、摩擦参数。
-任务工具会返回真实的校验、试运行和保存结果。失败后在本轮直接结合错误修复并再次调用工具，不让学生重复发送“继续”；需要关键物理条件、权限或人工操作时才说明阻碍并提问。
-原任务已经存在时始终使用 update_task；尚未成功新建才继续 create_task，不换编号逃避错误。版本冲突先 read_task 再修改。
-保存成功后本轮自动结束。不要在未收到保存成功结果时声称任务已创建，也不把试运行通过等同于物理模型正确。
-"""
-    instructions += "\n已有任务（可读取和修改）：" + json.dumps([{"id": t["id"], "title": t.get("title", t["id"])} for t in list_tasks(TASKS_DIR)], ensure_ascii=False)
-    return instructions
+    return """你是 VMAIL-BUAA 理论力学实验建模助教，使用中文帮助学生完成建模、计算、验证和纠错。
+主动在任务工作区完成：读取规则与任务→提出方案→申请必要操作→编辑→运行实验→比较理论与数据→修复→保存→复核→清理临时文件→说明结论。不要把能编译或默认工况能运行等同于物理模型正确。
+关键拓扑、尺寸、连接关系或题图标注不清时提问；可合理决定的细节采用默认值并说明，不反复请求口头确认。工具审批由网页交给学生，不用让学生重复发送“继续”。学生拒绝某次操作后尊重决定，不换工具绕过审批。
+只能创建或修改学习任务、模型、任务资源、任务脚本和实验报告，不能修改公共前后端、平台规则、全局索引、密钥或其他目录。索引由save_task自动登记。每个任务一个目录，原有任务修复保留编号；不要删除重建或用新编号逃避错误。
+所有工具文件读写均相对该任务。创建/修改文件、运行命令会自动审查并请求学生选择本次同意、本轮同类操作同意或拒绝。工具允许同一响应提出多个调用，执行按顺序进行。仅以真实工具结果声称保存成功。
+优先用write_task_files分批编写、patch_task_file局部修改、read_task_file分段读取；完成后save_task。create_task/update_task也可一次提交完整任务或改动文件。read_task读取已保存版本；list_task_files和read_task_file读取本轮工作区。版本冲突后重新读取最新任务，不能覆盖新版本。
+模型可使用MuJoCo内建功能、任务内include、模型资源和任务Python脚本；禁止原生插件与任务外资源。高级模型同时检查网页MuJoCo兼容性与物理简化。先read_task_docs(document='spec')查看默认XML模板与所需格式；按需阅读更多行，不臆造格式。
+参数可用mjcf目标列表和value安全数学表达式联动多项；initial_state也支持目标列表，每项value可引用参数，如一个转速联动多个相容初速。loads.yaml用于网页运行时载荷，Python脚本不会自动作为网页控制器执行。
+任务终端可申请 python -m backend.validate_task TASK_ID 或 python scripts/analysis.py、python .tmp/check.py。分析Python支持math、numpy、statistics、json以及simulate(parameters={}, duration=None, timestep=None)、read_text(name)、write_text(name,text)、read_csv(name)、write_csv(name,rows,fieldnames=None)。simulate返回series、units及参数。脚本不获得主机Shell、网络、安装、任意模块或系统文件权限；不要尝试绕过。数值环境不能实现的功能明确说明，使用平台支持的方法。
+用simulate_task测试默认、边界和有代表性的多组参数；对照理论检查初末值、量纲、约束及整段曲线。完整采样可用分析脚本simulate()做误差统计；不能只看t=0。保存成功后继续验证并报告，保存不强制结束本轮。参数与执行器说明统一称“参数与控制”。
+临时脚本和中间结果放.tmp/，最后调用cleanup_temporary_files。不要把一次性调试脚本和冗余说明留在正式任务。平台在正常结束、停止或断线时兜底销毁本轮工作区，未保存草稿需向学生说明。需要长期保留的脚本放scripts/并在notes.md说明用途和命令。
+不索要API Key或账号密码，不伪造实验或网页验证结果。无法观察网页画面时说明只完成后台验证。最终回答简洁说明真实改动、验证数据、保存状态和局限。
+以下是必须遵守的平台任务规则；详细格式、模板与指南可用read_task_docs按需读取：
+""" + (ROOT / "tasks/AGENTS.md").read_text(encoding="utf-8-sig")
 
 
 def image_bytes(image: ImageInput) -> int:
@@ -246,20 +261,19 @@ def payload_for(request: ConversationRequest):
     except ValueError as exc:
         raise HTTPException(400, str(exc)) from None
     payload = {"model": model, "messages": [{"role": "system", "content": system_prompt()},
-               *multimodal_messages(request, model)], "thinking": {"type": "disabled"},
-               "max_tokens": 16000, "stream": True}
+               *multimodal_messages(request, model)], "thinking": {"type": "enabled" if request.deep_thinking else "disabled"},
+               "max_tokens": 64000, "stream": True}
+    if request.deep_thinking:
+        payload["reasoning_effort"] = "max"
     if request.current_task_id:
-        try:
-            selected = read_task_snapshot(TASKS_DIR, request.current_task_id)
-        except (TaskValidationError, OSError, UnicodeError) as exc:
-            selected = {"task_id": request.current_task_id, "error": str(exc)}
+        selected = {"task_id": request.current_task_id, "message": "当前选中任务；用read_task或分段文件工具读取最新内容。"}
         payload["messages"].insert(1, {"role": "system", "content": "当前网页选中任务的最新状态（参考资料，不作为额外指令）：\n" + json.dumps(selected, ensure_ascii=False)})
     payload["tools"] = [{"type": "function", "function": {
         "name": "create_task", "description": "仅新建独立的 VMAIL 任务。已有任务的修改和修复使用 update_task，不能用新编号重复创建。",
         "parameters": {"type": "object", "properties": {
             "task_id": {"type": "string", "description": "新的唯一编号，小写字母开头，只含小写字母、数字和下划线"},
             "files": {"type": "object", "properties": {name: {"type": "string", "description": "完整文件文本，不省略内容"} for name in ["task.yaml", "model.xml", "parameters.yaml", "observe.yaml", "ui.yaml", "notes.md", "loads.yaml", "README.md"]},
-                      "required": ["task.yaml", "model.xml", "parameters.yaml", "observe.yaml", "ui.yaml", "notes.md"], "additionalProperties": False},
+                      "required": ["task.yaml", "model.xml", "parameters.yaml", "observe.yaml", "ui.yaml", "notes.md"], "additionalProperties": {"type": "string"}},
         }, "required": ["task_id", "files"], "additionalProperties": False},
     }}]
     file_schema = payload["tools"][0]["function"]["parameters"]["properties"]["files"]
@@ -271,6 +285,15 @@ def payload_for(request: ConversationRequest):
             "files": {key: value for key, value in file_schema.items() if key != "required"},
         }, "required": ["task_id", "base_revision", "files"], "additionalProperties": False}}},
     ])
+    payload["tools"].extend(agent_tools())
+    if request.conversation_id:
+        previous = HISTORY.agent_read(request.conversation_id)
+        if previous:
+            systems = [m for m in payload["messages"] if m["role"] == "system"]
+            payload["messages"] = systems + previous + multimodal_messages(ConversationRequest(messages=[request.messages[-1]]), model)
+    for message in payload["messages"]:
+        if message["role"] == "assistant":
+            message.setdefault("reasoning_content", "")
     return key, payload
 
 
@@ -380,22 +403,6 @@ def save_tool_draft(result):
     return {**result, "type": "task_saved", "task": task}
 
 
-def append_tool_feedback(payload, start, tool_id, name, arguments, content, result):
-    # Keep the latest read and latest attempted edit. Older full bundles otherwise
-    # accumulate on every repair and can exhaust the model's context window.
-    previous = payload["messages"][start:]
-    latest_read = []
-    for index in range(0, len(previous), 2):
-        if previous[index]["tool_calls"][0]["function"]["name"] == "read_task":
-            latest_read = previous[index:index + 2]
-    if name == "read_task":
-        latest_read = []
-    feedback = result.get("snapshot", result) if name == "read_task" else result
-    payload["messages"][start:] = [*latest_read,
-        {"role": "assistant", "content": content or None, "tool_calls": [{"id": tool_id, "type": "function", "function": {"name": name, "arguments": arguments}}]},
-        {"role": "tool", "tool_call_id": tool_id, "content": json.dumps(feedback, ensure_ascii=False)},
-    ]
-
 
 async def cancellable_stream(iterator, stopped):
     """Signal disconnects even while a synchronous upstream read is blocked."""
@@ -428,24 +435,35 @@ async def cancellable_stream(iterator, stopped):
 def chat(request: ConversationRequest):
     key, payload = payload_for(request)
     stopped = threading.Event()
-    feedback_start = len(payload["messages"])
 
     def stream():
+        agent = None
+        usage_total = {}
+        pending_updates = []
         try:
             with slot(AI_SLOT):
-                usage_total = {}
+                agent = TaskAgent(TASKS_DIR, stopped)
+                yield event({"type": "run_started", "run_id": agent.id, "thinking": "max" if request.deep_thinking else "disabled"})
                 for round_index in range(MAX_TOOL_ROUNDS):
                     if stopped.is_set():
                         return
+                    pending_updates.extend(agent.take_messages(stop=round_index == MAX_TOOL_ROUNDS - 1))
+                    if pending_updates:
+                        payload["messages"].extend({"role": "user", "content": item["content"]} for item in pending_updates)
+                        yield event({"type": "steering_applied", "messages": pending_updates})
+                        pending_updates = []
                     received, finish, completed = False, None, False
-                    tool_name, arguments, tool_id, content_text = "", "", "", ""
-                    preparing, usage = False, None
+                    content_text, reasoning = "", ""
+                    calls, usage = {}, None
+                    request_created = time.time()
+                    mode = "深度思考" if request.deep_thinking else "生成回复"
+                    yield event({"type": "status", "message": f"DeepSeek 正在{mode} · 第 {round_index + 1} 轮"})
                     with open_upstream("/chat/completions", key, payload) as response:
                         for raw in response:
                             if stopped.is_set():
                                 return
-                            if len(raw) > 1_000_000:
-                                raise ValueError()
+                            if len(raw) > 8_000_000:
+                                raise ValueError("上游数据块过大")
                             line = raw.decode("utf-8").strip()
                             if not line.startswith("data:"):
                                 continue
@@ -454,75 +472,147 @@ def chat(request: ConversationRequest):
                                 completed = True
                                 break
                             chunk = json.loads(text)
+                            request_created = chunk.get("created") or request_created
                             if chunk.get("error"):
-                                raise ValueError()
+                                raise ValueError("上游返回错误")
                             usage = chunk.get("usage") or usage
                             for choice in chunk.get("choices", []):
                                 delta = choice.get("delta", {})
-                                content = delta.get("content")
                                 finish = choice.get("finish_reason") or finish
+                                thinking = delta.get("reasoning_content") or ""
+                                if thinking:
+                                    reasoning += thinking
+                                    yield event({"type": "reasoning_delta", "round": round_index + 1, "content": thinking})
+                                content = delta.get("content")
                                 if content:
                                     received = True
                                     content_text += content
                                     yield event({"type": "delta", "content": content})
                                 for call in delta.get("tool_calls", []):
-                                    if call.get("index", 0) != 0:
-                                        raise ValueError("Only one tool per response")
-                                    if not preparing:
-                                        preparing = True
-                                        yield event({"type": "status", "message": "DS 正在处理任务文件…"})
-                                    tool_id = call.get("id") or tool_id
-                                    function = call.get("function", {})
-                                    tool_name += function.get("name") or ""
-                                    arguments += function.get("arguments") or ""
-                                    if len(arguments) > 1_000_000:
-                                        raise ValueError("Task too large")
+                                    index = call.get("index", 0)
+                                    if not isinstance(index, int) or not 0 <= index < 16:
+                                        raise ValueError("单次工具调用过多")
+                                    item = calls.setdefault(index, {"id": "", "type": "function", "function": {"name": "", "arguments": ""}})
+                                    item["id"] = call.get("id") or item["id"]
+                                    fn = call.get("function", {})
+                                    item["function"]["name"] += fn.get("name") or ""
+                                    item["function"]["arguments"] += fn.get("arguments") or ""
+                                    if len(item["function"]["arguments"]) > 6_000_000:
+                                        raise ValueError("单次任务输出过大")
                     if not completed:
-                        yield event({"type": "error", "message": "连接提前结束，请重试。"})
+                        yield event({"type": "error", "message": "连接提前结束；已保存任务不受影响，可以继续对话。"})
                         return
-                    for name, value in (usage or {}).items():
-                        if isinstance(value, (int, float)):
-                            usage_total[name] = usage_total.get(name, 0) + value
-                    if preparing and (finish == "tool_calls" or finish == "length" and tool_id):
-                        if not tool_id:
-                            raise ValueError("Missing tool call id")
-                        if finish == "length":
-                            result = {"type": "task_error", "message": "任务输出达到单次长度上限，未执行或保存。请精简模型与说明，在保留必要文件和功能的前提下重新提交完整内容。"}
-                            yield event(result)
-                        elif tool_name == "read_task":
-                            result = task_tool_result(tool_name, arguments)
-                        else:
-                            yield event({"type": "status", "message": f"正在检查任务文件并试运行（第 {round_index + 1}/{MAX_TOOL_ROUNDS} 轮）…"})
-                            result = task_tool_result(tool_name, arguments)
+                    accumulate_usage(usage_total, usage, payload["model"], request_created)
+                    if calls and finish == "tool_calls":
+                        ordered = [calls[i] for i in sorted(calls)]
+                        if any(not c["id"] for c in ordered):
+                            raise ValueError("工具调用缺少编号")
+                        payload["messages"].append({"role": "assistant", "content": content_text or None,
+                            "reasoning_content": reasoning, "tool_calls": ordered})
+                        for call in ordered:
                             if stopped.is_set():
                                 return
-                            if result.get("validation", {}).get("valid"):
-                                yield event({"type": "status", "message": "校验通过，正在保存任务…"})
-                                if stopped.is_set():
-                                    return
-                                result = save_tool_draft(result)
-                            yield event(result)
-                            if result["type"] == "task_saved":
-                                yield event({"type": "done", "usage": usage_total})
-                                return
-                        append_tool_feedback(payload, feedback_start, tool_id, tool_name, arguments, content_text, result)
-                        if round_index + 1 < MAX_TOOL_ROUNDS:
-                            message = "已返回任务读取结果，DS 正在继续分析…" if tool_name == "read_task" else "已将错误返回 DS，正在自动排查并修复…"
-                            yield event({"type": "status", "message": message})
+                            pending_updates.extend(agent.take_messages())
+                            if pending_updates:
+                                payload["messages"].append({"role": "tool", "tool_call_id": call["id"], "content": json.dumps({"skipped": True, "message": "学生发来修正，取消尚未执行的旧操作；请先按后续学生消息重新规划。"}, ensure_ascii=False)})
+                                continue
+                            name, arguments = call["function"]["name"], call["function"]["arguments"]
+                            try:
+                                data = json.loads(arguments)
+                                if not isinstance(data, dict):
+                                    raise ValueError("工具参数必须是对象")
+                                if name in {"create_task", "update_task", "read_task"}:
+                                    result = task_tool_result(name, arguments)
+                                    if name == "read_task":
+                                        snapshot = result.get("snapshot", {})
+                                        task_id = data.get("task_id")
+                                        if snapshot.get("base_revision") and task_id in agent.tasks:
+                                            stage = agent.tasks[task_id]
+                                            if stage["revision"] != snapshot["base_revision"]:
+                                                # A conflict requires an explicit re-read before rebasing edits.
+                                                shutil.rmtree(stage["folder"])
+                                                del agent.tasks[task_id]
+                                    else:
+                                        if result.get("validation", {}).get("valid"):
+                                            task_id = result["draft"]["task_id"]
+                                            stage = agent.stage(task_id)
+                                            changes = result.get("edit", result["draft"])["files"]
+                                            rows = [describe_change(task_id, n, stage["original"].get(n), v) for n, v in changes.items()]
+                                            accepted = yield from stream_events(agent.approve({"kind": "files", "task_id": task_id,
+                                                "title": "保存任务文件", "files": rows,
+                                                "description": "文件已通过格式校验和默认工况试运行；请审查差异后选择是否写入。"}, ("files", task_id)))
+                                            if accepted and not stopped.is_set():
+                                                yield event({"type": "status", "message": "校验通过，正在保存任务…"})
+                                                if stopped.is_set():
+                                                    return
+                                                result = save_tool_draft(result)
+                                                if result.get("type") == "task_saved":
+                                                    yield event(agent.record(task_id, changes, "saved"))
+                                                    for n, v in result["draft"]["files"].items():
+                                                        target = stage["folder"] / n
+                                                        target.parent.mkdir(parents=True, exist_ok=True)
+                                                        target.write_text(v, encoding="utf-8")
+                                                    yield event(agent.brand_assets(task_id, result["draft"]["files"]["model.xml"], "saved"))
+                                                    snapshot = read_task_snapshot(TASKS_DIR, task_id)
+                                                    stage.update(revision=snapshot["base_revision"], original=snapshot["files"])
+                                            else:
+                                                result = {"type": "task_error", "denied": True, "message": "学生未同意本次文件保存，原任务未改变；不要绕过审批。"}
+                                        yield event(result)
+                                else:
+                                    result = yield from stream_events(agent.call(name, data))
+                                    result = result or {"ok": True}
+                            except (TaskValidationError, ValueError, TypeError, KeyError, OSError, UnicodeError) as exc:
+                                result = {"type": "task_error", "message": str(exc)[:4000]}
+                                yield event(result)
+                            # File arguments already carry the edited contents; avoid duplicating full bundles.
+                            feedback = {k: v for k, v in result.items() if k not in {"draft", "edit"}}
+                            payload["messages"].append({"role": "tool", "tool_call_id": call["id"], "content": json.dumps(feedback, ensure_ascii=False)})
+                        yield event({"type": "delta", "content": "\n\n"})
                         continue
-                    elif not received or finish != "stop" or preparing:
-                        yield event({"type": "error", "message": "回答未完整结束，请重试或缩短问题。"})
-                    else:
+                    if calls and finish == "length":
+                        message = "本次输出达到长度上限；未执行不完整的工具调用。请分批修改文件。"
+                        yield event({"type": "task_error", "message": message})
+                        if any(c["id"] for c in calls.values()):
+                            payload["messages"].extend([
+                                {"role": "assistant", "content": content_text or "任务输出未完成。", "reasoning_content": reasoning},
+                                {"role": "user", "content": "程序反馈：" + message}])
+                            continue
                         yield event({"type": "done", "usage": usage_total})
+                        return
+                    if finish != "stop" or not received:
+                        yield event({"type": "error", "message": "回答未完整结束，请重试或分步处理。"})
+                        return
+                    payload["messages"].append({"role": "assistant", "content": content_text, "reasoning_content": reasoning})
+                    pending_updates.extend(agent.take_messages(final=True))
+                    if pending_updates:
+                        continue
+                    if request.conversation_id:
+                        HISTORY.agent_save(request.conversation_id, payload["messages"])
+                    rows = agent.close()
+                    agent = None
+                    yield event({"type": "file_changes", "files": rows})
+                    yield event({"type": "done", "usage": usage_total})
                     return
-                yield event({"type": "task_error", "message": f"本轮已达到 {MAX_TOOL_ROUNDS} 次工具调用上限，尚未保存任务变更。草稿和错误已保留，可继续对话修复。"})
+                yield event({"type": "task_error", "message": f"本轮达到 {MAX_TOOL_ROUNDS} 次模型调用上限。已保存任务保留，未保存工作区将清理；可继续对话。"})
                 yield event({"type": "done", "usage": usage_total})
         except HTTPException as exc:
             yield event({"type": "error", "message": exc.detail})
-        except (ValueError, KeyError, TypeError, OSError, URLError):
-            yield event({"type": "error", "message": "DeepSeek 响应中断或格式异常，请重试。"})
+        except (ValueError, KeyError, TypeError, OSError, URLError) as exc:
+            yield event({"type": "error", "message": "本轮处理中断：" + str(exc)[:300] + "。已保存任务不受影响。"})
+        finally:
+            if agent is not None:
+                agent.close()
 
     return StreamingResponse(cancellable_stream(stream(), stopped), media_type="application/x-ndjson", headers={"Cache-Control": "no-store", "X-Accel-Buffering": "no"})
+
+
+def stream_events(operation):
+    """Forward a task operation's events while preserving its final tool result."""
+    while True:
+        try:
+            yield event(next(operation))
+        except StopIteration as end:
+            return end.value
 
 
 @router.post("/tasks")

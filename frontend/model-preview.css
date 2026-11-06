@@ -1,5 +1,6 @@
+@layer foundation {
 .model-preview { position:fixed; inset:0; z-index:30; display:grid; grid-template-rows:auto minmax(0,1fr) auto; background:var(--stage); }
-.preview-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; min-width:0; padding:12px 24px; border-bottom:1px solid var(--line); background:var(--panel); }
+.preview-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; min-width:0; border-bottom:1px solid var(--line); background:var(--panel); }
 .preview-brand { display:flex; align-items:center; gap:10px; flex:none; }
 .preview-header h1 { flex:1; min-width:120px; overflow:hidden; margin:0; color:var(--ink); font-size:16px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
 .preview-actions { display:flex; flex-wrap:wrap; gap:8px; }
@@ -16,7 +17,7 @@
 .preview-joints .joint-panel { margin-bottom:0; }
 .preview-joints .joint-panel-header button { border-color:#c8cec2; background:#f4f5f0; }
 .preview-joints .joint-panel-header button:hover { border-color:#a9b29f; background:#e9ede3; }
-.preview-status { position:absolute; top:44%; left:50%; transform:translate(-50%,-50%); width:min(460px,calc(100% - 660px)); max-height:55%; overflow:auto; margin:0; padding:30px; border:1px dashed #555f60; border-radius:7px; background:#252c2f; color:#b0b9b8; font-size:13px; line-height:2; text-align:center; overflow-wrap:anywhere; }
+.preview-status { position:absolute; top:44%; left:50%; transform:translate(-50%,-50%); width:min(460px,calc(100% - 660px)); max-height:55%; overflow:auto; margin:0; padding:30px; border:1px dashed #555f60; font-size:13px; line-height:2; text-align:center; overflow-wrap:anywhere; }
 .preview-status.preview-error { border-color:#ad705a; color:#e1b199; }
 .model-preview [data-preview-action=play] { padding:0 13px; color:#fffaf4; background:#b95936; }
 .model-preview [data-preview-action=play]:hover { background:#c66b47; }
@@ -42,4 +43,6 @@
   .preview-library > .quiet-button { white-space:normal; font-size:11px; }
   .preview-library .task-item { padding:10px 5px; font-size:11px; }
   .preview-library .task-item::before { display:none; }
+}
+
 }

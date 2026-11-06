@@ -1,6 +1,6 @@
 import {test} from "node:test";
 import assert from "node:assert/strict";
-import {prepareAssistantContext, readAssistantStream} from "../frontend/assistant-client.js";
+import {prepareAssistantContext, readAssistantStream, usageText} from "../frontend/assistant-client.js";
 import {classifyDroppedFiles, setupFileDrop} from "../frontend/file-drop.js";
 import {validateImageFiles, imageMime} from "../frontend/assistant-images.js";
 
@@ -109,4 +109,22 @@ test("incomplete turns stay in the stored transcript but are excluded from model
   const {messages} = prepareAssistantContext(history, null);
   assert.deepEqual(messages, [{role: "user", content: "重新发送的问题"}]);
   assert.equal(history.length, 3);
+});
+
+test("a large buffered thinking stream yields to input timers without losing events",async t=>{
+  let clock=0,received=0,atTimer=-1;
+  t.mock.method(performance,"now",()=>clock+=9);
+  const timer=new Promise(resolve=>setTimeout(()=>{atTimer=received;resolve();},0));
+  const chunks=4096;
+  await readAssistantStream(response('{"type":"reasoning_delta","content":"思考"}\n'.repeat(chunks)+'{"type":"done"}\n'),()=>{},()=>received++);
+  await timer;
+  assert.equal(received,chunks);
+  assert.ok(atTimer>0&&atTimer<chunks,`input timer ran after ${atTimer} chunks`);
+});
+
+test("token status appends the CNY estimate and never fabricates zero for missing billing data",()=>{
+  assert.equal(usageText({total_tokens:1100,estimated_cost_cny:"0.001624"}),"本次消耗 1,100 tokens · 估算费用 0.001624 元");
+  assert.match(usageText({total_tokens:10}),/估算费用暂不可用/);
+  assert.match(usageText({total_tokens:10,estimated_cost_cny:"0.00000004"}),/不足 0.000001 元/);
+  assert.equal(usageText(null),"");
 });

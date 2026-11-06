@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from contextlib import asynccontextmanager
 from typing import Any
 import threading
 import time
@@ -17,6 +18,7 @@ from .task_io import TaskValidationError, load_task, list_tasks, save_run_result
 from .simulator import MAX_STEPS, SimulationError, prepare_browser_model, run_mujoco_task
 from .preview import preview_choices, prepare_preview, pack_preview
 from .assistant import router as assistant_router, local_request, local_origin
+from .assistant_agent import recover_workspaces
 from .course_resources import course_resources, public_resource, find_resource, reproduce_task
 from .branding import referenced_logos
 from .workspace import TASKS_DIR, ensure_tasks
@@ -74,7 +76,13 @@ RUN_LOCK = TASK_STATE_LOCK
 COMPUTE_SLOTS = threading.BoundedSemaphore(2)
 
 
-app = FastAPI(title="VMAIL Local Workbench")
+@asynccontextmanager
+async def lifespan(app):
+    recover_workspaces()
+    yield
+
+
+app = FastAPI(title="VMAIL Local Workbench", lifespan=lifespan)
 app.include_router(assistant_router)
 @app.middleware("http")
 async def protect_local_service(request, call_next):
