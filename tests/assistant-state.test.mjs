@@ -17,15 +17,15 @@ for(const saved of [true,false])test(`clearing an input-only conversation ${save
     return persist;
   `);
   const persist=makePersist(async(path,options)=>{requests.push({path,body:options.body});return{json:async()=>({id:"draft-one",title:"新对话"})};},
-    {Input:{value:""},Thinking:{checked:true},HistoryState:{}},()=>{},()=>{});
+    {Input:{value:""},Thinking:{checked:true},Effort:{value:"high"},HistoryState:{}},()=>{},()=>{});
   await persist();
   assert.equal(requests.length,saved?1:0);
-  if(saved){assert.equal(requests[0].body.input,"");assert.deepEqual(requests[0].body.messages,[]);}
+  if(saved){assert.equal(requests[0].body.input,"");assert.deepEqual(requests[0].body.messages,[]);assert.equal(requests[0].body.reasoning_effort,"high");}
 });
 
 function chatHarness(events, {truncated = false} = {}) {
   const requests = [], created = [], statuses = [];
-  const el = {Input: {value: "创建任务", focus() {}}, Thinking:{checked:true}, Settings: {}, Conversation: {scrollHeight: 0, scrollTop: 0, clientHeight: 100}};
+  const el = {Input: {value: "创建任务", focus() {}}, Thinking:{checked:true},Effort:{value:"high"}, Settings: {}, Conversation: {scrollHeight: 0, scrollTop: 0, clientHeight: 100}};
   const body = {classList: {add() {}}};
   const chatStart = source.indexOf("  async function chat(");
   const chatSource = source.slice(chatStart, source.indexOf("  el.ChatForm.addEventListener", chatStart));
@@ -103,5 +103,6 @@ test("a correction separates the old response, student message and revised answe
   assert.deepEqual(history.map(m=>m.role),["user","assistant","user","assistant"]);
   assert.deepEqual(history.map(m=>m.content),["创建任务","原方案","改为只解释","已修正"]);
   assert.equal(harness.requests[0].options.body.deep_thinking,true);
+  assert.equal(harness.requests[0].options.body.reasoning_effort,"high");
   assert.ok(history.every(m=>!m.incomplete));
 });

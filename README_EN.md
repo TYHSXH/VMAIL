@@ -98,7 +98,7 @@ The browser assistant creates tasks using primitive geometry and standard `loads
 
 ## 4. AI assistance: use a DeepSeek extension and your API key in VS Code
 
-A local editor is suitable for complex models, MJCF spread across multiple files, STL assets, and experiment scripts. Use **Open Folder** in VS Code to open the entire **VMAIL** project so the AI can read `tasks/AGENTS.md` and the task specification.
+A local editor is suitable for complex models, MJCF spread across multiple files, STL assets, and experiment scripts. Use **Open Folder** in VS Code to open the entire **VMAIL** project so the AI can read `docs/task-rules.md` and the task specification.
 
 DeepSeek provides an official [VS Code / Copilot integration guide](https://api-docs.deepseek.com/quick_start/agent_integrations/github_copilot/) linking to the [DeepSeek V4 for Copilot extension](https://github.com/Vizards/deepseek-v4-for-copilot). Follow that guide to install the required VS Code version, configure your Copilot account or plan, and install the extension. Then:
 
@@ -109,7 +109,7 @@ DeepSeek provides an official [VS Code / Copilot integration guide](https://api-
 For other DeepSeek coding extensions that support an OpenAI-compatible interface, follow the extension's documentation to configure the provider, API key, Base URL `https://api.deepseek.com` (some extensions require `/v1`), and model name `deepseek-flash` or `deepseek-v4-pro`. Consult the extension's instructions and the [DeepSeek API documentation](https://api-docs.deepseek.com/). Check the extension's publisher and permissions. Do not put your key in XML, prompts, or the Git repository. Editor and browser API settings are independent and do not synchronize automatically.
 
 ```text
-First read tasks/AGENTS.md and docs/task-package-spec.md.
+First read docs/task-rules.md and docs/task-package-spec.md.
 If the task involves complex geometry, also read docs/task-guide.md.
 Create an independent task under .local/tasks/ without modifying the shared
 frontend or backend.
@@ -176,7 +176,7 @@ The supporting guides below are maintained in Chinese. The [complete document na
 | [Development and maintenance](docs/development.md) | Architecture, builds, tests, migration, release checks, and dated verification records |
 | [Copyright and contributions](COPYRIGHT.md) | Rights, student work display, license choices, software registration, and third-party model boundaries |
 | [Third-party notices](THIRD_PARTY_NOTICES.md) | Component versions, licenses, model sources, and redistribution requirements |
-| [Task directory rules](tasks/AGENTS.md) | Mandatory rules for AI tools editing tasks |
+| [Task directory rules](docs/task-rules.md) | Mandatory rules for AI tools editing tasks |
 | [Model library](model_library/README.md) · [Logo rights](assets/logos/README.md) | Resource selection, original model licenses, and separate logo rights |
 
 The repository includes the ready-to-run `app/` build. Only developers need Node.js; use `npm ci`, `npm test`, and `npm run build`. Python dependencies are pinned through `requirements.txt` and `constraints.txt`. Keep all student runtime files, copyright notices, and model licenses in the distributed release.

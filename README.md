@@ -121,7 +121,7 @@ python -m pip install -r requirements.txt
 
 ## 4. AI 辅助：在 VS Code 中使用 DS 插件与自己的 API
 
-本地编辑器适合复杂模型、多文件 MJCF、STL 资源和实验脚本。使用 VS Code 的“打开文件夹”打开整个 **VMAIL** 项目，使 AI 能读取 `tasks/AGENTS.md` 与任务规范。
+本地编辑器适合复杂模型、多文件 MJCF、STL 资源和实验脚本。使用 VS Code 的“打开文件夹”打开整个 **VMAIL** 项目，使 AI 能读取 `docs/task-rules.md` 与任务规范。
 
 DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deepseek.com/quick_start/agent_integrations/github_copilot/)及其链接的 [DeepSeek V4 for Copilot 扩展](https://github.com/Vizards/deepseek-v4-for-copilot)。按该教程安装对应版本 VS Code、配置 Copilot 账号／方案和扩展后：
 
@@ -132,7 +132,7 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 若使用其他支持 OpenAI 兼容接口的 DS 编程插件，按该插件文档设置服务商、API Key、Base URL `https://api.deepseek.com`（部分插件要求 `/v1`）与模型名 `deepseek-flash` 或 `deepseek-v4-pro`；以插件及 [DeepSeek API 文档](https://api-docs.deepseek.com/)为准。检查扩展发布者和权限，不把 Key 写入 XML、提示词或 Git 仓库。编辑器绑定与网页绑定各自独立，互不自动同步。
 
 ```text
-请先阅读 tasks/AGENTS.md、docs/task-package-spec.md，
+请先阅读 docs/task-rules.md、docs/task-package-spec.md，
 涉及复杂外形时再读 docs/task-guide.md。
 在 .local/tasks/ 下创建独立任务，不修改公共前后端。
 我的研究对象是……；已知条件是……；希望改变……，观察……。
@@ -196,20 +196,20 @@ DeepSeek 官方提供了 [VS Code / Copilot 集成教程](https://api-docs.deeps
 | 如何修改、迁移和发布系统 | [开发与维护](docs/development.md) | 项目结构、构建与测试、前后端实现、[迁移与换机检查](docs/development.md#迁移与换机检查)、[发布验收](docs/development.md#发布验收)及历史检查记录 |
 | 能否复用、展示和申请软著 | [版权、贡献与软著说明](COPYRIGHT.md) | 平台／Logo／学生作品的权利范围、[贡献与展示规则](COPYRIGHT.md#贡献与学生作品展示)、[许可证选择](COPYRIGHT.md#许可证选择与使用)、[软著登记与模型库版权边界](COPYRIGHT.md#软件著作权登记) |
 | 用到了哪些第三方内容 | [第三方声明](THIRD_PARTY_NOTICES.md) | 组件版本、许可证、模型来源与分发要求；[MuJoCo 上游通知](licenses/mujoco-THIRD_PARTY.md)保留原文 |
-| AI 修改任务必须遵守什么 | [任务目录规则](tasks/AGENTS.md) | 任务目录、建模与单位、观测、载荷、校验规则；给 AI 的操作约束 |
+| AI 修改任务必须遵守什么 | [任务目录规则](docs/task-rules.md) | 任务目录、建模与单位、观测、载荷、校验规则；给 AI 的操作约束 |
 | 模型素材和 Logo 怎么使用 | [模型资料库](model_library/README.md) · [模型复用提示词](model_library/AI_TASK_PROMPT.md) · [Logo 说明](assets/logos/README.md) | 模型选题与资源入口、按原许可证复用、Logo 的单独权利说明 |
 
 各题目的背景、假设、理论公式和操作步骤统一放在各自的 `notes.md`，网页“任务”页直接读取，无需再找单独的任务 README：
 
 | 学习任务 | 任务说明 |
 | --- | --- |
-| 弹簧阻尼滑块 | [notes.md](.local/tasks/example_mass_spring/notes.md) |
-| 变方向外力与偏心力矩 | [notes.md](.local/tasks/rotating_load_demo/notes.md) |
-| 曲柄滑块速度验证 | [notes.md](.local/tasks/slider_crank_block_force/notes.md) |
-| 改型全回转纯滚圆盘 | [notes.md](.local/tasks/rolling_disk_points_bc/notes.md) |
-| 铅垂杆推动楔块 | [notes.md](.local/tasks/wedge_rod_acceleration_v4/notes.md) |
-| 行星齿轮 M 点加速度 | [notes.md](.local/tasks/planetary_gear_point_acceleration/notes.md) |
-| 行星齿轮相对转速修正版 | [notes.md](.local/tasks/planetary_gear_point_acceleration_relative_speed/notes.md) |
+| 弹簧阻尼滑块 | [notes.md](course_resources/tasks/course_team/example_mass_spring/notes.md) |
+| 变方向外力与偏心力矩 | [notes.md](course_resources/tasks/course_team/rotating_load_demo/notes.md) |
+| 曲柄滑块速度验证 | [notes.md](course_resources/tasks/course_team/slider_crank_block_force/notes.md) |
+| 改型全回转纯滚圆盘 | [notes.md](course_resources/tasks/course_team/rolling_disk_points_bc/notes.md) |
+| 铅垂杆推动楔块 | [notes.md](course_resources/tasks/course_team/wedge_rod_acceleration_v4/notes.md) |
+| 行星齿轮 M 点加速度 | [notes.md](course_resources/tasks/course_team/planetary_gear_point_acceleration/notes.md) |
+| 行星齿轮相对转速修正版 | [notes.md](course_resources/tasks/course_team/planetary_gear_point_acceleration_relative_speed/notes.md) |
 
 仓库包含可直接运行的 `app/` 构建产物。开发者才需要 Node.js，使用 `npm ci`、`npm test`、`npm run build`；Python 依赖由 `requirements.txt` 与 `constraints.txt` 固定。所有学生运行文件、版权说明和模型许可证都应随发行版保留。
 

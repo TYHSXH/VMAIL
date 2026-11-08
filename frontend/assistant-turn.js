@@ -109,10 +109,10 @@ export function setupAssistantTurn(article, body, initial = {}, {onOpenFile = ()
     const known = new Map(files.map(row => [`${row.task_id}/${row.path}`, row]));
     files = mergeTurnFiles(files, latestFiles.filter(row => (!runId || row.run_id === runId) && known.has(`${row.task_id}/${row.path}`))
       .map(row => ({...row, action: known.get(`${row.task_id}/${row.path}`).action})), runId);
-    cancelPaint(); phase = "finished"; thinking.open = false; filePanel.open = files.length > 0;
+    cancelPaint(); phase = "finished"; thinking.open = false; filePanel.open = false;
     body.classList.remove("hidden");
     drawThinking(); drawFiles();
   }
-  drawThinking(); drawFiles(); filePanel.open = files.length > 0;
+  drawThinking(); drawFiles(); filePanel.open = false;
   return {handle, replyStarted, finish, snapshot: () => ({thinking_text: text, thinking_truncated: truncated, turn_files: files})};
 }

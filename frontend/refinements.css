@@ -111,20 +111,6 @@ input:not([type=range]):focus-visible, select:focus-visible { outline: none; bor
 .input-unit input, .simulation-settings input, .runtime-number, .joint-row input[type=number] { min-height: 38px; border-radius: 6px; border-color: #d6dfca; }
 .simulation-settings { padding: 18px; gap: 12px; border: 1px solid var(--line); border-radius: 8px; background: #f2f4ea; }
 .chart-card { border-radius: 8px; }
-.assistant-heading { padding: 8px 3px 10px; }
-.assistant-heading h2 { flex-wrap: wrap; gap: 4px 8px; font-size: 14px; white-space: normal; }
-.assistant-heading .panel-kicker { color: #8b7758; font-size: 8px; }
-.assistant-settings { border-radius: 8px; }
-.assistant-settings > summary { min-height: 38px; border-radius: 8px; color: #5b6c50; }
-.assistant-conversation { padding: 8px 5px; }
-.assistant-message { margin-bottom: 24px; }
-.assistant-message.user .task-prose { padding: 12px 14px; border-radius: 9px 9px 3px 9px; background: #edf0e3; }
-.assistant-composer { padding: 13px; border-radius: 10px; border-color: #cbd5be; box-shadow: 0 3px 10px #2d3b2010; }
-.assistant-composer:focus-within { border-color: #ab795b; box-shadow: 0 0 0 3px #ad4d300a; }
-.assistant-composer textarea { min-height: 78px; }
-.assistant-compose-actions button { min-height: 34px; border-radius: 5px; }
-.assistant-orbit { width: 46px; height: 46px; margin-bottom: 18px; }
-.assistant-welcome { padding: 38px 8px; }
 .course-space { border-radius: 14px; border-color: #b6c0ae; box-shadow: 0 32px 100px #07110966; }
 .course-header { padding: 26px 32px; }
 .course-header h1 { display: flex; align-items: center; gap: 12px; margin-top: 7px; font-size: 30px; letter-spacing: -.03em; }
@@ -190,7 +176,6 @@ dialog[open] { animation: dialog-in .24s var(--ease-out); }
   .inspector.collapsed { width: 0; }
   .inspector-header { height: 58px; }
   .inspector .tab-panel { height: calc(100dvh - var(--topbar-height) - 58px); padding: 24px; }
-  .inspector #panel-assistant { padding: 12px; }
   .welcome-workbench { padding: 36px; }
   .welcome-main { grid-template-columns: 1.2fr 1fr; }
   .welcome-copy h2 { font-size: 40px; }

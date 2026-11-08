@@ -24,6 +24,8 @@ from .task_io import TaskValidationError, list_tasks
 from .branding import copy_brand_assets, referenced_logos
 
 ROOT = Path(__file__).resolve().parents[1]
+TASK_DOCUMENTS = {name: ROOT / "docs" / filename for name, filename in {
+    "rules": "task-rules.md", "spec": "task-package-spec.md", "guide": "task-guide.md"}.items()}
 RUNS = {}
 RUNS_LOCK = threading.Lock()
 
@@ -381,8 +383,7 @@ class TaskAgent:
             stage = self.stage(task_id)
             return {"files": [{"path": p.relative_to(stage["folder"]).as_posix(), "bytes": p.stat().st_size} for p in stage["folder"].rglob("*") if p.is_file()][:2000]}
         if name == "read_task_docs":
-            docs = {"rules": "tasks/AGENTS.md", "spec": "docs/task-package-spec.md", "guide": "docs/task-guide.md"}
-            source = (ROOT / docs[data.get("document", "spec")]).read_text(encoding="utf-8-sig").splitlines()
+            source = TASK_DOCUMENTS[data.get("document", "spec")].read_text(encoding="utf-8-sig").splitlines()
             start = max(0, int(data.get("start_line", 1)) - 1)
             return {"document": data.get("document", "spec"), "total_lines": len(source), "content": "\n".join(source[start:start + min(500, int(data.get("line_count", 200)))])}
         if name == "list_tasks":

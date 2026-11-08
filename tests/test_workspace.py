@@ -50,6 +50,11 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(list_tasks(legacy), [])
         self.assertEqual(migrate_legacy_tasks(self.root), 0)
 
+    def test_migration_without_legacy_tasks_is_a_noop(self):
+        self.assertEqual(migrate_legacy_tasks(self.root), 0)
+        self.assertFalse((self.root / 'tasks').exists())
+        self.assertFalse((self.root / '.local/tasks').exists())
+
     def test_model_is_persistent_loadable_and_removal_only_hides(self):
         saved = personal_models.save_model(xml=XML, filename='my-model.xml')
         self.assertEqual(personal_models.model_choices()[0]['model_id'], saved['model_id'])

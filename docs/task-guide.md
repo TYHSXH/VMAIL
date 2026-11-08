@@ -109,7 +109,7 @@ AI 应先说明：
 理论核对方法：【如机构运动学公式；不确定时请建议】
 
 请先说明简化假设、自由度和单位；缺少必要条件时先问我。
-先阅读 tasks/AGENTS.md 和 docs/task-package-spec.md；需要载荷时查阅其中的“任务载荷与控制规律”章节。
+先阅读 docs/task-rules.md 和 docs/task-package-spec.md；需要载荷时查阅其中的“任务载荷与控制规律”章节。
 只在 .local/tasks/ 下新建独立任务，登记 .local/tasks/manifest.yaml，不为单个任务修改公共前后端。
 如果需要新写或重写 XML，使用 docs/task-package-spec.md 中“默认 XML 模板”的代码，并把项目的 assets/logos/logo-black.png 复制为任务内 assets/logo-black.png；保留深色地面中央的黑色 Logo，按模型尺度调整，不平铺；网页以低透明度水印呈现，使其隐约可见并融入地面。
 参数提供中文名称、单位与范围，观测量对应实际模型；固定研究点用具名 site。
@@ -125,7 +125,7 @@ AI 应先说明：
 目前出现：【原始报错、复现步骤或异常现象】。
 我期望：【应有的结果，可附课本公式或截图】。
 
-请先阅读该任务文件和 tasks/AGENTS.md，说明原因后修改同一个任务。
+请先阅读该任务文件和 docs/task-rules.md，说明原因后修改同一个任务。
 保留与本次修改无关的配置和已有实验结果，不改公共系统代码。
 修改后重新校验并计算完整时长，说明修复内容和网页操作方法。
 ```
@@ -224,7 +224,7 @@ MuJoCo 普通 mesh 的碰撞检测使用网格的**凸包**。一个带孔或凹
 可直接交给本地 AI 的提示词：
 
 ```text
-请阅读 tasks/AGENTS.md 和 docs/task-guide.md。
+请阅读 docs/task-rules.md 和 docs/task-guide.md。
 我已将零件 STL 放入 .local/tasks/my_mesh_task/assets/，尺寸单位为毫米。
 零件原点、朝向、关节位置、质量与惯量分别为……。
 研究重点是……，必须保留的接触面／孔槽是……。

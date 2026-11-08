@@ -3,11 +3,12 @@ import {prepareAssistantContext, readAssistantStream, usageText} from "./assista
 import {readAssistantImage, validateImageFiles} from "./assistant-images.js";
 import {setupAssistantWorkspace} from "./assistant-workspace.js";
 import {setupAssistantTurn} from "./assistant-turn.js";
+import {icon} from "./icons.js";
 
 export function setupAssistant({onOpen, onCreated, onError, getTask = () => null}) {
   const panel = document.getElementById("panel-assistant");
   panel.innerHTML = `
-    <div class="assistant-heading"><h2>我是菜鸟，需要辅助<span id="aiThinkingMode" class="panel-kicker">DEEPSEEK · 深度思考 MAX</span></h2><button id="aiNew" class="quiet-button" type="button">新对话</button></div>
+    <div class="assistant-heading"><h2>我是菜鸟 需要辅助<span id="aiThinkingMode" class="panel-kicker">DEEPSEEK · HIGH</span></h2><button id="aiNew" class="quiet-button" type="button">${icon("edit")}<span>新对话</span></button></div>
     <details id="aiSettings" class="assistant-settings">
       <summary><span>历史与连接</span><span class="assistant-summary-state"><span id="aiConnectionState" class="ai-connection-state">读取中</span><span id="aiHistoryState" role="status"></span></span></summary>
       <div class="assistant-history"><label class="sr-only" for="aiHistory">历史对话</label><select id="aiHistory" aria-label="选择历史对话"><option value="">新对话</option></select><button id="aiDelete" class="quiet-button" type="button">删除此对话</button></div>
@@ -21,7 +22,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
       </form>
     </details>
     <div id="aiConversation" class="assistant-conversation" role="log" aria-label="与 DeepSeek 的对话" aria-live="off">
-      <div id="aiWelcome" class="assistant-welcome"><span class="assistant-orbit" aria-hidden="true">＋</span><h3>你想研究什么现象？</h3><button id="aiExample" type="button">试试：比较单摆在不同初始角度下的周期 ↗</button></div>
+      <div id="aiWelcome" class="assistant-welcome"><span class="assistant-orbit" aria-hidden="true">${icon("orbit")}</span><h3>从一个力学问题开始</h3><button id="aiExample" type="button">比较单摆的周期与初始角度 ↗</button></div>
     </div>
     <div class="assistant-bottom">
       <div id="aiWorkspace" class="assistant-workspace"></div>
@@ -33,20 +34,15 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
         </div>
       </details>
       <p id="aiStatus" class="assistant-status" role="status"></p>
-      <form id="aiChatForm" class="assistant-composer"><div id="aiAttachments" class="assistant-attachments hidden" aria-label="待发送的图片"></div><label class="sr-only" for="aiInput">你的研究问题</label><textarea id="aiInput" rows="3" maxlength="12000" placeholder="描述机构、已知条件；也可以添加题目图或草图…" title="Enter 发送，Shift+Enter 换行"></textarea><input id="aiImageFiles" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple /><div class="assistant-compose-actions"><button id="aiChooseImages" class="quiet-button" type="button" aria-label="添加图片">＋ 图片</button><button id="aiStop" class="quiet-button hidden" type="button">停止</button><button id="aiSend" class="primary-button" type="submit">发送</button></div></form>
+      <form id="aiChatForm" class="assistant-composer"><div id="aiAttachments" class="assistant-attachments hidden" aria-label="待发送的图片"></div><label class="sr-only" for="aiInput">你的研究问题</label><textarea id="aiInput" rows="2" maxlength="12000" placeholder="描述问题，或添加题目图、草图…" title="Enter 发送，Shift+Enter 换行"></textarea><input id="aiImageFiles" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple /><div class="assistant-compose-actions"><button id="aiChooseImages" class="quiet-button" type="button" aria-label="添加图片">＋ 图片</button><div class="assistant-thinking-controls"><label class="assistant-thinking-toggle"><input id="aiThinking" type="checkbox" checked />深度思考</label><select id="aiEffort" aria-label="思考强度" title="LOW 轻量 · HIGH 均衡 · MAX 深入"><option value="low">LOW</option><option value="high" selected>HIGH</option><option value="max">MAX</option></select></div><button id="aiStop" class="quiet-button hidden" type="button">停止</button><button id="aiSend" class="primary-button" type="submit">发送</button></div></form>
     </div>`;
-  const ids = ["Settings", "ConnectionState", "ConnectionForm", "Key", "Model", "Remember", "Save", "Test", "Forget", "Conversation", "Welcome", "Example", "New", "Draft", "DraftId", "Validation", "Errors", "FileCount", "File", "FileContent", "Status", "ChatForm", "Input", "Stop", "Send", "Attachments", "ChooseImages", "ImageFiles"];
+  const ids = ["Settings", "ConnectionState", "ConnectionForm", "Key", "Model", "Remember", "Save", "Test", "Forget", "Conversation", "Welcome", "Example", "New", "Draft", "DraftId", "Validation", "Errors", "FileCount", "File", "FileContent", "Status", "ChatForm", "Input", "Stop", "Send", "Attachments", "ChooseImages", "ImageFiles", "History", "Delete", "HistoryState", "Thinking", "ThinkingMode", "Effort"];
   const el = Object.fromEntries(ids.map(name => [name, document.getElementById("ai" + name)]));
-  for (const name of ["History", "Delete", "HistoryState"]) el[name] = document.getElementById("ai" + name);
   let history = [], draft = null, validation = null, configured = false, busy = false, controller = null, savedTask = false;
   let attachments = [], readingImages = false, configuredModel = "deepseek-flash";
   let conversationId = crypto.randomUUID(), conversations = [], saveQueue = Promise.resolve(true), saveTimer;
   let activeRunId = "", steeringSending = false;
   const steeringMessages = new Map();
-  const thinkingToggle = document.createElement("label"); thinkingToggle.className = "assistant-thinking-toggle";
-  thinkingToggle.innerHTML = '<input id="aiThinking" type="checkbox" checked />深度思考';
-  panel.querySelector(".assistant-compose-actions").prepend(thinkingToggle);
-  el.Thinking = document.getElementById("aiThinking"); el.ThinkingMode = document.getElementById("aiThinkingMode");
   const messageViews = new WeakMap();
   const agentWorkspace = setupAssistantWorkspace(document.getElementById("aiWorkspace"), {api, changed: scheduleSave});
 
@@ -73,7 +69,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     clearTimeout(saveTimer);
     if (!history.length && !el.Input.value && !attachments.length && !draft && !conversations.some(item => item.id === conversationId)) return saveQueue;
     const id = conversationId;
-    const state = JSON.parse(JSON.stringify({messages: history, input: el.Input.value, attachments, draft, validation, saved_task: savedTask, deep_thinking: el.Thinking.checked, ...agentWorkspace.snapshot()}));
+    const state = JSON.parse(JSON.stringify({messages: history, input: el.Input.value, attachments, draft, validation, saved_task: savedTask, deep_thinking: el.Thinking.checked, reasoning_effort: el.Effort.value, ...agentWorkspace.snapshot()}));
     el.HistoryState.textContent = "正在保存…";
     saveQueue = saveQueue.then(async () => {
       try {
@@ -93,6 +89,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     history = state.messages || []; draft = state.draft || null; validation = state.validation || {valid: false, errors: []};
     savedTask = !!state.saved_task; attachments = state.attachments || []; el.Input.value = state.input || "";
     el.Thinking.checked = state.deep_thinking !== false; steeringMessages.clear();
+    el.Effort.value = ["low", "high", "max"].includes(state.reasoning_effort) ? state.reasoning_effort : "high";
     agentWorkspace.restore(state);
     for (const item of el.Conversation.querySelectorAll(".assistant-message")) item.remove();
     el.Welcome.classList.toggle("hidden", !!history.length);
@@ -113,9 +110,10 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     el.Send.disabled = !configured || readingImages || steeringSending || busy && !canSteer;
     el.Send.textContent = controller ? "发送修正" : "发送";
     el.Input.disabled = readingImages || busy && !controller;
-    el.Input.placeholder = controller ? "可补充文字修正；在当前请求结束后优先处理…" : "描述机构、已知条件；也可以添加题目图或草图…";
+    el.Input.placeholder = controller ? "继续补充，或修正当前思路…" : "描述问题，或添加题目图、草图…";
     el.Thinking.disabled = working;
-    el.ThinkingMode.textContent = el.Thinking.checked ? "DEEPSEEK · 深度思考 MAX" : "DEEPSEEK · 快速回复";
+    el.Effort.disabled = working || !el.Thinking.checked;
+    el.ThinkingMode.textContent = el.Thinking.checked ? `DEEPSEEK · ${el.Effort.value.toUpperCase()}` : "DEEPSEEK · 快速回复";
     el.ChooseImages.disabled = working;
     for (const item of [el.New, el.Save, el.Model, el.Key]) item.disabled = working;
     el.History.disabled = working;
@@ -238,7 +236,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
     try {
       const context = history.map(item => item === turn ? {...item, incomplete: false} : item);
       const {messages, omitted} = prepareAssistantContext(context, savedTask && getTask() ? null : draft, savedTask ? [] : validation?.errors || []);
-      const response = await api("/chat", {method: "POST", body: {messages, current_task_id: getTask(), conversation_id: conversationId, deep_thinking: el.Thinking.checked}, signal: controller.signal});
+      const response = await api("/chat", {method: "POST", body: {messages, current_task_id: getTask(), conversation_id: conversationId, deep_thinking: el.Thinking.checked, reasoning_effort: el.Effort.value}, signal: controller.signal});
       const usage = await readAssistantStream(response, delta => {
         const nearBottom = el.Conversation.scrollHeight - el.Conversation.scrollTop - el.Conversation.clientHeight < 100;
         if (delta.trim()) turnView.replyStarted();
@@ -324,6 +322,7 @@ export function setupAssistant({onOpen, onCreated, onError, getTask = () => null
   }
   el.ChatForm.addEventListener("submit", event => { event.preventDefault(); if (controller) void sendCorrection(); else void chat(); });
   el.Thinking.addEventListener("change", () => { sync(); scheduleSave(); });
+  el.Effort.addEventListener("change", () => { sync(); scheduleSave(); });
   el.ChooseImages.addEventListener("click", () => el.ImageFiles.click());
   el.ImageFiles.addEventListener("change", () => { void addImages(Array.from(el.ImageFiles.files)); el.ImageFiles.value = ""; });
   el.Input.addEventListener("paste", event => {

@@ -8,7 +8,7 @@ VMAIL 的核心不是预置很多模型，而是定义一种稳定的“学习�
 
 - [目录结构](#目录结构)
 - [默认 XML 模板](#默认-xml-模板)
-- [.local/tasks/manifest.yaml](#tasksmanifestyaml)
+- [.local/tasks/manifest.yaml](#localtasksmanifestyaml)
 - [task.yaml](#taskyaml)
 - [model.xml](#modelxml)
 - [parameters.yaml](#parametersyaml)
@@ -45,13 +45,13 @@ front_suspension_damping
 robot_arm_endpoint_force
 ```
 
-AI coding 工具还必须读取 `tasks/AGENTS.md`。该文件是任务目录的工作约定，规定了命名、验证、脚本安全和结果保存方式。
+AI coding 工具还必须读取 `docs/task-rules.md`。该文件是任务目录的工作约定，规定了命名、验证、脚本安全和结果保存方式。
 
 ## 默认 XML 模板
 
 从零创建或重写 XML 时，将下面代码保存为 `.local/tasks/<task_id>/model.xml`，把项目根目录的 `assets/logos/logo-black.png` 复制为该任务的 `assets/logo-black.png`。示例球体只是占位对象，可替换为实际机构；保留 floor、logo 纹理及材质，随模型尺度调整地面尺寸，使黑色标志居中，保持 `texrepeat="1 1"`，不平铺为小图标。网页统一以低透明度贴花呈现 Logo，使其隐约可见并融入地面；不通过降低地面本身的透明度实现。原生 MuJoCo 查看器按 XML 材质渲染，外观可能不同。
 
-该模板与本规范整合维护，不另设模板文件夹。它只是模型起点，还需按 `tasks/AGENTS.md` 补齐任务配置、参数、观测、界面和学习说明，再登记任务索引并验证。帮助中的下载入口使用本段代码和现有 logo 自动打包。
+该模板与本规范整合维护，不另设模板文件夹。它只是模型起点，还需按 `docs/task-rules.md` 补齐任务配置、参数、观测、界面和学习说明，再登记任务索引并验证。帮助中的下载入口使用本段代码和现有 logo 自动打包。
 
 网页中的任务仿真和模型预览共用 `FloorBranding`：黑色 Logo、透明度 `0.1`、单个居中贴花，地面保持不透明。新建任务、AI 创建任务和模板下载均使用黑色 Logo；已有灰色 Logo 任务仍可加载，网页显示也统一使用黑色水印。
 
@@ -350,7 +350,7 @@ MJCF 的 include 与外部资源只允许引用本任务目录内文件（不能
 
 ## 可选 Python 脚本
 
-网页中需要时变外力／力矩、分段输入、表格插值或关节反馈时，优先使用可选的 **loads.yaml**，详见 [载荷与控制规范](#任务载荷与控制规律)。网页实时、单步和后台批量计算使用相同定义；载荷输出自动记录并生成曲线。参考完整任务 `.local/tasks/rotating_load_demo/`。
+网页中需要时变外力／力矩、分段输入、表格插值或关节反馈时，优先使用可选的 **loads.yaml**，详见 [载荷与控制规范](#任务载荷与控制规律)。网页实时、单步和后台批量计算使用相同定义；载荷输出自动记录并生成曲线。参考完整任务 `course_resources/tasks/course_team/rotating_load_demo/`。
 
 超出标准载荷配置能力的算法、扫参或数据处理可增加 `scripts/`。脚本不是任务加载的必需文件，网页不会自动执行它。推荐：
 
@@ -397,11 +397,11 @@ observe.yaml 还可以通过 equalities 列表读取 MJCF 闭环 equality 约束
 
 在任务文件夹中新建可选文件 `loads.yaml`。网页实时仿真、单步与后台批量计算均读取它。只需修改任务文件，不需要为每个任务编写网页或后端。
 
-可直接复制 `.local/tasks/rotating_load_demo/` 作为起点，并更新任务 id、标题和 manifest 索引。
+可直接复制 `course_resources/tasks/course_team/rotating_load_demo/` 作为起点，并更新任务 id、标题和 manifest 索引。
 
 ### 给 AI 的创建提示
 
-> 请按 tasks/AGENTS.md 和 docs/task-package-spec.md 创建 VMAIL 学习任务。将模型结构写入 model.xml，将载荷规律写入 loads.yaml，将可调幅值、频率等写入 parameters.yaml（含中文名称、单位和范围）。明确力的作用点、方向参考坐标系、力与力矩的单位。不要修改公共前后端，不要依赖网页执行 Python。配置运动观测与曲线，说明简化假设，并运行 backend.validate_task 及完整时长的计算，检查公式与仿真是否稳定。
+> 请按 docs/task-rules.md 和 docs/task-package-spec.md 创建 VMAIL 学习任务。将模型结构写入 model.xml，将载荷规律写入 loads.yaml，将可调幅值、频率等写入 parameters.yaml（含中文名称、单位和范围）。明确力的作用点、方向参考坐标系、力与力矩的单位。不要修改公共前后端，不要依赖网页执行 Python。配置运动观测与曲线，说明简化假设，并运行 backend.validate_task 及完整时长的计算，检查公式与仿真是否稳定。
 
 ### 配置结构
 

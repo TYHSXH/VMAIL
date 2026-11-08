@@ -20,7 +20,7 @@ def check_python() -> None:
 
 
 def check_project(root: Path = ROOT) -> None:
-    required = ["app/index.html", "app/help.html", "requirements.txt", "tasks/manifest.yaml",
+    required = ["app/index.html", "app/help.html", "requirements.txt", "docs/task-rules.md",
                 "docs/user-guide.md", "docs/task-guide.md", "docs/course-resources.md", "model_library/catalog.json",
                 "docs/task-package-spec.md", "assets/logos/logo-black.png", "assets/logos/logo-gray.png", "constraints.txt",
                 "app/.vite/manifest.json", "THIRD_PARTY_NOTICES.md", "COPYRIGHT.md", "LICENSE", "NOTICE", "assets/logos/LICENSE.txt"]

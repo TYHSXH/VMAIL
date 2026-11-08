@@ -21,6 +21,7 @@ class HistoryTests(unittest.TestCase):
 
     def test_restart_restores_text_images_draft_revision_and_failed_turn(self):
         state = self.state()
+        state["reasoning_effort"] = "low"
         state["messages"][0].update(images=[{"name": "题图", "data_url": "data:image/png;base64,iVBORw=="}], incomplete=True)
         state["draft"] = {"task_id": "test", "files": {name: "text" for name in ["task.yaml", "model.xml", "parameters.yaml", "observe.yaml", "ui.yaml", "notes.md"]}, "operation": "update", "base_revision": "a" * 64}
         state["validation"] = {"valid": False, "errors": ["还需修复"]}

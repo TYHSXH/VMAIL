@@ -25,10 +25,10 @@ def migrate_legacy_tasks(root: Path = ROOT) -> int:
     import yaml
     root = root.resolve()
     legacy = root / 'tasks'
-    target = ensure_tasks(root / '.local/tasks')
     entries = list_tasks(legacy)
     if not entries:
         return 0
+    target = ensure_tasks(root / '.local/tasks')
     for entry in entries:
         source = legacy / entry['id']
         if source.is_symlink() or source.resolve().parent != legacy.resolve() or not source.is_dir():

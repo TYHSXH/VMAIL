@@ -64,6 +64,24 @@ class AgentTests(unittest.TestCase):
         self.assertEqual(payload["thinking"], {"type": "disabled"})
         self.assertNotIn("reasoning_effort", payload)
 
+    def test_platform_task_rules_are_read_from_docs_independently_of_workspace_root(self):
+        _, result = self.collect(self.agent.call("read_task_docs", {"document": "rules", "line_count": 3}))
+        self.assertIn("VMAIL 学习任务创建规则", result["content"])
+        self.assertIn("VMAIL 学习任务创建规则", assistant.system_prompt())
+
+    def test_thinking_defaults_high_and_all_three_efforts_reach_upstream(self):
+        messages = [{"role": "user", "content": "分析机构"}]
+        self.assertEqual(assistant.ConversationRequest(messages=messages).reasoning_effort, "high")
+        self.assertEqual(assistant.ConversationState().reasoning_effort, "high")
+        with patch.object(assistant.STORE, "snapshot", return_value=("test", "deepseek-flash")):
+            for effort in ("low", "high", "max"):
+                with self.subTest(effort=effort):
+                    _, payload = assistant.payload_for(assistant.ConversationRequest(messages=messages, reasoning_effort=effort))
+                    self.assertEqual(payload["reasoning_effort"], effort)
+                    self.assertEqual(payload["thinking"], {"type": "enabled"})
+        with self.assertRaises(ValueError):
+            assistant.ConversationRequest(messages=messages, reasoning_effort="invalid")
+
     def test_stream_applies_correction_before_old_tools_or_after_a_plain_answer(self):
         for with_tool in (True, False):
             with self.subTest(with_tool=with_tool):
@@ -234,7 +252,7 @@ class AgentTests(unittest.TestCase):
             self.assertEqual([(e["round"], e["content"]) for e in events if e["type"] == "reasoning_delta"], [(1, "reasoning-test"), (2, "final-thinking")])
             self.assertEqual("".join(e["content"] for e in events if e["type"] == "delta").strip(), "done")
             self.assertEqual(requests[0]["thinking"], {"type": "enabled"})
-            self.assertEqual(requests[0]["reasoning_effort"], "max")
+            self.assertEqual(requests[0]["reasoning_effort"], "high")
             self.assertEqual(requests[1]["messages"][-3]["reasoning_content"], "reasoning-test")
             self.assertEqual([m["tool_call_id"] for m in requests[1]["messages"][-2:]], ["a", "b"])
             _, next_payload = assistant.payload_for(assistant.ConversationRequest(conversation_id="test", messages=[{"role": "user", "content": "next"}]))

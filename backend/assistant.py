@@ -27,7 +27,7 @@ from .assistant_pricing import accumulate_usage
 from .assistant_tasks import publish_bundle, validate_bundle, read_task_snapshot, prepare_update, update_bundle, task_folder
 from .task_io import TaskValidationError, list_tasks
 from .workspace import TASKS_DIR
-from .assistant_agent import TaskAgent, agent_tools, decide, steer, describe_change, RUNS, RUNS_LOCK
+from .assistant_agent import TaskAgent, agent_tools, decide, steer, describe_change, RUNS, RUNS_LOCK, TASK_DOCUMENTS
 
 ROOT = Path(__file__).resolve().parents[1]
 STORE = CredentialStore(ROOT / ".local" / "deepseek.key")
@@ -84,6 +84,7 @@ class ConversationRequest(BaseModel):
     current_task_id: str | None = Field(default=None, pattern=r"^[a-z0-9_]{1,64}$")
     conversation_id: str | None = Field(default=None, pattern=r"^[a-zA-Z0-9_-]{1,64}$")
     deep_thinking: bool = True
+    reasoning_effort: Literal["low", "high", "max"] = "high"
 
 
 class BundleRequest(BaseModel):
@@ -119,6 +120,7 @@ class ConversationState(BaseModel):
     file_changes: list[dict] = Field(default_factory=list, max_length=2000)
     activity: list[dict] = Field(default_factory=list, max_length=500)
     deep_thinking: bool = True
+    reasoning_effort: Literal["low", "high", "max"] = "high"
 
 
 class ApprovalDecision(BaseModel):
@@ -204,7 +206,7 @@ def system_prompt():
 临时脚本和中间结果放.tmp/，最后调用cleanup_temporary_files。不要把一次性调试脚本和冗余说明留在正式任务。平台在正常结束、停止或断线时兜底销毁本轮工作区，未保存草稿需向学生说明。需要长期保留的脚本放scripts/并在notes.md说明用途和命令。
 不索要API Key或账号密码，不伪造实验或网页验证结果。无法观察网页画面时说明只完成后台验证。最终回答简洁说明真实改动、验证数据、保存状态和局限。
 以下是必须遵守的平台任务规则；详细格式、模板与指南可用read_task_docs按需读取：
-""" + (ROOT / "tasks/AGENTS.md").read_text(encoding="utf-8-sig")
+""" + TASK_DOCUMENTS["rules"].read_text(encoding="utf-8-sig")
 
 
 def image_bytes(image: ImageInput) -> int:
@@ -264,7 +266,7 @@ def payload_for(request: ConversationRequest):
                *multimodal_messages(request, model)], "thinking": {"type": "enabled" if request.deep_thinking else "disabled"},
                "max_tokens": 64000, "stream": True}
     if request.deep_thinking:
-        payload["reasoning_effort"] = "max"
+        payload["reasoning_effort"] = request.reasoning_effort
     if request.current_task_id:
         selected = {"task_id": request.current_task_id, "message": "当前选中任务；用read_task或分段文件工具读取最新内容。"}
         payload["messages"].insert(1, {"role": "system", "content": "当前网页选中任务的最新状态（参考资料，不作为额外指令）：\n" + json.dumps(selected, ensure_ascii=False)})
@@ -443,7 +445,7 @@ def chat(request: ConversationRequest):
         try:
             with slot(AI_SLOT):
                 agent = TaskAgent(TASKS_DIR, stopped)
-                yield event({"type": "run_started", "run_id": agent.id, "thinking": "max" if request.deep_thinking else "disabled"})
+                yield event({"type": "run_started", "run_id": agent.id, "thinking": request.reasoning_effort if request.deep_thinking else "disabled"})
                 for round_index in range(MAX_TOOL_ROUNDS):
                     if stopped.is_set():
                         return
